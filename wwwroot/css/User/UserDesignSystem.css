@@ -1,0 +1,625 @@
+/* ══════════════════════════════════════════
+   USER DESIGN SYSTEM - NEXUS (PARITY WITH SUPER ADMIN)
+   ══════════════════════════════════════════ */
+
+:root {
+    --nexus-primary: #6366f1;
+    --nexus-secondary: #475569;
+    --nexus-success: #10B981;
+    --nexus-warning: #F59E0B;
+    --nexus-danger: #EF4444;
+    --nexus-dark: #1e1e2d;
+    --nexus-bg: #f8fafc;
+    --nexus-card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    --nexus-sidebar-width: 250px;
+    --nexus-sidebar-collapsed: 85px;
+}
+
+/* Base Body Styles */
+body {
+    background-color: #f4f6f9;
+    color: #1E293B;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    margin: 0;
+}
+
+/* Layout Core — primary rules; the inline <style> in UserLayout also sets
+   these so specificity is intentionally identical. */
+.main-content {
+    margin-left: var(--nexus-sidebar-width);
+    width: calc(100% - var(--nexus-sidebar-width));
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+    .main-content.expanded {
+        margin-left: var(--nexus-sidebar-collapsed);
+        width: calc(100% - var(--nexus-sidebar-collapsed));
+    }
+
+@media (max-width: 768px) {
+    .main-content, .main-content.expanded {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+}
+
+/* ========== SIDEBAR STYLES (SYNCED WITH SUPER ADMIN) ========== */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: var(--nexus-sidebar-width);
+    background: var(--nexus-dark);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    z-index: 1030;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+    .sidebar.collapsed {
+        width: var(--nexus-sidebar-collapsed);
+    }
+
+.sidebar-header {
+    padding: 30px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    flex-shrink: 0;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 10px 0;
+    overflow-y: auto;
+}
+
+    .sidebar-nav::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .sidebar-nav::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.05);
+        border-radius: 10px;
+    }
+
+.sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    flex-shrink: 0;
+}
+
+.nav-section {
+    margin-bottom: 24px;
+}
+
+.section-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #494b74;
+    padding: 0 20px 8px;
+    font-weight: 600;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 20px;
+    color: #A2A3B7;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+    .nav-item i {
+        width: 22px;
+        font-size: 1.1rem;
+        color: var(--nexus-primary);
+    }
+
+    .nav-item:hover {
+        background: #2d2d3f;
+        color: #FFFFFF;
+    }
+
+    .nav-item.active {
+        background: #3d3d5c;
+        color: #FFFFFF;
+        border-left-color: var(--nexus-primary);
+    }
+
+        .nav-item.active i {
+            color: #FFFFFF;
+        }
+
+.sidebar.collapsed .nav-text, .sidebar.collapsed .section-title span {
+    display: none;
+}
+
+.sidebar.collapsed .nav-item {
+    padding: 12px 0;
+    justify-content: center;
+}
+
+    .sidebar.collapsed .nav-item:hover::after {
+        content: attr(data-title);
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #1E293B;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        margin-left: 12px;
+        z-index: 1060;
+    }
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 12px;
+    color: var(--nexus-danger);
+    text-decoration: none;
+    transition: 0.2s;
+    font-weight: 700;
+}
+
+    .logout-btn:hover {
+        background: var(--nexus-danger);
+        color: #FFFFFF;
+    }
+
+.sidebar.collapsed .logout-btn span {
+    display: none;
+}
+
+/* ========== TOP NAVBAR & NAVIGATION ========== */
+.top-navbar {
+    background: #FFFFFF;
+    padding: 16px 28px;
+    box-shadow: 0 1px 15px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+}
+
+.toggle-btn {
+    background: #F1F5F9;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+    .toggle-btn:hover {
+        background: #E2E8F0;
+    }
+
+.page-title-section h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1E293B;
+    margin: 0;
+}
+
+.page-title-section p {
+    font-size: 0.8rem;
+    color: #6C757D;
+    margin: 4px 0 0 0;
+}
+
+.admin-avatar-pill {
+    background: #f8fafc;
+    border-radius: 50px;
+    padding: 6px 16px;
+    border: 1px solid #e2e8f0;
+}
+
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1040;
+    display: none;
+}
+
+    .sidebar-overlay.show {
+        display: block;
+    }
+
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 1050;
+    }
+
+        .sidebar.mobile-open {
+            transform: translateX(0);
+        }
+}
+
+/* Typography & General */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.uppercase {
+    text-transform: uppercase;
+}
+
+.letter-spacing-1 {
+    letter-spacing: 1px;
+}
+
+.fw-800 {
+    font-weight: 800;
+}
+
+/* Premium Cards */
+.stat-card {
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 24px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    transition: none;
+    position: relative;
+    /* Default flex layout: text-left, icon-right pattern used by all stat cards */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.section-card {
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 24px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    transition: none;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Premium Buttons */
+.premium-btn {
+    background: #6366f1;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+}
+
+    .premium-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(99, 102, 241, 0.25);
+        background: #4f46e5;
+        color: white;
+    }
+
+    .premium-btn.secondary {
+        background: white;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+    }
+
+        .premium-btn.secondary:hover {
+            background: #f8fafc;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            color: #1e293b;
+        }
+
+.tool-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+
+    .tool-btn:hover {
+        border-color: #6366f1;
+        color: white;
+        background: #6366f1;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+    }
+
+    .tool-btn.danger:hover {
+        border-color: #f43f5e;
+        color: white;
+        background: #f43f5e;
+        box-shadow: 0 4px 12px rgba(244, 63, 94, 0.25);
+    }
+
+    /* Colour variant: used on QR/scan action buttons */
+    .tool-btn.success {
+        color: #10b981;
+        border-color: #e2e8f0;
+    }
+
+        .tool-btn.success:hover {
+            border-color: #10b981;
+            color: white;
+            background: #10b981;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
+
+    .tool-btn.danger {
+        color: var(--nexus-danger);
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+
+/* Nexus Table Styles */
+.nexus-table-wrapper {
+    background: #FFFFFF;
+    border-radius: 12px;
+    box-shadow: var(--nexus-card-shadow);
+    overflow-x: auto;
+    border: 1px solid #f1f5f9;
+}
+
+.nexus-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 800px;
+}
+
+    .nexus-table th {
+        background: #f8fafc;
+        padding: 18px 24px;
+        font-weight: 800;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #64748b;
+        border-bottom: 2px solid #f1f5f9;
+        white-space: nowrap;
+    }
+
+    .nexus-table td {
+        padding: 18px 24px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+
+    .nexus-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .nexus-table tr:hover td {
+        background: #f8fafc;
+    }
+
+/* hover-row: applied on <tr> elements for clickable rows */
+.hover-row {
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+    .hover-row:hover td {
+        background: #f1f5fb !important;
+    }
+
+/* Nexus Badges */
+.nexus-badge {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.nexus-badge-success {
+    background: #DCFCE7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.nexus-badge-warning {
+    background: #FEF3C7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+
+.nexus-badge-danger {
+    background: #FEE2E2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.nexus-badge-info {
+    background: #DBEAFE;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+/* Form Controls */
+.nexus-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.nexus-label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 800;
+    font-size: 0.75rem;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.nexus-input {
+    width: 100%;
+    padding: 12px 18px;
+    border-radius: 10px;
+    border: 2px solid #e2e8f0;
+    background: #f8fafc;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    outline: none;
+    color: #1e293b;
+}
+
+    .nexus-input:focus {
+        border-color: var(--nexus-primary);
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        background: white;
+    }
+
+/* Modals */
+.nexus-modal-content {
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.nexus-modal-header {
+    padding: 24px 32px;
+    border-bottom: 1px solid #f1f5f9;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.nexus-modal-footer {
+    padding: 24px 32px;
+    border-top: 1px solid #f1f5f9;
+    background: #f8fafc;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-up {
+    animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* Layout Helpers */
+.page-header {
+    margin-bottom: 2rem;
+}
+
+/* section-title-sm: used both as a section heading (mb utility classes override)
+   and as a stat-card label (keep margin minimal here, use mb-* utilities inline) */
+.section-title-sm {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+/* Filter Bar — kept for legacy pages that still use it */
+.filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    flex-wrap: wrap;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: var(--nexus-card-shadow);
+    margin-bottom: 2rem;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.search-input-group {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+}
+
+    .search-input-group i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
+
+    .search-input-group .nexus-input {
+        padding-left: 45px;
+    }

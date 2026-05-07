@@ -354,7 +354,7 @@ namespace VMSProject.Controllers
             var visitor = _context.Visitors.Find(id);
             if (visitor == null) return NotFound();
             ViewBag.AdminName = HttpContext.Session.GetString("AdminName");
-            return View("VisitorManagement", visitor);
+            return View("GenerateQR", visitor);
         }
 
         [HttpPost]
@@ -451,22 +451,48 @@ namespace VMSProject.Controllers
         [HttpPost]
         public IActionResult ProcessQR(string code)
         {
-            // Logic to check in/out via QR
-            var visit = _context.Visits.Include(v => v.Visitor).FirstOrDefault(v => v.PassNumber == code && v.Status == "Active");
-            if (visit != null) {
-                visit.CheckOutTime = DateTime.Now;
-                visit.Status = "CheckedOut";
+            if (string.IsNullOrEmpty(code)) return Json(new { success = false, message = "Invalid code" });
+
+            // 1. Check for an Active visit (to check out)
+            var activeVisit = _context.Visits.Include(v => v.Visitor)
+                .FirstOrDefault(v => v.PassNumber == code && v.Status == "Active");
+            
+            if (activeVisit != null) {
+                activeVisit.CheckOutTime = DateTime.Now;
+                activeVisit.Status = "CheckedOut";
                 _context.SaveChanges();
-                return Json(new { success = true, message = "Checked Out Successfully", visitor = visit.Visitor.Name });
+                return Json(new { success = true, message = "Checked Out Successfully", visitor = activeVisit.Visitor?.Name });
             }
             
-            // Or check in if pending
-            var pending = _context.Visits.Include(v => v.Visitor).FirstOrDefault(v => v.PassNumber == code && v.Status == "Pending");
-            if (pending != null) {
-                pending.CheckInTime = DateTime.Now;
-                pending.Status = "Active";
+            // 2. Check for a Pending visit (to check in)
+            var pendingVisit = _context.Visits.Include(v => v.Visitor)
+                .FirstOrDefault(v => v.PassNumber == code && v.Status == "Pending");
+            
+            if (pendingVisit != null) {
+                pendingVisit.CheckInTime = DateTime.Now;
+                pendingVisit.Status = "Active";
                 _context.SaveChanges();
-                return Json(new { success = true, message = "Checked In Successfully", visitor = pending.Visitor.Name });
+                return Json(new { success = true, message = "Checked In Successfully", visitor = pendingVisit.Visitor?.Name });
+            }
+
+            // 3. Check if this is a Visitor's permanent QR code (create new visit)
+            var visitor = _context.Visitors.FirstOrDefault(v => v.QRCode == code);
+            if (visitor != null) {
+                // Auto-create an active visit for this permanent pass holder
+                var employee = _context.Employees.FirstOrDefault(e => e.Name == visitor.WhomeToMeet);
+                var newVisit = new Visit {
+                    VisitorId = visitor.VisitorId,
+                    EmployeeId = employee?.EmployeeId,
+                    Purpose = visitor.PurposeOfVisit,
+                    VisitDate = DateTime.Now,
+                    CheckInTime = DateTime.Now,
+                    Status = "Active",
+                    PassNumber = code,
+                    CreatedBy = 1 // Default system admin
+                };
+                _context.Visits.Add(newVisit);
+                _context.SaveChanges();
+                return Json(new { success = true, message = "Checked In Successfully (Auto-entry)", visitor = visitor.Name });
             }
 
             return Json(new { success = false, message = "Invalid or expired pass" });

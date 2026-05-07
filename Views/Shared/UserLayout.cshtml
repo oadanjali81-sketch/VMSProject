@@ -20,18 +20,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- User Design System -->
-    <link rel="stylesheet" href="/css/UserDesignSystem.css">
+    <link rel="stylesheet" href="/css/User/UserDesignSystem.css">
     
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body style="background-color: #f8fafc; font-family: 'Inter', sans-serif;">
-
+<body>
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- Sidebar -->
     @{
         var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
-        var currentAction     = ViewContext.RouteData.Values["action"]?.ToString()     ?? "";
+        var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
     }
 
     <aside class="sidebar" id="sidebar">
@@ -103,162 +102,100 @@
         </div>
     </aside>
 
-    <style>
-        /* ========== SIDEBAR STYLES (MATCHED TO SUPER ADMIN) ========== */
-        .sidebar { 
-            position: fixed; top: 0; left: 0; height: 100vh; width: 250px; 
-            background: #1e1e2d; 
-            box-shadow: 0 0 40px rgba(0, 0, 0, 0.1); 
-            transition: all 0.3s ease; z-index: 1030; 
-            display: flex; flex-direction: column; overflow: hidden;
-        }
-        .sidebar.collapsed { width: 85px; }
-        
-        .sidebar-header { padding: 30px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
-        .tmb-sidebar-logo { display: flex; align-items: center; gap: 12px; font-size: 1.4rem; font-weight: 800; color: #FFFFFF; letter-spacing: -0.5px; }
-        .tmb-logo-icon { color: #F59E0B; font-size: 1.5rem; text-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
-        .tmb-logo-accent { color: #6366f1; margin-left: 2px; }
-
-        .sidebar-nav { flex: 1; padding: 10px 0; overflow-y: auto; }
-        .sidebar-nav::-webkit-scrollbar { width: 4px; }
-        .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        
-        .sidebar-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
-        
-        .nav-section { margin-bottom: 20px; }
-        .section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #494b74; padding: 0 20px 8px; font-weight: 600; }
-        
-        .nav-item { 
-            display: flex; align-items: center; gap: 14px; padding: 12px 20px; 
-            color: #A2A3B7; text-decoration: none; transition: all 0.2s; cursor: pointer; 
-            border-left: 3px solid transparent; white-space: nowrap; font-weight: 500;
-            font-size: 0.9rem;
-        }
-        .nav-item i { width: 22px; font-size: 1.1rem; color: #6366f1; text-align: center; }
-        .nav-item:hover { background: rgba(255, 255, 255, 0.05); color: #FFFFFF; }
-        .nav-item.active { background: rgba(99, 102, 241, 0.1); color: #FFFFFF; border-left-color: #6366f1; }
-        .nav-item.active i { color: #FFFFFF; }
-        
-        .logout-btn { 
-            display: flex; align-items: center; justify-content: center; gap: 12px; 
-            padding: 12px 16px; background: rgba(239, 68, 68, 0.1); border-radius: 12px; 
-            color: #EF4444; text-decoration: none; transition: 0.2s; font-weight: 700; 
-        }
-        .logout-btn:hover { background: #EF4444; color: #FFFFFF; }
-
-        /* Collapsed State */
-        .sidebar.collapsed .nav-text, .sidebar.collapsed .section-title { display: none; }
-        .sidebar.collapsed .nav-item { padding: 12px 0; justify-content: center; border-left: none; }
-        .sidebar.collapsed .sidebar-header { padding: 20px 10px; text-align: center; }
-        .sidebar.collapsed .tmb-sidebar-logo { justify-content: center; }
-        .sidebar.collapsed .logout-btn span { display: none; }
-        .sidebar.collapsed .logout-btn { padding: 12px 0; width: 44px; margin: 0 auto; }
-
-        @@media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); position: fixed; z-index: 1050; }
-            .sidebar.mobile-open { transform: translateX(0); }
-        }
-    </style>
-
-    <!-- Page Content -->
-    <div id="page-content-wrapper" class="main-content">
-        <!-- Top Navigation -->
-        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom py-3 px-4 shadow-sm sticky-top">
-            <div class="d-flex align-items-center">
-                <button class="btn btn-light border-0 me-3" id="menu-toggle"><i class="fas fa-bars"></i></button>
-                <h5 class="mb-0 fw-bold text-dark d-none d-md-block" id="pageTitle">@ViewData["Title"]</h5>
+    <!-- Sidebar and Main Content styles are now centralized in UserDesignSystem.css -->
+    <!-- Page Content Wrapper -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Navbar -->
+        <nav class="top-navbar d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <button class="toggle-btn" id="toggleSidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="page-title-section">
+                    <h1 id="pageTitle">@ViewData["Title"]</h1>
+                </div>
             </div>
-
-            <div class="ms-auto d-flex align-items-center">
-                <div class="dropdown">
-                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <div class="text-end me-3 d-none d-md-block">
-                            <div class="fw-bold mb-0 lh-1">@adminName</div>
-                            <small class="text-muted">Company Administrator</small>
-                        </div>
-                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 40px; height: 40px; border: 2px solid #fff;">
-                            @adminInitial
-                        </div>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="userDropdown">
-                        <li><a class="dropdown-item py-2" href="/Account/Logout"><i class="fas fa-sign-out-alt text-danger me-2"></i> Logout</a></li>
-                    </ul>
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2 px-3 py-2 bg-light rounded-pill">
+                    <div style="width: 32px; height: 32px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.75rem;">@adminInitial</div>
+                    <div class="d-none d-md-block text-end">
+                        <div style="font-size: 0.85rem; font-weight: 700; color: #1e1e2d; line-height: 1;">@adminName</div>
+                        <div style="font-size: 0.7rem; color: #64748b; font-weight: 600;">Company Admin</div>
+                    </div>
                 </div>
             </div>
         </nav>
 
-        <!-- Main Content Container -->
-        <div class="container-fluid px-4 py-4" style="min-height: calc(100vh - 160px);">
+        <!-- Main Body Area -->
+        <div class="container-fluid p-4 animate-fade-up" style="min-height: calc(100vh - 160px);">
             @RenderBody()
         </div>
 
-        <!-- Standardized Footer -->
-        <footer class="py-4 px-4 border-top mt-auto bg-white text-center">
-            <p class="mb-0 text-muted small">&copy; @DateTime.Now.Year Visitor Management System. All Rights Reserved.</p>
+        <!-- Footer -->
+        <footer class="py-4 text-center" style="border-top: 1px solid rgba(0,0,0,0.05); color: #64748b; font-size: 0.85rem; font-weight: 500;">
+            <p class="mb-0">&copy; @DateTime.Now.Year VISION VMS. All rights reserved.</p>
         </footer>
     </div>
 
-    <style>
-        .main-content { margin-left: 250px; transition: all 0.3s ease; min-height: 100vh; display: flex; flex-direction: column; }
-        .main-content.expanded { margin-left: 85px; }
-        
-        .sidebar-overlay { 
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
-            background: rgba(0,0,0,0.5); z-index: 1040; display: none; 
-        }
-        .sidebar-overlay.show { display: block; }
-
-        @@media (max-width: 768px) {
-            .main-content { margin-left: 0; }
-            .main-content.expanded { margin-left: 0; }
-        }
-    </style>
+    <!-- sidebar-overlay is declared once at the top of the body -->
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <script src="/js/Global/vision-global.js"></script>
+
     <script>
-        // ── MODAL UTILITIES ──
-        function openModal(modalId) {
-            const modalEl = document.getElementById(modalId);
-            if (modalEl) {
-                let modal = bootstrap.Modal.getInstance(modalEl);
-                if (!modal) modal = new bootstrap.Modal(modalEl);
-                modal.show();
-            }
-        }
+        /**
+        * ── GLOBAL UTILITIES ──
+        * These provide standardized behavior for all modules.
+        */
+        
+        // Modal Instance Management
+        const getModal = (id) => {
+        const el = document.getElementById(id);
+        if (!el) return null;
+        return bootstrap.Modal.getOrCreateInstance(el);
+        };
 
-        function closeModal(modalId) {
-            const modalEl = document.getElementById(modalId);
-            if (modalEl) {
-                const modal = bootstrap.Modal.getInstance(modalEl);
-                if (modal) modal.hide();
-            }
-        }
+        const openModal = (id) => getModal(id)?.show();
+        const closeModal = (id) => getModal(id)?.hide();
 
-        // Sidebar Toggle Logic
+        // Sidebar Control Logic
         const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('page-content-wrapper');
-        const toggleBtn = document.getElementById('menu-toggle');
+        const mainContent = document.getElementById('mainContent');
         const overlay = document.getElementById('sidebarOverlay');
-        
+        const toggleBtn = document.getElementById('toggleSidebar');
+
         if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => {
-                if (window.innerWidth <= 768) { 
-                    sidebar.classList.toggle('mobile-open'); 
-                    overlay.classList.toggle('show'); 
-                } else { 
-                    sidebar.classList.toggle('collapsed'); 
-                    mainContent.classList.toggle('expanded'); 
-                }
-            });
+        toggleBtn.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+        sidebar.classList.toggle('mobile-open');
+        overlay.classList.toggle('show');
+        } else {
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('expanded');
         }
-        
+        });
+        }
+
         if (overlay) {
-            overlay.addEventListener('click', () => {
-                sidebar.classList.remove('mobile-open');
-                overlay.classList.remove('show');
-            });
+        overlay.addEventListener('click', () => {
+        sidebar.classList.remove('mobile-open');
+        overlay.classList.remove('show');
+        });
+        }
+
+        // Global Table Quick Filter
+        function filterTable(inputId = "tableSearchInput", tableId = "standardTable") {
+        const val = document.getElementById(inputId).value.toUpperCase();
+        const rows = document.getElementById(tableId).getElementsByTagName("tr");
+        for (let i = 1; i < rows.length; i++) {
+        let found = false;
+        const cells = rows[i].getElementsByTagName("td");
+        for (let j = 0; j < cells.length; j++) {
+        if (cells[j] && cells[j].textContent.toUpperCase().indexOf(val) > -1) { found = true; break; }
+        }
+        rows[i].style.display = found ? "" : "none";
+        }
         }
     </script>
     

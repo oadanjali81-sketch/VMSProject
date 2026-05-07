@@ -4,74 +4,87 @@
 }
 
 <div class="row g-4">
+    <!-- Live Scanner Console -->
     <div class="col-xl-8">
-        <div class="table-section">
-            <div class="table-header-title d-flex align-items-center justify-content-between">
-                <span><i class="fas fa-camera me-2 text-primary"></i>Live Scanner Console</span>
-                <div class="d-flex gap-2">
-                    <button id="switchCameraBtn" class="btn btn-sm btn-light border" style="display:none;"><i class="fas fa-sync me-1"></i>Switch</button>
-                    <button id="manualEntryBtn" class="btn btn-sm btn-light border" onclick="toggleManualEntry()"><i class="fas fa-keyboard me-1"></i>Manual Entry</button>
+        <div class="section-card h-100 animate-fade-up">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+                <div>
+                    <h5 class="fw-800 text-dark mb-1" style="letter-spacing: -0.5px;">Scanner Console</h5>
+                    <p class="text-muted small mb-0">Live visitor check-in/out via QR pass verification.</p>
+                </div>
+                
+                <div class="d-flex align-items-center gap-2">
+                    <button id="switchCameraBtn" class="premium-btn secondary py-2 px-3" style="display:none;"><i class="fas fa-sync me-2"></i>Switch</button>
+                    <button id="manualEntryBtn" class="premium-btn secondary py-2 px-3" onclick="toggleManualEntry()"><i class="fas fa-keyboard me-2"></i>Manual Entry</button>
                 </div>
             </div>
-            <div class="p-4 bg-light bg-opacity-50">
-                <div class="scanner-video-wrap shadow-sm mx-auto" style="max-width: 100%; position: relative; background: #000; border-radius: 20px; overflow: hidden; min-height: 450px; display: flex; align-items: center; justify-content: center;">
+
+            <div class="p-2 p-md-4 bg-light rounded-4 border border-white" style="background: rgba(248, 250, 252, 0.6) !important;">
+                <div class="scanner-video-wrap shadow-lg mx-auto" style="max-width: 100%; position: relative; background: #000; border-radius: 24px; overflow: hidden; min-height: 480px; display: flex; align-items: center; justify-content: center; border: 4px solid #fff;">
                     <video id="scannerVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
                     <canvas id="scannerCanvas" style="display:none;"></canvas>
                     
-                    <div class="scanner-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; display: flex; align-items: center; justify-content: center; flex-direction: column;">
-                        <div class="scanner-frame" style="width: 280px; height: 280px; border: 2px solid rgba(255,255,255,0.3); border-radius: 24px; position: relative; transition: all 0.3s ease;">
-                            <div class="scanner-line" style="position: absolute; width: 100%; height: 2px; background: #3B82F6; box-shadow: 0 0 15px #3B82F6; top: 0; animation: scanline 2.5s linear infinite;"></div>
+                    <div class="scanner-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; display: flex; align-items: center; justify-content: center;">
+                        <div class="scanner-frame" style="width: 280px; height: 280px; border: 2px solid rgba(255,255,255,0.4); border-radius: 32px; position: relative;">
+                            <div class="scanner-line" style="position: absolute; width: 100%; height: 2px; background: var(--nexus-primary); box-shadow: 0 0 20px var(--nexus-primary); top: 0; animation: scanline 2.5s linear infinite;"></div>
+                            <!-- Corner Accents -->
+                            <div style="position: absolute; top: -5px; left: -5px; width: 30px; height: 30px; border-top: 5px solid var(--nexus-primary); border-left: 5px solid var(--nexus-primary); border-radius: 12px 0 0 0;"></div>
+                            <div style="position: absolute; top: -5px; right: -5px; width: 30px; height: 30px; border-top: 5px solid var(--nexus-primary); border-right: 5px solid var(--nexus-primary); border-radius: 0 12px 0 0;"></div>
+                            <div style="position: absolute; bottom: -5px; left: -5px; width: 30px; height: 30px; border-bottom: 5px solid var(--nexus-primary); border-left: 5px solid var(--nexus-primary); border-radius: 0 0 0 12px;"></div>
+                            <div style="position: absolute; bottom: -5px; right: -5px; width: 30px; height: 30px; border-bottom: 5px solid var(--nexus-primary); border-right: 5px solid var(--nexus-primary); border-radius: 0 0 12px 0;"></div>
                         </div>
                     </div>
                     
-                    <div id="scannerStatus" style="position: absolute; bottom: 20px; background: rgba(0,0,0,0.75); color: #fff; padding: 8px 20px; border-radius: 30px; font-size: 0.8rem; backdrop-filter: blur(4px);">
-                        <i class="fas fa-circle-notch fa-spin me-2"></i>Initializing Scanner...
+                    <div id="scannerStatus" style="position: absolute; bottom: 30px; background: rgba(15, 23, 42, 0.85); color: #fff; padding: 10px 25px; border-radius: 50px; font-size: 0.85rem; backdrop-filter: blur(8px); font-weight: 600; border: 1px solid rgba(255,255,255,0.1);">
+                        <i class="fas fa-circle-notch fa-spin me-2 text-primary"></i>Ready to Scan
                     </div>
                 </div>
 
                 <div class="text-center mt-4">
-                    <button id="startScanBtn" class="btn btn-primary fw-800 px-5 py-3 rounded-pill shadow-lg" onclick="startScanner()">
-                        <i class="fas fa-play me-2"></i>START SCANNING
+                    <button id="startScanBtn" class="premium-btn py-3 px-5 rounded-pill shadow-lg" onclick="startScanner()" style="font-size: 1.1rem;">
+                        <i class="fas fa-play-circle me-2"></i>START SCANNING
                     </button>
-                    <button id="stopScanBtn" class="btn btn-danger fw-800 px-5 py-3 rounded-pill shadow-lg" onclick="stopScanner()" style="display:none;">
-                        <i class="fas fa-stop me-2"></i>STOP SCANNER
+                    <button id="stopScanBtn" class="premium-btn py-3 px-5 rounded-pill shadow-lg bg-danger border-danger" onclick="stopScanner()" style="display:none; font-size: 1.1rem;">
+                        <i class="fas fa-stop-circle me-2"></i>STOP SCANNER
                     </button>
                 </div>
 
                 <!-- Manual Entry Section -->
-                <div id="manualEntryCard" class="mt-4 animate__animated animate__fadeInUp" style="display:none;">
-                    <div class="input-group shadow-sm" style="max-width: 500px; margin: 0 auto;">
-                        <span class="input-group-text bg-white border-end-0 rounded-start-pill ps-4"><i class="fas fa-id-card text-muted"></i></span>
-                        <input type="text" id="manualPassInput" class="form-control border-start-0 py-3 ps-0" placeholder="Enter Pass ID manually...">
-                        <button onclick="processManualEntry()" class="btn btn-dark fw-800 px-4 rounded-end-pill">VALIDATE</button>
+                <div id="manualEntryCard" class="mt-4" style="display:none; animation: fadeInUp 0.4s ease;">
+                    <div class="d-flex justify-content-center">
+                        <div class="input-group shadow-sm" style="max-width: 500px;">
+                            <span class="input-group-text bg-white border-end-0 rounded-start-pill ps-4" style="border-color: #e2e8f0;"><i class="fas fa-id-card text-muted"></i></span>
+                            <input type="text" id="manualPassInput" class="form-control border-start-0 border-end-0 py-3 ps-0 bg-white" placeholder="Type Pass ID (e.g. VIS-2026-X)..." style="border-color: #e2e8f0; font-weight: 600;">
+                            <button onclick="processManualEntry()" class="premium-btn rounded-end-pill px-4" style="border-radius: 0 50px 50px 0;">VALIDATE</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Results and Activity -->
+    <!-- Results and Activity Feed -->
     <div class="col-xl-4">
-        <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden" id="resultCard" style="display:none;">
-            <div class="card-header bg-primary text-white py-3 text-center border-0" id="resultHeader">
-                <h6 class="fw-800 mb-0" id="resultTitle">Scan Result</h6>
+        <!-- Live Result Card -->
+        <div class="section-card p-0 overflow-hidden mb-4 animate-fade-up" id="resultCard" style="display:none; border: 2px solid #e2e8f0;">
+            <div class="px-4 py-3 text-center border-0" id="resultHeader" style="background: var(--nexus-primary);">
+                <h6 class="fw-800 mb-0 text-white" id="resultTitle" style="letter-spacing: 1px;">SCAN RESULT</h6>
             </div>
-            <div class="card-body p-4" id="resultContent">
-                <!-- Dynamic Content -->
+            <div class="p-4" id="resultContent">
+                <!-- Dynamic Content Injection -->
             </div>
         </div>
 
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
-                <h6 class="fw-800 mb-0 text-dark"><i class="fas fa-history me-2 text-primary"></i>Recent Scans</h6>
-                <button class="btn btn-sm btn-link text-muted text-decoration-none fw-bold" onclick="clearActivity()">Clear</button>
+        <!-- Activity Feed -->
+        <div class="section-card h-100 p-0 overflow-hidden animate-fade-up" style="display: flex; flex-direction: column;">
+            <div class="p-4 border-bottom d-flex align-items-center justify-content-between bg-light bg-opacity-50">
+                <h6 class="fw-800 mb-0 text-dark"><i class="fas fa-clock-rotate-left me-2 text-primary"></i>Session Logs</h6>
+                <button class="tool-btn danger" onclick="clearActivity()" title="Clear logs"><i class="fas fa-trash-alt"></i></button>
             </div>
-            <div class="card-body p-0">
-                <div id="activityList" class="activity-feed">
-                    <div class="text-center py-5 text-muted activity-empty">
-                        <i class="fas fa-inbox fa-2x mb-2 opacity-25"></i>
-                        <p class="small mb-0">No scans in this session</p>
-                    </div>
+            <div id="activityList" class="flex-grow-1 overflow-auto" style="max-height: 600px;">
+                <div class="text-center py-5 text-muted activity-empty">
+                    <div class="opacity-25 mb-3"><i class="fas fa-box-open fa-3x"></i></div>
+                    <p class="small fw-600 mb-0">Waiting for first scan...</p>
                 </div>
             </div>
         </div>
@@ -81,19 +94,18 @@
 <style>
     @@keyframes scanline { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
     
-    .activity-feed { max-height: 500px; overflow-y: auto; }
-    .activity-item { padding: 15px 20px; border-bottom: 1px solid #f1f5f9; transition: background 0.2s; }
+    .activity-item { 
+        padding: 20px; 
+        border-bottom: 1px solid #f1f5f9; 
+        transition: all 0.2s; 
+        animation: fadeInUp 0.3s ease;
+    }
     .activity-item:hover { background: #f8fafc; }
-    .activity-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
-    .activity-name { font-weight: 700; color: #1e293b; }
-    .activity-time { font-size: 0.75rem; color: #94a3b8; }
-    .activity-details { font-size: 0.8rem; color: #64748b; display: flex; flex-direction: column; gap: 2px; }
-    .activity-pass { font-family: monospace; font-weight: 700; color: #3b82f6; margin-top: 4px; }
     
-    .result-info { display: flex; flex-direction: column; gap: 12px; }
-    .result-field { display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; }
-    .result-label { font-size: 0.75rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; }
-    .result-value { font-weight: 700; color: #1e293b; }
+    .result-info { display: flex; flex-direction: column; gap: 15px; }
+    .result-field { display: flex; flex-direction: column; gap: 4px; padding: 12px; background: #f8fafc; border-radius: 12px; border: 1px solid #f1f5f9; }
+    .result-label { font-size: 0.65rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+    .result-value { font-weight: 700; color: #1e293b; font-size: 0.95rem; }
 </style>
 
 @section Scripts {
@@ -104,7 +116,7 @@
         let scanInterval = null;
         let lastScannedCode = null;
         let lastScanTime = 0;
-        const SCAN_COOLDOWN = 2000;
+        const SCAN_COOLDOWN = 3000;
 
         function toggleManualEntry() {
             const card = document.getElementById('manualEntryCard');
@@ -119,12 +131,12 @@
             const stopBtn = document.getElementById('stopScanBtn');
 
             try {
-                status.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Accessing Camera...';
+                status.innerHTML = '<i class="fas fa-spinner fa-spin me-2 text-primary"></i>Accessing Camera...';
                 videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
                 video.srcObject = videoStream;
                 await video.play();
                 
-                status.style.display = 'none';
+                status.innerHTML = '<i class="fas fa-wifi fa-pulse me-2 text-success"></i>Scanner Online';
                 scanningActive = true;
                 startBtn.style.display = 'none';
                 stopBtn.style.display = 'inline-block';
@@ -132,8 +144,8 @@
                 scanInterval = setInterval(scanQRCode, 200);
             } catch (err) {
                 console.error("Scanner Error:", err);
-                status.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Camera Access Denied';
-                alert("Please allow camera access to use the scanner.");
+                status.innerHTML = '<i class="fas fa-times-circle me-2 text-danger"></i>Access Denied';
+                alert("Camera access is required for scanning.");
             }
         }
 
@@ -143,8 +155,7 @@
             if (videoStream) videoStream.getTracks().forEach(t => t.stop());
             
             document.getElementById('scannerVideo').srcObject = null;
-            document.getElementById('scannerStatus').style.display = 'block';
-            document.getElementById('scannerStatus').innerHTML = 'Scanner Ready';
+            document.getElementById('scannerStatus').innerHTML = '<i class="fas fa-power-off me-2 opacity-50"></i>Scanner Offline';
             document.getElementById('startScanBtn').style.display = 'inline-block';
             document.getElementById('stopScanBtn').style.display = 'none';
         }
@@ -184,7 +195,7 @@
                 displayResult(res, passNumber);
                 if (res.success) addActivity(res.visitor, passNumber, res.message);
             })
-            .catch(err => console.error("Process Error:", err));
+            .catch(err => console.error("API Error:", err));
         }
 
         function displayResult(res, pass) {
@@ -194,16 +205,16 @@
             const content = document.getElementById('resultContent');
 
             card.style.display = 'block';
-            header.className = res.success ? 'card-header bg-success text-white py-3 text-center border-0' : 'card-header bg-danger text-white py-3 text-center border-0';
-            title.innerHTML = res.success ? '<i class="fas fa-check-circle me-2"></i>SUCCESS' : '<i class="fas fa-times-circle me-2"></i>FAILED';
+            header.style.backgroundColor = res.success ? '#10B981' : '#EF4444';
+            title.innerHTML = res.success ? '<i class="fas fa-check-double me-2"></i>ACCESS GRANTED' : '<i class="fas fa-times-circle me-2"></i>ACCESS DENIED';
 
             content.innerHTML = `
                 <div class="result-info">
-                    <div class="result-field"><span class="result-label">Pass ID</span><span class="result-value font-monospace">${pass}</span></div>
-                    <div class="result-field"><span class="result-label">Visitor</span><span class="result-value">${res.visitor || 'N/A'}</span></div>
-                    <div class="result-field"><span class="result-label">Message</span><span class="result-value">${res.message}</span></div>
+                    <div class="result-field"><span class="result-label">PASS IDENTIFIER</span><span class="result-value fw-800 text-primary">${pass}</span></div>
+                    <div class="result-field"><span class="result-label">VISITOR NAME</span><span class="result-value">${res.visitor || 'N/A'}</span></div>
+                    <div class="result-field"><span class="result-label">SYSTEM MESSAGE</span><span class="result-value">${res.message}</span></div>
                 </div>
-                <button class="btn btn-outline-secondary w-100 mt-4 rounded-pill fw-bold" onclick="document.getElementById('resultCard').style.display='none'">Dismiss</button>
+                <button class="premium-btn secondary w-100 mt-4 rounded-pill fw-800" onclick="document.getElementById('resultCard').style.display='none'">DISMISS</button>
             `;
         }
 
@@ -213,22 +224,20 @@
             if (empty) empty.remove();
 
             const item = document.createElement('div');
-            item.className = 'activity-item animate__animated animate__fadeIn';
+            item.className = 'activity-item';
             item.innerHTML = `
-                <div class="activity-header">
-                    <span class="activity-name">${name || 'Unknown'}</span>
-                    <span class="activity-time">${new Date().toLocaleTimeString()}</span>
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="fw-800 text-dark" style="font-size: 0.95rem;">${name || 'Anonymous'}</span>
+                    <span class="nexus-badge nexus-badge-info" style="font-size: 0.65rem;">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                 </div>
-                <div class="activity-details">
-                    <div>${msg}</div>
-                    <div class="activity-pass">${pass}</div>
-                </div>
+                <div class="text-muted small mb-2">${msg}</div>
+                <div class="font-monospace fw-800 text-primary" style="font-size: 0.75rem;">${pass}</div>
             `;
             list.insertBefore(item, list.firstChild);
         }
 
         function clearActivity() {
-            document.getElementById('activityList').innerHTML = '<div class="text-center py-5 text-muted activity-empty"><i class="fas fa-inbox fa-2x mb-2 opacity-25"></i><p class="small mb-0">No scans in this session</p></div>';
+            document.getElementById('activityList').innerHTML = '<div class="text-center py-5 text-muted activity-empty"><div class="opacity-25 mb-3"><i class="fas fa-box-open fa-3x"></i></div><p class="small fw-600 mb-0">Waiting for first scan...</p></div>';
         }
 
         function processManualEntry() {

@@ -1,103 +1,125 @@
+@model List<VMSProject.Models.VisitorListViewModel>
 @{
     Layout = "UserLayout";
     ViewData["Title"] = "Visitor Management";
 }
 
-<div class="table-section">
-    <div class="table-header-title d-flex align-items-center justify-content-between flex-wrap gap-3">
-        <div class="d-flex align-items-center">
-            <i class="fas fa-users-viewfinder me-2 text-primary"></i>
-            <span class="fw-800 text-dark" style="font-size: 1.1rem; letter-spacing: -0.5px;">Visitor Directory</span>
-        </div>
-        
-        <div class="d-flex align-items-center gap-2 flex-wrap ms-auto">
-            <span class='badge bg-primary bg-opacity-10 text-primary fw-800 px-3 py-2 rounded-pill me-2' style='font-size:0.75rem;'>
-                <i class='fas fa-users me-1'></i> Total: @ViewBag.TotalVisitors
-            </span>
-            <div class="input-group input-group-sm" style="width: 280px;">
-                <span class="input-group-text bg-light border-end-0 border-light"><i class="fas fa-search text-muted"></i></span>
-                <input type="text" class="form-control border-start-0 ps-0 shadow-none bg-light border-light" id="tableSearchInput" placeholder="Search name, phone or company..." onkeyup="filterTable()">
+<!-- Quick Stats Header -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div>
+                <p class="text-muted small mb-1">TOTAL VISITORS</p>
+                <h3>@ViewBag.TotalVisitors</h3>
             </div>
-            <div class="d-flex gap-2">
-                <a href='/User/AddVisitor' class='btn btn-primary btn-sm fw-bold px-3 rounded-pill shadow-sm'>
-                    <i class='fas fa-plus me-1'></i> New Visitor
-                </a>
+            <div style="width: 48px; height: 48px; background: rgba(99, 102, 241, 0.1); color: #6366f1; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                <i class="fas fa-users"></i>
             </div>
         </div>
     </div>
+</div>
 
-    <div style="overflow-x: auto;">
-        <table class="user-table" id="standardTable">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Visitor</th>
-                    <th>Contact</th>
-                    <th>Company</th>
-                    <th>Who to Meet</th>
-                    <th>Department</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model != null && Model.Count > 0)
-                {
-                    int i = 1;
-                    foreach (var v in Model)
+<div class="section-card animate-fade-up">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+        <div>
+            <h5 class="fw-800 text-dark mb-1" style="letter-spacing: -0.5px;">Visitor Directory</h5>
+            <p class="text-muted small mb-0">Manage and track all registered visitors in the system.</p>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div class="input-group" style="width: 300px;">
+                <span class="input-group-text bg-light border-end-0" style="border-radius: 10px 0 0 10px; border-color: #e2e8f0;"><i class="fas fa-search text-muted"></i></span>
+                <input type="text" class="form-control bg-light border-start-0" id="tableSearchInput" placeholder="Search visitors..." onkeyup="filterTable()" style="border-radius: 0 10px 10px 0; border-color: #e2e8f0; font-size: 0.9rem;">
+            </div>
+            <a href="/User/AddVisitor" class="premium-btn">
+                <i class="fas fa-plus"></i> New Visitor
+            </a>
+        </div>
+    </div>
+
+    <div class="nexus-table-wrapper">
+        <div class="table-responsive">
+            <table class="nexus-table" id="standardTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Visitor Details</th>
+                        <th>Contact Info</th>
+                        <th>Company</th>
+                        <th>Host Details</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Count > 0)
                     {
-                        <tr onclick="if(!event.target.closest('.acts-group')) { openViewModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(v).Replace("'", "\\'"))); }" style="cursor: pointer;" class="hover-row">
-                            <td><span class="badge bg-light text-secondary border rounded-pill">@i</span></td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    @if (!string.IsNullOrEmpty(v.CapturePhoto))
-                                    {
-                                        <div class="rounded-circle overflow-hidden me-3 shadow-sm" style="width: 38px; height: 38px; min-width: 38px; border: 2px solid rgba(59,130,246,0.2);">
-                                            <img src="@v.CapturePhoto" class="w-100 h-100" style="object-fit: cover;" />
+                        int i = 1;
+                        foreach (var v in Model)
+                        {
+                            <tr class="hover-row">
+                                <td style="width: 60px;"><span class="nexus-badge nexus-badge-info">@i</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        @if (!string.IsNullOrEmpty(v.CapturePhoto))
+                                        {
+                                            <div class="rounded-circle overflow-hidden shadow-sm" style="width: 42px; height: 42px; border: 2px solid #fff; outline: 1px solid #e2e8f0;">
+                                                <img src="@v.CapturePhoto" class="w-100 h-100" style="object-fit: cover;" />
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-800" style="width: 42px; height: 42px; font-size: 0.9rem; border: 1px solid rgba(99, 102, 241, 0.2);">
+                                                @(string.IsNullOrEmpty(v.Name) ? "?" : v.Name.Substring(0, 1).ToUpper())
+                                            </div>
+                                        }
+                                        <div>
+                                            <div class="fw-700 text-dark lh-1 mb-1">@(v.Name ?? "Anonymous")</div>
+                                            <small class="text-muted" style="font-size: 0.75rem;">ID: #100@v.VisitorId</small>
                                         </div>
-                                    }
-                                    else
-                                    {
-                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold me-3 shadow-sm" style="width: 38px; height: 38px; min-width: 38px; font-size: 0.85rem; border: 1px solid rgba(59, 130, 246, 0.2);">
-                                            @(string.IsNullOrEmpty(v.Name) ? "?" : v.Name!.Substring(0, 1).ToUpper())
-                                        </div>
-                                    }
-                                    <div>
-                                        <div class="fw-bold text-dark">@(v.Name ?? "Anonymous")</div>
-                                        <small class="text-muted">@(v.Email ?? "—")</small>
                                     </div>
-                                </div>
-                            </td>
-                            <td><div class="fw-semibold text-dark">@(v.Phone ?? "—")</div></td>
-                            <td><div class="fw-semibold text-dark">@(v.CompanyName ?? "—")</div></td>
-                            <td><div class="fw-bold text-primary">@(v.WhomeToMeet ?? "—")</div></td>
-                            <td>
-                                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill shadow-sm" style="font-size: 0.7rem;">
-                                    @(v.Department ?? "General")
-                                </span>
-                            </td>
-                            <td>
-                                <div class="acts-group">
-                                    <button type="button" class="act-btn act-edit" title="Edit Visitor" onclick='openEditModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(v).Replace("'", "\\'")))'><i class="fas fa-pen-to-square"></i></button>
-                                    <button class="act-btn act-qr" title="View QR Pass" onclick="openQRPassModal('@v.VisitorId', '@Html.Raw(v.Name?.Replace("'","\'") ?? "Visitor")', '@(v.QRCode ?? "")', '@(v.CapturePhoto ?? "")', '@Html.Raw(v.CompanyName?.Replace("'","\'") ?? "INDIVIDUAL")')">
-                                        <i class="fas fa-qrcode"></i>
-                                    </button>
-                                </div>
+                                </td>
+                                <td>
+                                    <div class="fw-600 text-dark mb-1">@(v.Phone ?? "—")</div>
+                                    <div class="text-muted small">@(v.Email ?? "—")</div>
+                                </td>
+                                <td><span class="fw-700 text-primary small uppercase letter-spacing-1">@(v.CompanyName ?? "INDIVIDUAL")</span></td>
+                                <td>
+                                    <div class="fw-700 text-dark mb-1">@(v.WhomeToMeet ?? "—")</div>
+                                    <span class="nexus-badge nexus-badge-info" style="font-size: 0.65rem;">@(v.Department ?? "General")</span>
+                                </td>
+                                <td>
+                                    <span class="nexus-badge nexus-badge-success">Registered</span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button class="tool-btn" title="View Details" onclick='openViewModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(v).Replace("'", "\\'")))'>
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="tool-btn" style="color: #F59E0B;" title="Edit" onclick='openEditModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(v).Replace("'", "\\'")))'>
+                                            <i class="fas fa-pen"></i>
+                                        </button>
+                                        <button class="tool-btn success" title="QR Pass" onclick="openQRPassModal('@v.VisitorId', '@Html.Raw(v.Name?.Replace("'", "\'") ?? "Visitor")', '@(v.QRCode ?? "")', '@(v.CapturePhoto ?? "")', '@Html.Raw(v.CompanyName?.Replace("'", "\'") ?? "INDIVIDUAL")')">
+                                            <i class="fas fa-qrcode"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <div class="opacity-25 mb-3"><i class="fas fa-users-slash fa-3x"></i></div>
+                                <p class="text-muted fw-600">No visitors found in the directory.</p>
                             </td>
                         </tr>
-                        i++;
                     }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">
-                            <i class="fas fa-users-slash fs-2 mb-3 d-block opacity-25"></i>
-                            No visitors registered yet.
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     @if (ViewBag.Pagination != null)
@@ -105,265 +127,205 @@
         var pModel = (VMSProject.Models.PaginationViewModel)ViewBag.Pagination;
         @if (pModel.TotalPages > 0)
         {
-            <div class="pagination-container">
-                <div class="pagination-info">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mt-4 px-2">
+                <div class="text-muted small fw-600">
                     Showing @(((pModel.CurrentPage - 1) * pModel.PageSize) + 1) to @(Math.Min(pModel.CurrentPage * pModel.PageSize, pModel.TotalItems)) of @pModel.TotalItems entries
                 </div>
-                <div class="pagination-controls">
-                    <div class="page-size-selector">
-                        <select class="page-size-select" onchange="updatePageSize(this.value)">
-                            <option value="10" selected="@(pModel.PageSize == 10)">10</option>
-                            <option value="20" selected="@(pModel.PageSize == 20)">20</option>
-                            <option value="50" selected="@(pModel.PageSize == 50)">50</option>
-                            <option value="100" selected="@(pModel.PageSize == 100)">100</option>
-                        </select>
-                    </div>
-                    <div class="custom-pagination">
-                        @if (pModel.HasPreviousPage) {
-                            var prevVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage - 1).ToString() };
-                            <a href="@Url.Action(pModel.Action, pModel.Controller, prevVals)" class="page-link-custom">Previous</a>
-                        } else { <span class="page-link-custom disabled">Previous</span> }
-                        @{
-                            int startPage = Math.Max(1, pModel.CurrentPage - 2);
-                            int endPage = Math.Min(pModel.TotalPages, startPage + 4);
-                            if (endPage - startPage < 4) startPage = Math.Max(1, endPage - 4);
-                        }
-                        @for (int i = startPage; i <= endPage; i++) {
-                            var pageVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = i.ToString() };
-                            <a href="@Url.Action(pModel.Action, pModel.Controller, pageVals)" class="page-link-custom @(i == pModel.CurrentPage ? "active" : "")">@i</a>
-                        }
-                        @if (pModel.HasNextPage) {
-                            var nextVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage + 1).ToString() };
-                            <a href="@Url.Action(pModel.Action, pModel.Controller, nextVals)" class="page-link-custom">Next</a>
-                        } else { <span class="page-link-custom disabled">Next</span> }
-                    </div>
+                <div class="d-flex align-items-center gap-3">
+                    <select class="form-select form-select-sm rounded-pill px-3" onchange="updatePageSize(this.value)" style="width: auto; border-color: #e2e8f0; font-weight: 600;">
+                        <option value="10" selected="@(pModel.PageSize == 10)">10 per page</option>
+                        <option value="20" selected="@(pModel.PageSize == 20)">20 per page</option>
+                        <option value="50" selected="@(pModel.PageSize == 50)">50 per page</option>
+                    </select>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0 gap-1">
+                            @if (pModel.HasPreviousPage)
+                            {
+                                var prevVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage - 1).ToString() };
+                                <li class="page-item"><a href="@Url.Action(pModel.Action, pModel.Controller, prevVals)" class="page-link rounded-circle border-0 bg-light text-dark"><i class="fas fa-chevron-left"></i></a></li>
+                            }
+                            @for (int i = Math.Max(1, pModel.CurrentPage - 2); i <= Math.Min(pModel.TotalPages, pModel.CurrentPage + 2); i++)
+                            {
+                                var pageVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = i.ToString() };
+                                <li class="page-item"><a href="@Url.Action(pModel.Action, pModel.Controller, pageVals)" class="page-link rounded-circle border-0 @(i == pModel.CurrentPage ? "bg-primary text-white shadow-sm" : "bg-light text-dark")" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: 700;">@i</a></li>
+                            }
+                            @if (pModel.HasNextPage)
+                            {
+                                var nextVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage + 1).ToString() };
+                                <li class="page-item"><a href="@Url.Action(pModel.Action, pModel.Controller, nextVals)" class="page-link rounded-circle border-0 bg-light text-dark"><i class="fas fa-chevron-right"></i></a></li>
+                            }
+                        </ul>
+                    </nav>
                 </div>
             </div>
             <script>
-                function updatePageSize(size) {
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('pageSize', size);
-                    url.searchParams.set('page', '1');
-                    window.location.href = url.toString();
-                }
+                    function updatePageSize(size) {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('pageSize', size);
+                        url.searchParams.set('page', '1');
+                        window.location.href = url.toString();
+                    }
             </script>
         }
     }
 </div>
 
-<!-- MODALS -->
-<!-- MODAL 1: VIEW VISITOR DETAILS -->
-<div class="modal fade" id="modalView" tabindex="-1" aria-hidden="true">
+<!-- MODALS SYNCED WITH NEXUS DESIGN -->
+<!-- VIEW VISITOR -->
+<div class="modal fade animate-fade-up" id="modalView" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="modal-content nexus-modal-content">
             <div class="modal-body p-0">
-                <div style="height: 120px; background: linear-gradient(135deg, #4f46e5, #3b82f6); position: relative;">
-                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div style="height: 140px; background: linear-gradient(135deg, #6366f1, #4f46e5); position: relative;">
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="px-4 pb-4">
-                    <div class="d-flex align-items-center gap-3" style="margin-top: -50px; margin-bottom: 25px; position: relative; z-index: 5;">
-                        <div class="rounded-4 border border-4 border-white shadow-sm overflow-hidden bg-white d-flex align-items-center justify-content-center shadow-lg" style="width: 100px; height: 100px; min-width: 100px;">
+                    <div class="d-flex align-items-center gap-4" style="margin-top: -60px; margin-bottom: 25px;">
+                        <div class="rounded-4 border border-4 border-white shadow-lg overflow-hidden bg-white d-flex align-items-center justify-content-center" style="width: 120px; height: 120px; min-width: 120px;">
                             <img id="v_photo" src="" class="w-100 h-100 object-fit-cover d-none" />
-                            <span id="v_initial" class="fw-800 text-primary fs-2">?</span>
+                            <span id="v_initial" class="fw-800 text-primary fs-1">?</span>
                         </div>
-                        <div class="pt-4 mt-2">
-                            <h2 id="v_name_top" class="fw-800 text-dark mb-0" style="letter-spacing: -0.5px; font-size: 1.5rem;">Visitor Name</h2>
-                            <p id="v_company_top" class="text-primary small fw-800 uppercase letter-spacing-1 mb-0" style="font-size: 0.7rem;">COMPANY NAME</p>
+                        <div class="pt-4 mt-3">
+                            <h2 id="v_name_top" class="fw-800 text-dark mb-0" style="letter-spacing: -1px; font-size: 1.75rem;">Visitor Name</h2>
+                            <p id="v_company_top" class="text-primary fw-800 uppercase letter-spacing-2 mb-0" style="font-size: 0.75rem;">COMPANY NAME</p>
                         </div>
                     </div>
-                    <div class="row g-2">
+                    
+                    <div class="row g-3">
                         <div class="col-6">
-                            <div class="p-2 px-3 bg-light rounded-4 border border-light h-100" style="background: #f8fafc !important;">
-                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.55rem; opacity: 0.6;">EMAIL</label>
-                                <div id="v_email" class="fw-700 text-dark small d-flex align-items-center">
-                                    <i class="fas fa-envelope me-2 opacity-50" style="font-size: 0.8rem;"></i>
-                                    <span>—</span>
-                                </div>
+                            <div class="p-3 bg-light rounded-4 border border-white">
+                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.6rem;">EMAIL ADDRESS</label>
+                                <div id="v_email" class="fw-700 text-dark small"><i class="fas fa-envelope me-2 opacity-50"></i><span>—</span></div>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="p-2 px-3 bg-light rounded-4 border border-light h-100" style="background: #f8fafc !important;">
-                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.55rem; opacity: 0.6;">PHONE</label>
-                                <div id="v_phone" class="fw-700 text-dark small d-flex align-items-center">
-                                    <i class="fas fa-phone me-2 opacity-50" style="font-size: 0.8rem;"></i>
-                                    <span>—</span>
-                                </div>
+                            <div class="p-3 bg-light rounded-4 border border-white">
+                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.6rem;">PHONE NUMBER</label>
+                                <div id="v_phone" class="fw-700 text-dark small"><i class="fas fa-phone me-2 opacity-50"></i><span>—</span></div>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="p-2 px-3 bg-light rounded-4 border border-light h-100" style="background: #f8fafc !important;">
-                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.55rem; opacity: 0.6;">HOST</label>
-                                <div id="v_host" class="fw-800 text-primary small d-flex align-items-center">
-                                    <i class="fas fa-user-tie me-2" style="font-size: 0.8rem;"></i>
-                                    <span>—</span>
-                                </div>
+                            <div class="p-3 bg-light rounded-4 border border-white">
+                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.6rem;">VISIT PURPOSE</label>
+                                <div id="v_purpose" class="fw-700 text-dark small"><i class="fas fa-clipboard-check me-2 opacity-50"></i><span>—</span></div>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="p-2 px-3 bg-light rounded-4 border border-light h-100" style="background: #f8fafc !important;">
-                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.55rem; opacity: 0.6;">DEPARTMENT</label>
-                                <div id="v_department" class="fw-700 text-dark small d-flex align-items-center">
-                                    <i class="fas fa-building me-2 opacity-50" style="font-size: 0.8rem;"></i>
-                                    <span>—</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="p-2 px-3 bg-light rounded-4 border border-light" style="background: #f8fafc !important;">
-                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.55rem; opacity: 0.6;">PURPOSE OF VISIT</label>
-                                <div id="v_purpose" class="fw-700 text-dark small d-flex align-items-center">
-                                    <i class="fas fa-clipboard-list me-2 opacity-50" style="font-size: 0.8rem;"></i>
-                                    <span>—</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="p-2 px-3 bg-light rounded-4 border border-light h-100" style="background: #f8fafc !important;">
-                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.55rem; opacity: 0.6;">VEHICLE</label>
-                                <div id="v_vehicle" class="fw-700 text-dark small d-flex align-items-center">
-                                    <i class="fas fa-car me-2 opacity-50" style="font-size: 0.8rem;"></i>
-                                    <span>—</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="p-2 px-3 bg-light rounded-4 border border-light h-100" style="background: #f8fafc !important;">
-                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.55rem; opacity: 0.6;">QR PASS TOKEN</label>
-                                <div id="v_qr_pass" class="fw-800 text-primary small d-flex align-items-center">
-                                    <i class="fas fa-qrcode me-2 opacity-50" style="font-size: 0.8rem;"></i>
-                                    <span>—</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="p-2 px-3 bg-light rounded-4 border border-light" style="background: #f8fafc !important;">
-                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.55rem; opacity: 0.6;">COMPANY ADDRESS</label>
-                                <div id="v_address" class="fw-700 text-dark small d-flex align-items-center">
-                                    <i class="fas fa-location-dot me-2 opacity-50" style="font-size: 0.8rem;"></i>
-                                    <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">—</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="p-2 px-3 bg-light rounded-4 border border-light" style="background: #f8fafc !important;">
-                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.55rem; opacity: 0.6;">IDENTITY DOCUMENT (ID PROOF)</label>
-                                <div id="v_id_proof_status" class="fw-700 text-dark small d-flex align-items-center">
-                                    <i class="fas fa-id-card me-2 opacity-50" style="font-size: 0.8rem;"></i>
-                                    <span id="v_id_proof_text">No Document Uploaded</span>
-                                    <a id="v_id_proof_link" href="#" target="_blank" class="ms-auto btn btn-link p-0 text-primary fw-800 d-none" style="font-size: 0.65rem; text-decoration: none;">
-                                        VIEW ATTACHMENT <i class="fas fa-external-link-alt ms-1"></i>
-                                    </a>
-                                </div>
+                            <div class="p-3 bg-light rounded-4 border border-white">
+                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.6rem;">HOST & DEPT</label>
+                                <div id="v_host" class="fw-700 text-primary small"><i class="fas fa-user-tie me-2"></i><span>—</span></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 p-4 pt-0 d-flex justify-content-center gap-2">
-                <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-800 small text-muted border shadow-sm" data-bs-dismiss="modal" style="font-size: 0.7rem; min-width: 120px;">CLOSE</button>
-                <button type="button" id="v_edit_btn" class="btn btn-primary rounded-pill px-4 py-2 fw-800 small shadow" style="background: #4f46e5; border: none; font-size: 0.7rem; min-width: 120px;">
-                    <i class="fas fa-edit me-1"></i> EDIT
+            <div class="nexus-modal-footer d-flex justify-content-center gap-3 bg-light bg-opacity-50">
+                <button type="button" class="premium-btn secondary" data-bs-dismiss="modal" style="min-width: 140px;">Dismiss</button>
+                <button type="button" id="v_edit_btn" class="premium-btn" style="min-width: 140px;">
+                    <i class="fas fa-edit"></i> Edit Profile
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- MODAL 2: EDIT VISITOR -->
+<!-- EDIT VISITOR -->
 <div class="modal fade" id="modalEdit" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header border-bottom py-3 bg-light bg-opacity-50">
-                <h5 class="modal-title fw-800 text-dark"><i class="fas fa-edit text-warning me-2"></i>Edit Visitor Profile</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content nexus-modal-content">
+            <div class="nexus-modal-header">
+                <h5 class="fw-800 mb-0 text-dark"><i class="fas fa-user-edit text-primary me-2"></i>Edit Visitor Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form action="/User/EditVisitor" method="post">
                 @Html.AntiForgeryToken()
                 <div class="modal-body p-4">
                     <input type="hidden" name="VisitorId" id="e_id">
-                    <div class="row g-3">
+                    <div class="row g-4">
                         <div class="col-md-6">
-                            <label class="form-label fw-800 small text-muted uppercase letter-spacing-1">FULL NAME</label>
-                            <input type="text" name="Name" id="e_name" class="form-control rounded-3 bg-light border-0 py-2" required>
+                            <div class="nexus-form-group">
+                                <label class="nexus-label">FULL NAME</label>
+                                <input type="text" name="Name" id="e_name" class="nexus-input" required>
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-800 small text-muted uppercase letter-spacing-1">EMAIL ADDRESS</label>
-                            <input type="email" name="Email" id="e_email" class="form-control rounded-3 bg-light border-0 py-2">
+                            <div class="nexus-form-group">
+                                <label class="nexus-label">EMAIL ADDRESS</label>
+                                <input type="email" name="Email" id="e_email" class="nexus-input">
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-800 small text-muted uppercase letter-spacing-1">PHONE NUMBER</label>
-                            <input type="text" name="Phone" id="e_phone" class="form-control rounded-3 bg-light border-0 py-2" required>
+                            <div class="nexus-form-group">
+                                <label class="nexus-label">PHONE NUMBER</label>
+                                <input type="text" name="Phone" id="e_phone" class="nexus-input" required>
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-800 small text-muted uppercase letter-spacing-1">VEHICLE NUMBER</label>
-                            <input type="text" name="VehicleNumber" id="e_vehicle" class="form-control rounded-3 bg-light border-0 py-2">
+                            <div class="nexus-form-group">
+                                <label class="nexus-label">VEHICLE NUMBER</label>
+                                <input type="text" name="VehicleNumber" id="e_vehicle" class="nexus-input">
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-800 small text-muted uppercase letter-spacing-1">COMPANY NAME</label>
-                            <input type="text" name="CompanyName" id="e_company" class="form-control rounded-3 bg-light border-0 py-2">
+                            <div class="nexus-form-group">
+                                <label class="nexus-label">COMPANY NAME</label>
+                                <input type="text" name="CompanyName" id="e_company" class="nexus-input">
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-800 small text-muted uppercase letter-spacing-1">DEPARTMENT</label>
-                            <input type="text" name="Department" id="e_dept" class="form-control rounded-3 bg-light border-0 py-2">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-800 small text-muted uppercase letter-spacing-1">HOST PERSON</label>
-                            <input type="text" name="WhomeToMeet" id="e_host" class="form-control rounded-3 bg-light border-0 py-2">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-800 small text-muted uppercase letter-spacing-1">PURPOSE OF VISIT</label>
-                            <input type="text" name="PurposeOfVisit" id="e_purpose" class="form-control rounded-3 bg-light border-0 py-2">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label fw-800 small text-muted uppercase letter-spacing-1">COMPANY ADDRESS</label>
-                            <textarea name="CompanyAddress" id="e_address" class="form-control rounded-3 bg-light border-0 py-2" rows="2"></textarea>
+                            <div class="nexus-form-group">
+                                <label class="nexus-label">DEPARTMENT</label>
+                                <input type="text" name="Department" id="e_dept" class="nexus-input">
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0 p-4 pt-0 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-light fw-800 px-4 rounded-pill small text-muted border shadow-sm" data-bs-dismiss="modal">Discard</button>
-                    <button type="submit" class="btn btn-warning fw-800 px-4 rounded-pill shadow text-white">Save Profile Changes</button>
+                <div class="nexus-modal-footer d-flex justify-content-end gap-3 bg-light bg-opacity-50">
+                    <button type="button" class="premium-btn secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="premium-btn">Save Changes</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- MODAL 4: QR PASS CARD -->
+<!-- QR PASS -->
 <div class="modal fade" id="modalQRPass" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 340px;">
-        <div class="modal-content border-0 shadow-lg rounded-5 overflow-hidden">
-            <div class="modal-body p-4 text-center bg-white">
-                <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
+        <div class="modal-content nexus-modal-content overflow-hidden">
+            <div class="modal-body p-5 text-center bg-white">
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-4" data-bs-dismiss="modal"></button>
+                
                 <div class="d-inline-block position-relative mb-4">
-                    <div class="rounded-circle border border-4 border-primary border-opacity-25 p-1 shadow-sm" style="width: 100px; height: 100px;">
+                    <div class="rounded-circle p-1 border border-primary border-opacity-10 shadow-sm" style="width: 110px; height: 110px;">
                         <div class="rounded-circle w-100 h-100 overflow-hidden bg-light d-flex align-items-center justify-content-center">
                             <img id="qrp_photo" src="" class="w-100 h-100 object-fit-cover d-none" />
-                            <span id="qrp_initial" class="fw-bold text-primary fs-1">?</span>
+                            <span id="qrp_initial" class="fw-800 text-primary fs-1">?</span>
                         </div>
                     </div>
                 </div>
-                <h3 id="qrp_name" class="fw-800 text-dark mb-1" style="font-size: 1.5rem;">Visitor Name</h3>
-                <p id="qrp_company" class="fw-bold text-muted text-uppercase mb-4" style="font-size: 0.85rem; letter-spacing: 1px;">COMPANY</p>
-                <div class="bg-white rounded-5 shadow-sm border border-light p-3 mb-4 d-inline-block mx-auto">
-                    <div id="qrp_img_container" style="width: 180px; height: 180px; position: relative;">
-                        <img id="qrp_img" src="" width="180" height="180" class="d-block mx-auto" />
-                        <div id="qrp_loading" class="position-absolute top-50 start-50 translate-middle text-muted opacity-25">
-                            <i class="fas fa-qrcode fa-5x"></i>
-                        </div>
+                
+                <h3 id="qrp_name" class="fw-800 text-dark mb-1" style="font-size: 1.75rem; letter-spacing: -0.5px;">Visitor Name</h3>
+                <p id="qrp_company" class="fw-800 text-muted uppercase mb-4" style="font-size: 0.85rem; letter-spacing: 2px;">COMPANY</p>
+                
+                <div class="bg-white rounded-5 shadow-sm border border-light p-4 mb-4 d-inline-block mx-auto">
+                    <div id="qrp_img_container" style="width: 220px; height: 220px; position: relative;">
+                        <img id="qrp_img" src="" width="220" height="220" class="d-block mx-auto" />
                     </div>
                 </div>
+                
                 <div class="mb-5">
-                    <span id="qrp_token" class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-4 py-3 fw-bold" style="font-size: 0.9rem; min-width: 180px;">
+                    <span id="qrp_token" class="nexus-badge nexus-badge-info py-3 px-4 rounded-pill" style="font-size: 1rem; border: 1px dashed rgba(99, 102, 241, 0.3);">
                         TOKEN
                     </span>
                 </div>
-                <div class="d-flex align-items-center justify-content-center gap-3">
-                    <button onclick="printCurrentQR()" class="btn btn-primary fw-bold px-5 py-3 rounded-pill shadow d-flex align-items-center gap-2 flex-grow-1 justify-content-center" style="background: #0d6efd; font-size: 1.1rem;">
-                        <i class="fas fa-print"></i> PRINT
+                
+                <div class="d-flex flex-column gap-3">
+                    <button onclick="printCurrentQR()" class="premium-btn w-100 py-3 rounded-pill" style="font-size: 1.1rem;">
+                        <i class="fas fa-print me-2"></i> PRINT PASS
                     </button>
-                    <button onclick="shareQRDirect()" class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 60px; height: 60px;">
-                        <i class="fas fa-share-nodes fs-4"></i>
+                    <button onclick="shareQRDirect()" class="premium-btn secondary w-100 py-3 rounded-pill">
+                        <i class="fas fa-share-nodes me-2"></i> SHARE PASS
                     </button>
                 </div>
             </div>
@@ -373,105 +335,75 @@
 
 @section Scripts {
     <script>
-        // ── MODAL 1: 👁 VIEW VISITOR ──
+
+        // ── VIEW VISITOR ──
         function openViewModal(v) {
-            try {
-                const name = v.Name || v.name || 'Anonymous';
-                const company = v.CompanyName || v.companyName || 'GUEST';
-                const email = v.Email || v.email || '—';
-                const phone = v.Phone || v.phone || '—';
-                const host = v.WhomeToMeet || v.whomeToMeet || '—';
-                const dept = v.Department || v.department || 'General';
-                const purpose = v.PurposeOfVisit || v.purposeOfVisit || '—';
-                const vehicle = v.VehicleNumber || v.vehicleNumber || '—';
-                const address = v.CompanyAddress || v.companyAddress || '—';
-                const qrPass = v.QRCode || v.qrCode || '—';
-                const photoPath = v.CapturePhoto || v.capturePhoto;
-
-                document.getElementById('v_name_top').textContent = name;
-                document.getElementById('v_company_top').textContent = company.toUpperCase();
-                
-                const setSpan = (id, val) => {
-                    const el = document.getElementById(id);
-                    if (el && el.querySelector('span')) el.querySelector('span').textContent = val;
-                };
-                
-                setSpan('v_email', email);
-                setSpan('v_phone', phone);
-                setSpan('v_host', host);
-                setSpan('v_department', dept);
-                setSpan('v_purpose', purpose);
-                setSpan('v_vehicle', vehicle);
-                setSpan('v_address', address);
-                setSpan('v_qr_pass', qrPass);
-                
-                const photo = document.getElementById('v_photo');
-                const initial = document.getElementById('v_initial');
-                if (photoPath) {
-                    photo.src = photoPath;
-                    photo.classList.remove('d-none');
-                    initial.classList.add('d-none');
-                } else {
-                    photo.classList.add('d-none');
-                    initial.classList.remove('d-none');
-                    initial.textContent = name.charAt(0).toUpperCase();
-                }
-                
-                document.getElementById('v_edit_btn').onclick = () => {
-                    closeModal('modalView');
-                    openEditModal(v);
-                };
-                
-                openModal('modalView');
-            } catch (err) { console.error(err); }
-        }
-
-        // ── MODAL 2: ✏ EDIT VISITOR ──
-        function openEditModal(v) {
-            document.getElementById('e_id').value = v.VisitorId || v.visitorId;
-            document.getElementById('e_name').value = v.Name || v.name || '';
-            document.getElementById('e_email').value = v.Email || v.email || '';
-            document.getElementById('e_phone').value = v.Phone || v.phone || '';
-            document.getElementById('e_vehicle').value = v.VehicleNumber || v.vehicleNumber || '';
-            document.getElementById('e_company').value = v.CompanyName || v.companyName || '';
-            document.getElementById('e_dept').value = v.Department || v.department || '';
-            document.getElementById('e_host').value = v.WhomeToMeet || v.whomeToMeet || '';
-            document.getElementById('e_purpose').value = v.PurposeOfVisit || v.purposeOfVisit || '';
-            document.getElementById('e_address').value = v.CompanyAddress || v.companyAddress || '';
-            openModal('modalEdit');
-        }
-
-        // ── MODAL 4: 🎫 QR PASS CARD ──
-        let _currentQRData = { id: '', name: '', code: '', photo: '', company: '' };
-        function openQRPassModal(visitorId, name, qrCode, photoPath, companyName) {
-            _currentQRData = { id: visitorId, name, code: qrCode, photo: photoPath, company: companyName || 'INDIVIDUAL' };
-            document.getElementById('qrp_name').textContent = name || 'Visitor';
-            document.getElementById('qrp_company').textContent = (companyName || 'INDIVIDUAL').toUpperCase();
-
-            const photo = document.getElementById('qrp_photo');
-            const initial = document.getElementById('qrp_initial');
-            if (photoPath) {
-                photo.src = photoPath;
+            document.getElementById('v_name_top').textContent = v.Name || 'Anonymous';
+            document.getElementById('v_company_top').textContent = (v.CompanyName || 'INDIVIDUAL').toUpperCase();
+            
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el && el.querySelector('span')) el.querySelector('span').textContent = val;
+            };
+            
+            setVal('v_email', v.Email || '—');
+            setVal('v_phone', v.Phone || '—');
+            setVal('v_host', v.WhomeToMeet || '—');
+            setVal('v_purpose', v.Purpose || '—');
+            
+            const photo = document.getElementById('v_photo');
+            const initial = document.getElementById('v_initial');
+            if (v.CapturePhoto) {
+                photo.src = v.CapturePhoto;
                 photo.classList.remove('d-none');
                 initial.classList.add('d-none');
             } else {
                 photo.classList.add('d-none');
                 initial.classList.remove('d-none');
+                initial.textContent = (v.Name || '?').charAt(0).toUpperCase();
+            }
+            
+            document.getElementById('v_edit_btn').onclick = () => {
+                closeModal('modalView');
+                openEditModal(v);
+            };
+            
+            openModal('modalView');
+        }
+
+        // ── EDIT VISITOR ──
+        function openEditModal(v) {
+            document.getElementById('e_id').value = v.VisitorId;
+            document.getElementById('e_name').value = v.Name || '';
+            document.getElementById('e_email').value = v.Email || '';
+            document.getElementById('e_phone').value = v.Phone || '';
+            document.getElementById('e_vehicle').value = v.VehicleNumber || '';
+            document.getElementById('e_company').value = v.CompanyName || '';
+            document.getElementById('e_dept').value = v.Department || '';
+            openModal('modalEdit');
+        }
+
+        // ── QR PASS ──
+        let _currentQRData = { name: '', code: '', company: '' };
+        function openQRPassModal(id, name, qrCode, photo, company) {
+            _currentQRData = { name, code: qrCode, company: company || 'INDIVIDUAL' };
+            document.getElementById('qrp_name').textContent = name;
+            document.getElementById('qrp_company').textContent = (company || 'INDIVIDUAL').toUpperCase();
+            document.getElementById('qrp_token').textContent = qrCode;
+
+            const photoImg = document.getElementById('qrp_photo');
+            const initial = document.getElementById('qrp_initial');
+            if (photo) {
+                photoImg.src = photo;
+                photoImg.classList.remove('d-none');
+                initial.classList.add('d-none');
+            } else {
+                photoImg.classList.add('d-none');
+                initial.classList.remove('d-none');
                 initial.textContent = (name || '?').charAt(0).toUpperCase();
             }
 
-            const img = document.getElementById('qrp_img');
-            const loading = document.getElementById('qrp_loading');
-            if (qrCode) {
-                img.src = `https://api.qrserver.com/v1/create-qr-code/?size=360x360&data=${encodeURIComponent(qrCode)}`;
-                img.classList.remove('d-none');
-                loading.classList.add('d-none');
-                document.getElementById('qrp_token').textContent = qrCode;
-            } else {
-                img.classList.add('d-none');
-                loading.classList.remove('d-none');
-                document.getElementById('qrp_token').textContent = '— No Pass —';
-            }
+            document.getElementById('qrp_img').src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(qrCode)}`;
             openModal('modalQRPass');
         }
 
@@ -479,29 +411,23 @@
             if (!_currentQRData.code) return;
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(_currentQRData.code)}`;
             const w = window.open('', '_blank');
-            w.document.write(`<html><body><div style="text-align:center;padding:20px;border:2px solid #eee;border-radius:20px;display:inline-block;"><h3>${_currentQRData.name}</h3><p>${_currentQRData.company}</p><img src="${qrUrl}" width="200"/><br/><br/><b>${_currentQRData.code}</b></div><script>setTimeout(()=> {window.print(); window.close();},500);<\/script></body></html>`);
+            w.document.write(`<html><body style="font-family:'Inter',sans-serif;text-align:center;padding:40px;">
+                <div style="border:2px solid #6366f1;border-radius:24px;padding:30px;display:inline-block;width:300px;">
+                    <h2 style="margin:0;color:#1e1e2d;">${_currentQRData.name}</h2>
+                    <p style="color:#6366f1;font-weight:bold;text-transform:uppercase;margin:5px 0 20px;">${_currentQRData.company}</p>
+                    <img src="${qrUrl}" width="200" style="margin-bottom:20px;"/>
+                    <div style="background:#f1f5f9;padding:10px;border-radius:10px;font-family:monospace;font-weight:bold;">${_currentQRData.code}</div>
+                </div>
+                <script>setTimeout(()=> {window.print(); window.close();},500);<\/script>
+            </body></html>`);
             w.document.close();
         }
 
         function shareQRDirect() {
-            if (!_currentQRData.code) return;
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(_currentQRData.code)}`;
             if (navigator.share) navigator.share({ title: 'Visitor Pass', url: qrUrl });
             else window.open(qrUrl, '_blank');
         }
 
-        function filterTable() {
-            var input = document.getElementById("tableSearchInput");
-            var filter = input.value.toUpperCase();
-            var tr = document.getElementById("standardTable").getElementsByTagName("tr");
-            for (var i = 1; i < tr.length; i++) {
-                var found = false;
-                var td = tr[i].getElementsByTagName("td");
-                for (var j = 0; j < td.length; j++) {
-                    if (td[j] && td[j].textContent.toUpperCase().indexOf(filter) > -1) { found = true; break; }
-                }
-                tr[i].style.display = found ? "" : "none";
-            }
-        }
     </script>
 }

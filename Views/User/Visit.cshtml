@@ -4,170 +4,193 @@
     ViewData["Title"] = "Visit Logs";
 }
 
-<div class="stat-card-row">
-    <div class="user-stat-card">
-        <div class="stat-info">
-            <span class="stat-label">Total Logs</span>
-            <span class="stat-value">@ViewBag.TotalVisits</span>
-        </div>
-        <div class="stat-icon" style="background: #3B82F6;"><i class="fas fa-database"></i></div>
-    </div>
-    <div class="user-stat-card">
-        <div class="stat-info">
-            <span class="stat-label">Active Now</span>
-            <span class="stat-value">@ViewBag.ActiveVisits</span>
-        </div>
-        <div class="stat-icon" style="background: #10B981;"><i class="fas fa-walking"></i></div>
-    </div>
-    <div class="user-stat-card">
-        <div class="stat-info">
-            <span class="stat-label">Expected Today</span>
-            <span class="stat-value">@ViewBag.PendingVisits</span>
-        </div>
-        <div class="stat-icon" style="background: #F59E0B;"><i class="fas fa-clock"></i></div>
-    </div>
-</div>
-
-<!-- Standardized Filter Section -->
-<form method="get" action="/User/Visit" class="filter-section">
-    <div class="filter-grid">
-        <div class="filter-group">
-            <label>Search Identity</label>
-            <input type="text" name="search" value="@ViewBag.Search" class="filter-control" placeholder="Visitor name or phone...">
-        </div>
-        <div class="filter-group">
-            <label>Status</label>
-            <select name="status" class="filter-control">
-                <option value="">All Statuses</option>
-                <option value="Pending" selected="@(ViewBag.StatusFilter == "Pending")">Pending</option>
-                <option value="Active" selected="@(ViewBag.StatusFilter == "Active")">Checked In</option>
-                <option value="CheckedOut" selected="@(ViewBag.StatusFilter == "CheckedOut")">Completed</option>
-            </select>
-        </div>
-        <div class="filter-group">
-            <label>From Date</label>
-            <input type="date" name="dateFrom" value="@ViewBag.DateFrom" class="filter-control">
-        </div>
-        <div class="filter-group">
-            <label>To Date</label>
-            <input type="date" name="dateTo" value="@ViewBag.DateTo" class="filter-control">
-        </div>
-        <div class="d-flex gap-2 align-items-end">
-            <button type="submit" class="btn btn-primary fw-bold px-4 rounded-3 shadow-sm h-100"><i class="fas fa-filter me-2"></i>Filter</button>
-            <a href="/User/VisitReport" class="btn btn-outline-primary fw-bold px-4 rounded-3 shadow-sm h-100 d-flex align-items-center"><i class="fas fa-chart-bar me-2"></i>Report</a>
-        </div>
-    </div>
-</form>
-
-<div class="table-section">
-    <div class="table-header-title d-flex align-items-center justify-content-between flex-wrap gap-3">
-        <div class="d-flex align-items-center">
-            <i class="fas fa-calendar-check me-2 text-primary"></i>
-            <span class="fw-800 text-dark" style="font-size: 1.1rem; letter-spacing: -0.5px;">Entry Logs</span>
-        </div>
-        
-        <div class="d-flex align-items-center gap-2 flex-wrap ms-auto">
-            <div class="input-group input-group-sm" style="width: 280px;">
-                <span class="input-group-text bg-light border-end-0 border-light"><i class="fas fa-search text-muted"></i></span>
-                <input type="text" class="form-control border-start-0 ps-0 shadow-none bg-light border-light" id="tableSearchInput" placeholder="Search by visitor name or mobile..." onkeyup="filterTable()">
+<!-- Summary Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div>
+                <p class="text-muted small mb-1">TOTAL LOGS</p>
+                <h3>@ViewBag.TotalVisits</h3>
+            </div>
+            <div style="width: 48px; height: 48px; background: rgba(99, 102, 241, 0.1); color: #6366f1; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                <i class="fas fa-database"></i>
             </div>
         </div>
     </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div>
+                <p class="text-muted small mb-1">ACTIVE NOW</p>
+                <h3>@ViewBag.ActiveVisits</h3>
+            </div>
+            <div style="width: 48px; height: 48px; background: rgba(16, 185, 129, 0.1); color: #10B981; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                <i class="fas fa-walking"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div>
+                <p class="text-muted small mb-1">EXPECTED TODAY</p>
+                <h3>@ViewBag.PendingVisits</h3>
+            </div>
+            <div style="width: 48px; height: 48px; background: rgba(245, 158, 11, 0.1); color: #F59E0B; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                <i class="fas fa-clock"></i>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <div style="overflow-x: auto;">
-        <table class="user-table" id="standardTable">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Visitor</th>
-                    <th>Host Person</th>
-                    <th>Check In / Out</th>
-                    <th>Duration</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model != null && Model.Count > 0)
-                {
-                    int i = 1;
-                    foreach (var v in Model)
+<!-- Filters -->
+<div class="section-card mb-4">
+    <form method="get" action="/User/Visit">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="nexus-label">SEARCH IDENTITY</label>
+                <input type="text" name="search" value="@ViewBag.Search" class="nexus-input" placeholder="Name or phone...">
+            </div>
+            <div class="col-md-2">
+                <label class="nexus-label">STATUS</label>
+                <select name="status" class="nexus-input">
+                    <option value="">All Statuses</option>
+                    <option value="Pending" selected="@(ViewBag.StatusFilter == "Pending")">Pending</option>
+                    <option value="Active" selected="@(ViewBag.StatusFilter == "Active")">Checked In</option>
+                    <option value="CheckedOut" selected="@(ViewBag.StatusFilter == "CheckedOut")">Completed</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="nexus-label">FROM DATE</label>
+                <input type="date" name="dateFrom" value="@ViewBag.DateFrom" class="nexus-input">
+            </div>
+            <div class="col-md-2">
+                <label class="nexus-label">TO DATE</label>
+                <input type="date" name="dateTo" value="@ViewBag.DateTo" class="nexus-input">
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="premium-btn flex-grow-1">
+                    <i class="fas fa-filter me-2"></i>Apply
+                </button>
+                <a href="/User/VisitReport" class="premium-btn secondary">
+                    <i class="fas fa-file-export"></i>
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Entry Logs Table -->
+<div class="section-card animate-fade-up">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+        <div>
+            <h5 class="fw-800 text-dark mb-1" style="letter-spacing: -0.5px;">Entry Logs</h5>
+            <p class="text-muted small mb-0">Detailed history of all check-ins and check-outs.</p>
+        </div>
+        
+        <div class="input-group" style="width: 280px;">
+            <span class="input-group-text bg-light border-end-0" style="border-radius: 10px 0 0 10px; border-color: #e2e8f0;"><i class="fas fa-search text-muted"></i></span>
+            <input type="text" class="form-control bg-light border-start-0" id="tableSearchInput" placeholder="Quick search..." onkeyup="filterTable()" style="border-radius: 0 10px 10px 0; border-color: #e2e8f0; font-size: 0.9rem;">
+        </div>
+    </div>
+
+    <div class="nexus-table-wrapper">
+        <div class="table-responsive">
+            <table class="nexus-table" id="standardTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Visitor Details</th>
+                        <th>Host Details</th>
+                        <th>Timing (In/Out)</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Count > 0)
                     {
-                        string dur = "—";
-                        if (v.CheckOutTime.HasValue)
+                        int i = 1;
+                        foreach (var v in Model)
                         {
-                            int mins = (int)(v.CheckOutTime.Value - v.CheckInTime).TotalMinutes;
-                            dur = mins >= 60 ? $"{mins/60}h {mins%60}m" : $"{mins}m";
-                        }
-                        <tr onclick="if(!event.target.closest('.acts-group')) { window.location.href='/User/VisitDetail/@v.VisitId'; }" style="cursor: pointer;" class="hover-row">
-                            <td><span class="badge bg-light text-secondary border rounded-pill">@i</span></td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold me-3 shadow-sm overflow-hidden" style="width: 38px; height: 38px; border: 1px solid rgba(59, 130, 246, 0.2);">
-                                        @if (!string.IsNullOrEmpty(v.Visitor?.CapturePhoto))
-                                        {
-                                            <img src="@v.Visitor.CapturePhoto" alt="" class="w-100 h-100" style="object-fit: cover;" />
-                                        }
-                                        else
-                                        {
-                                            <span>@(v.Visitor?.Name != null && v.Visitor.Name.Length > 0 ? v.Visitor.Name[0].ToString().ToUpper() : "?")</span>
-                                        }
+                            string dur = "—";
+                            if (v.CheckOutTime.HasValue)
+                            {
+                                int mins = (int)(v.CheckOutTime.Value - v.CheckInTime).TotalMinutes;
+                                dur = mins >= 60 ? $"{mins / 60}h {mins % 60}m" : $"{mins}m";
+                            }
+                            <tr class="hover-row" style="cursor: pointer;" onclick="if(!event.target.closest('.tool-btn')) { window.location.href='/User/VisitDetail/@v.VisitId'; }">
+                                <td style="width: 60px;"><span class="nexus-badge nexus-badge-info">@i</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-800" style="width: 38px; height: 38px; font-size: 0.85rem; border: 1px solid rgba(99, 102, 241, 0.1);">
+                                            @if (!string.IsNullOrEmpty(v.Visitor?.CapturePhoto))
+                                            {
+                                                <img src="@v.Visitor.CapturePhoto" class="w-100 h-100 rounded-circle" style="object-fit: cover;" />
+                                            }
+                                            else
+                                            {
+                                                <span>@(v.Visitor?.Name != null && v.Visitor.Name.Length > 0 ? v.Visitor.Name[0].ToString().ToUpper() : "?")</span>
+                                            }
+                                        </div>
+                                        <div>
+                                            <div class="fw-700 text-dark mb-1">@(v.Visitor?.Name ?? "Unknown")</div>
+                                            <small class="text-muted font-monospace" style="font-size: 0.7rem;">@v.PassNumber</small>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div class="fw-bold text-dark">@(v.Visitor?.Name ?? "Unknown")</div>
-                                        <small class="text-muted text-uppercase font-monospace">@v.PassNumber</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="fw-bold text-primary">@(v.Employee?.Name ?? v.Visitor?.WhomeToMeet ?? "—")</div>
-                                <small class="text-muted">@(v.Employee?.Department?.DepartmentName ?? "General")</small>
-                            </td>
-                            <td>
-                                <div class="d-flex flex-column gap-1">
+                                </td>
+                                <td>
+                                    <div class="fw-700 text-primary mb-1">@(v.Employee?.Name ?? v.Visitor?.WhomeToMeet ?? "—")</div>
+                                    <span class="nexus-badge nexus-badge-info" style="font-size: 0.6rem;">@(v.Employee?.Department?.DepartmentName ?? "General")</span>
+                                </td>
+                                <td>
                                     @if (v.Status != "Pending")
                                     {
-                                        <span class="text-success small fw-bold"><i class="fas fa-sign-in-alt me-1"></i> @v.CheckInTime.ToString("dd MMM · HH:mm")</span>
-                                        if (v.CheckOutTime.HasValue)
-                                        {
-                                            <span class="text-danger small fw-bold"><i class="fas fa-sign-out-alt me-1"></i> @v.CheckOutTime.Value.ToString("dd MMM · HH:mm")</span>
-                                        }
+                                        <div class="d-flex flex-column gap-1">
+                                            <span class="text-success small fw-700"><i class="fas fa-sign-in-alt me-1"></i> @v.CheckInTime.ToString("dd MMM, HH:mm")</span>
+                                            @if (v.CheckOutTime.HasValue)
+                                            {
+                                                <span class="text-danger small fw-700"><i class="fas fa-sign-out-alt me-1"></i> @v.CheckOutTime.Value.ToString("dd MMM, HH:mm")</span>
+                                            }
+                                        </div>
                                     }
                                     else
                                     {
                                         <span class="text-muted fst-italic small">Registry Pending</span>
                                     }
-                                </div>
-                            </td>
-                            <td><span class="fw-bold font-monospace">@dur</span></td>
-                            <td>
-                                @{
-                                    var statusClass = v.Status switch {
-                                        "Active" => "bg-success",
-                                        "Pending" => "bg-warning",
-                                        _ => "bg-secondary"
-                                    };
-                                    var statusText = v.Status == "Active" ? "Inside" : (v.Status == "CheckedOut" ? "Completed" : v.Status);
-                                }
-                                <span class="badge @statusClass px-3 py-2 rounded-pill shadow-sm" style="font-size: 0.7rem;">@statusText</span>
-                            </td>
-                            <td>
-                                <div class="acts-group">
-                                    <a href="/User/ScanQR" class="act-btn act-qr" title="Scan QR Code"><i class="fas fa-qrcode"></i></a>
-                                </div>
+                                </td>
+                                <td><span class="fw-800 text-dark font-monospace">@dur</span></td>
+                                <td>
+                                    @{
+                                        var (statusBadge, statusText) = v.Status switch
+                                        {
+                                            "Active" => ("nexus-badge-success", "Inside"),
+                                            "Pending" => ("nexus-badge-warning", "Pending"),
+                                            _ => ("nexus-badge-danger", "Completed")
+                                        };
+                                    }
+                                    <span class="nexus-badge @statusBadge">@statusText</span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="/User/ScanQR" class="tool-btn success" title="Scan QR">
+                                        <i class="fas fa-qrcode"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <div class="opacity-25 mb-3"><i class="fas fa-history fa-3x"></i></div>
+                                <p class="text-muted fw-600">No activity logs found for the selected criteria.</p>
                             </td>
                         </tr>
-                        i++;
                     }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">No activity records found.</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     @if (ViewBag.Pagination != null)
@@ -175,46 +198,44 @@
         var pModel = (VMSProject.Models.PaginationViewModel)ViewBag.Pagination;
         @if (pModel.TotalPages > 0)
         {
-            <div class="pagination-container">
-                <div class="pagination-info">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mt-4 px-2">
+                <div class="text-muted small fw-600">
                     Showing @(((pModel.CurrentPage - 1) * pModel.PageSize) + 1) to @(Math.Min(pModel.CurrentPage * pModel.PageSize, pModel.TotalItems)) of @pModel.TotalItems entries
                 </div>
-                <div class="pagination-controls">
-                    <div class="page-size-selector">
-                        <select class="page-size-select" onchange="updatePageSize(this.value)">
-                            <option value="15" selected="@(pModel.PageSize == 15)">15</option>
-                            <option value="30" selected="@(pModel.PageSize == 30)">30</option>
-                            <option value="50" selected="@(pModel.PageSize == 50)">50</option>
-                        </select>
-                    </div>
-                    <div class="custom-pagination">
-                        @if (pModel.HasPreviousPage) {
-                            var prevVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage - 1).ToString() };
-                            <a href="@Url.Action(pModel.Action, pModel.Controller, prevVals)" class="page-link-custom">Previous</a>
-                        } else { <span class="page-link-custom disabled">Previous</span> }
-                        @{
-                            int startPage = Math.Max(1, pModel.CurrentPage - 2);
-                            int endPage = Math.Min(pModel.TotalPages, startPage + 4);
-                            if (endPage - startPage < 4) startPage = Math.Max(1, endPage - 4);
-                        }
-                        @for (int j = startPage; j <= endPage; j++) {
-                            var pageVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = j.ToString() };
-                            <a href="@Url.Action(pModel.Action, pModel.Controller, pageVals)" class="page-link-custom @(j == pModel.CurrentPage ? "active" : "")">@j</a>
-                        }
-                        @if (pModel.HasNextPage) {
-                            var nextVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage + 1).ToString() };
-                            <a href="@Url.Action(pModel.Action, pModel.Controller, nextVals)" class="page-link-custom">Next</a>
-                        } else { <span class="page-link-custom disabled">Next</span> }
-                    </div>
+                <div class="d-flex align-items-center gap-3">
+                    <select class="form-select form-select-sm rounded-pill px-3" onchange="updatePageSize(this.value)" style="width: auto; border-color: #e2e8f0; font-weight: 600;">
+                        <option value="15" selected="@(pModel.PageSize == 15)">15 per page</option>
+                        <option value="30" selected="@(pModel.PageSize == 30)">30 per page</option>
+                        <option value="50" selected="@(pModel.PageSize == 50)">50 per page</option>
+                    </select>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0 gap-1">
+                            @if (pModel.HasPreviousPage)
+                            {
+                                var prevVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage - 1).ToString() };
+                                <li class="page-item"><a href="@Url.Action(pModel.Action, pModel.Controller, prevVals)" class="page-link rounded-circle border-0 bg-light text-dark"><i class="fas fa-chevron-left"></i></a></li>
+                            }
+                            @for (int j = Math.Max(1, pModel.CurrentPage - 2); j <= Math.Min(pModel.TotalPages, pModel.CurrentPage + 2); j++)
+                            {
+                                var pageVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = j.ToString() };
+                                <li class="page-item"><a href="@Url.Action(pModel.Action, pModel.Controller, pageVals)" class="page-link rounded-circle border-0 @(j == pModel.CurrentPage ? "bg-primary text-white shadow-sm" : "bg-light text-dark")" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: 700;">@j</a></li>
+                            }
+                            @if (pModel.HasNextPage)
+                            {
+                                var nextVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage + 1).ToString() };
+                                <li class="page-item"><a href="@Url.Action(pModel.Action, pModel.Controller, nextVals)" class="page-link rounded-circle border-0 bg-light text-dark"><i class="fas fa-chevron-right"></i></a></li>
+                            }
+                        </ul>
+                    </nav>
                 </div>
             </div>
             <script>
-                function updatePageSize(size) {
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('pageSize', size);
-                    url.searchParams.set('page', '1');
-                    window.location.href = url.toString();
-                }
+                    function updatePageSize(size) {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('pageSize', size);
+                        url.searchParams.set('page', '1');
+                        window.location.href = url.toString();
+                    }
             </script>
         }
     }
@@ -222,27 +243,5 @@
 
 @section Scripts {
     <script>
-        function filterTable() {
-            var input, filter, table, tr, td, i, j, txtValue, found;
-            input = document.getElementById("tableSearchInput");
-            filter = input.value.toUpperCase();
-            table = document.getElementById("standardTable");
-            tr = table.getElementsByTagName("tr");
-
-            for (i = 1; i < tr.length; i++) {
-                td = tr[i].getElementsByTagName("td");
-                found = false;
-                for (j = 0; j < td.length; j++) {
-                    if (td[j]) {
-                        txtValue = td[j].textContent || td[j].innerText;
-                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                            found = true;
-                            break;
-                        }
-                    }
-                }
-                if (found) { tr[i].style.display = ""; } else { tr[i].style.display = "none"; }
-            }
-        }
     </script>
 }

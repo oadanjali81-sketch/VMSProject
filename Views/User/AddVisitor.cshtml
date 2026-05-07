@@ -136,40 +136,19 @@
         let camStream = null;
 
         function openCameraModal() {
-            const modalEl = document.getElementById('cameraModal');
-            let modal = bootstrap.Modal.getInstance(modalEl);
-            if (!modal) modal = new bootstrap.Modal(modalEl);
+            const modal = new bootstrap.Modal(document.getElementById('cameraModal'));
             modal.show();
-
             const video = document.getElementById('cameraVideo');
             const status = document.getElementById('cameraStatus');
-            
-            // Ensure status is visible initially
-            status.classList.remove('d-none');
-            status.innerHTML = `<div class="spinner-border text-primary mb-2"></div><p class="small">Initializing camera...</p>`;
-
-            navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: "user",
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                } 
-            })
-            .then(stream => {
-                camStream = stream;
-                video.srcObject = stream;
-                video.onloadedmetadata = () => {
-                    video.play();
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+                .then(stream => {
+                    camStream = stream;
+                    video.srcObject = stream;
                     status.classList.add('d-none');
-                };
-            })
-            .catch(err => {
-                console.error("Camera Error:", err);
-                let msg = "Camera access denied.";
-                if (err.name === 'NotFoundError') msg = "No camera found.";
-                if (err.name === 'NotReadableError') msg = "Camera is already in use.";
-                status.innerHTML = `<i class="fas fa-exclamation-circle text-danger mb-2"></i><p class="small">${msg}</p>`;
-            });
+                })
+                .catch(err => {
+                    status.innerHTML = `<i class="fas fa-exclamation-circle text-danger mb-2"></i><p class="small">Camera access denied.</p>`;
+                });
         }
 
         function closeCameraModal() {

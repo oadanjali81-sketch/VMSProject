@@ -1,6 +1,6 @@
 @model IEnumerable<VMSProject.Models.DemoRequest>
 @{
-    Layout = "~/Views/Shared/_SuperAdminLayout.cshtml";
+    Layout = "~/Views/Shared/SuperAdminLayout.cshtml";
     ViewData["Title"] = "Demo Requests";
     var requests = (List<VMSProject.Models.DemoRequest>)ViewBag.Requests;
     var totalCount = (int)ViewBag.TotalCount;

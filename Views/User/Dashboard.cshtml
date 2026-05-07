@@ -1,182 +1,173 @@
 @{
     Layout = "UserLayout";
-    ViewData["Title"] = "User Dashboard";
+    ViewData["Title"] = "Dashboard";
 }
 
-<!-- Row 1: Primary Stats -->
-<div class="row g-4 mb-4">
-    <div class="col-md-3">
-        <div class="stat-card-nexus">
-            <div>
-                <p class="stat-card-label" style="color: #3B82F6;">TOTAL VISITORS</p>
-                <h3 class="stat-card-value">@ViewBag.TotalVisitors</h3>
+<div class="page-header animate-fade-up">
+    <div class="row align-items-center">
+        <div class="col">
+            <h1 class="mb-1">Dashboard</h1>
+            <p class="text-muted mb-0">Welcome back! Here's what's happening with your visitor traffic today.</p>
+        </div>
+        <div class="col-auto">
+            <div class="d-flex gap-2">
+                <button class="premium-btn secondary px-3 py-2" title="Refresh Dashboard" onclick="location.reload()">
+                    <i class="fas fa-sync-alt m-0"></i>
+                </button>
+                <a href="/User/ScanQR" class="premium-btn shadow-sm">
+                    <i class="fas fa-qrcode"></i> Launch Scanner
+                </a>
             </div>
-            <div class="stat-card-icon" style="background: rgba(59,130,246,0.1); color: #3B82F6;">
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Grid -->
+<div class="row g-4 mb-5 animate-fade-up">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card d-flex align-items-center justify-content-between">
+            <div>
+                <p class="section-title-sm mb-2" style="font-size: 0.65rem;">Total Visitors</p>
+                <h3 class="mb-0">@ViewBag.TotalVisitors</h3>
+            </div>
+            <div style="width: 54px; height: 54px; background: rgba(99, 102, 241, 0.1); color: #6366f1; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
                 <i class="fas fa-users"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="stat-card-nexus">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card d-flex align-items-center justify-content-between">
             <div>
-                <p class="stat-card-label" style="color: #10B981;">TOTAL EMPLOYEES</p>
-                <h3 class="stat-card-value">@ViewBag.TotalEmployees</h3>
+                <p class="section-title-sm mb-2" style="font-size: 0.65rem;">Active Employees</p>
+                <h3 class="mb-0">@ViewBag.TotalEmployees</h3>
             </div>
-            <div class="stat-card-icon" style="background: rgba(16,185,129,0.1); color: #10B981;">
-                <i class="fas fa-user"></i>
+            <div style="width: 54px; height: 54px; background: rgba(16, 185, 129, 0.1); color: #10B981; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                <i class="fas fa-user-tie"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="stat-card-nexus">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card d-flex align-items-center justify-content-between">
             <div>
-                <p class="stat-card-label" style="color: #F59E0B;">TODAY'S VISITS</p>
-                <h3 class="stat-card-value">@ViewBag.TodayVisits</h3>
+                <p class="section-title-sm mb-2" style="font-size: 0.65rem;">Today's Entries</p>
+                <h3 class="mb-0">@ViewBag.TodayVisits</h3>
             </div>
-            <div class="stat-card-icon" style="background: rgba(245,158,11,0.1); color: #F59E0B;">
-                <i class="fas fa-calendar"></i>
+            <div style="width: 54px; height: 54px; background: rgba(245, 158, 11, 0.1); color: #F59E0B; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                <i class="fas fa-calendar-check"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="stat-card-nexus">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card d-flex align-items-center justify-content-between">
             <div>
-                <p class="stat-card-label" style="color: #EF4444;">ACTIVE INSIDE</p>
-                <h3 class="stat-card-value">@ViewBag.ActiveVisits</h3>
+                <p class="section-title-sm mb-2" style="font-size: 0.65rem;">Currently Inside</p>
+                <h3 class="mb-0">@ViewBag.ActiveVisits</h3>
             </div>
-            <div class="stat-card-icon" style="background: rgba(239,68,68,0.1); color: #EF4444;">
+            <div style="width: 54px; height: 54px; background: rgba(239, 68, 68, 0.1); color: #EF4444; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
                 <i class="fas fa-door-open"></i>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Row 2: Recent Visits + Quick Actions -->
-<div class="row g-4">
+<!-- Activity & Actions Grid -->
+<div class="row g-4 animate-fade-up" style="animation-delay: 0.1s;">
+    <!-- Recent Activity Table -->
     <div class="col-xl-8">
-        <div class="section-card-nexus">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="fw-bold mb-0 d-flex align-items-center" style="color: #1E293B; font-size: 1.1rem;">
-                    <i class="fas fa-history me-2 text-primary"></i>Recent Visits
-                </h5>
-                <a href="/User/Visit" class="btn btn-sm btn-light border fw-bold px-3" style="border-radius: 8px;">View All</a>
+        <div class="section-card h-100 p-0 border-0">
+            <div class="px-4 py-4 d-flex justify-content-between align-items-center border-bottom">
+                <h5 class="mb-0 text-dark fw-800">Recent Visitation Activity</h5>
+                <a href="/User/Visit" class="premium-btn secondary px-3 py-2 uppercase" style="font-size: 0.7rem;">View Detailed Log</a>
             </div>
-            <div class="table-responsive">
-                <table class="table table-hover mb-0 align-middle">
-                    <thead style="background: #1E293B; color: white;">
-                        <tr>
-                            <th style="padding: 15px; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; border: none;">Visitor</th>
-                            <th style="padding: 15px; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; border: none;">Host</th>
-                            <th style="padding: 15px; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; border: none;">Date</th>
-                            <th style="padding: 15px; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; border: none;">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (ViewBag.RecentVisits != null)
-                        {
-                            foreach (var visit in ViewBag.RecentVisits)
+            <div class="p-0">
+                <div class="table-responsive">
+                    <table class="nexus-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Visitor Name</th>
+                                <th>Host Employee</th>
+                                <th>Check-in Time</th>
+                                <th class="text-center">Current Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (ViewBag.RecentVisits != null)
                             {
-                                string statusBg = visit.Status == "Active" ? "#10B981" : "#64748B";
+                                foreach (var visit in ViewBag.RecentVisits)
+                                {
+                                    bool isActive = visit.Status == "Active";
+                                    string badgeClass = isActive ? "nexus-badge-success" : "nexus-badge-info";
+                                    string icon = isActive ? "fa-circle-check" : "fa-clock-rotate-left";
+                                    
+                                    <tr class="hover-row">
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-800" style="width: 32px; height: 32px; font-size: 0.75rem;">
+                                                    @(visit.VisitorName?[0].ToString().ToUpper() ?? "?")
+                                                </div>
+                                                <span class="fw-700 text-dark">@visit.VisitorName</span>
+                                            </div>
+                                        </td>
+                                        <td><div class="text-muted fw-600">@visit.EmployeeName</div></td>
+                                        <td><div class="text-muted small fw-500"><i class="far fa-clock me-1"></i> @visit.VisitDate.ToString("MMM dd, hh:mm tt")</div></td>
+                                        <td class="text-center">
+                                            <span class="nexus-badge @badgeClass">
+                                                <i class="fas @icon me-1"></i> @visit.Status
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
                                 <tr>
-                                    <td style="padding: 15px; font-weight: 600; color: #1E293B;">@visit.VisitorName</td>
-                                    <td style="padding: 15px; color: #475569;">@visit.EmployeeName</td>
-                                    <td style="padding: 15px; color: #64748B; font-size: 0.85rem;">@visit.VisitDate.ToString("MMM dd, hh:mm tt")</td>
-                                    <td style="padding: 15px;">
-                                        <span class="badge" style="background: @statusBg; color: white; padding: 6px 14px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">
-                                            @visit.Status
-                                        </span>
+                                    <td colspan="4" class="text-center py-5">
+                                        <div class="opacity-25 mb-2"><i class="fas fa-folder-open fa-3x"></i></div>
+                                        <p class="text-muted small fw-700 uppercase letter-spacing-1">No Visitation Records Found</p>
                                     </td>
                                 </tr>
                             }
-                        }
-                        else
-                        {
-                            <tr><td colspan="4" class="text-center py-5 text-muted">No recent records found</td></tr>
-                        }
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Quick Actions Panel -->
     <div class="col-xl-4">
-        <div class="section-card-nexus">
-            <div class="mb-4">
-                <h5 class="fw-bold mb-0 d-flex align-items-center" style="color: #1E293B; font-size: 1.1rem;">
-                    <i class="fas fa-bolt me-2 text-warning"></i>Quick Actions
-                </h5>
+        <div class="section-card h-100 border-0">
+            <div class="mb-4 pb-2 border-bottom">
+                <h5 class="text-dark fw-800 mb-1">Administrative Actions</h5>
+                <p class="text-muted small mb-0">Management shortcuts for quick access.</p>
             </div>
+            
             <div class="d-flex flex-column gap-3">
-                <a href="/User/ScanQR" class="btn btn-primary w-100 py-3 fw-bold d-flex align-items-center justify-content-center gap-2" style="border-radius: 10px; font-size: 0.95rem; background: #2563EB; border: none;">
-                    <i class="fas fa-qrcode"></i> Scan QR Pass
+                <a href="/User/ScanQR" class="premium-btn w-100 py-3 shadow-sm">
+                    <i class="fas fa-qrcode fs-5"></i>
+                    <span>Start Entry Scan</span>
                 </a>
-                <a href="/User/AddVisitor" class="btn btn-outline-primary w-100 py-3 fw-bold d-flex align-items-center justify-content-center gap-2" style="border-radius: 10px; font-size: 0.95rem; border: 2px solid #2563EB; color: #2563EB; background: white;">
-                    <i class="fas fa-user-plus"></i> Register New Visitor
+                
+                <a href="/User/AddVisitor" class="premium-btn secondary w-100 py-3" style="border-color: var(--nexus-primary); color: var(--nexus-primary);">
+                    <i class="fas fa-user-plus fs-5"></i>
+                    <span>Register New Visitor</span>
                 </a>
-                <a href="/User/AllQRCodes" class="btn btn-outline-secondary w-100 py-3 fw-bold d-flex align-items-center justify-content-center gap-2" style="border-radius: 10px; font-size: 0.95rem; border: 2px solid #E2E8F0; color: #475569; background: white;">
-                    <i class="fas fa-id-card"></i> View All Passes
+                
+                <a href="/User/AllQRCodes" class="premium-btn secondary w-100 py-3">
+                    <i class="fas fa-id-card fs-5"></i>
+                    <span>Manage Active Passes</span>
                 </a>
-                <a href="/User/Employee" class="btn btn-outline-success w-100 py-3 fw-bold d-flex align-items-center justify-content-center gap-2" style="border-radius: 10px; font-size: 0.95rem; border: 2px solid #10B981; color: #10B981; background: white;">
-                    <i class="fas fa-plus-circle"></i> Add Employee
-                </a>
+                
+                <div class="mt-4 pt-4 border-top">
+                    <div class="bg-light bg-opacity-50 p-4 rounded-4 border border-white position-relative">
+                        <div class="position-absolute top-0 end-0 p-3 opacity-10">
+                            <i class="fas fa-lightbulb fa-2x"></i>
+                        </div>
+                        <h6 class="fw-800 text-dark mb-2">Security Tip</h6>
+                        <p class="text-muted small mb-0 fw-500 lh-base">Always verify the visitor's government ID before generating a digital access pass to ensure compliance.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
-@section Styles {
-    <style>
-        /* ═══ NEXUS DASHBOARD DESIGN SYSTEM ═══ */
-        .stat-card-nexus {
-            background: #FFFFFF;
-            border-radius: 16px;
-            padding: 22px 24px;
-            border: 1px solid #E2E8F0;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .stat-card-nexus:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06);
-            border-color: #3B82F6;
-        }
-        .stat-card-label {
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-        .stat-card-value {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: #1E293B;
-            margin: 0;
-            line-height: 1;
-        }
-        .stat-card-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-        }
-
-        .section-card-nexus {
-            background: #FFFFFF;
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 0;
-            border: 1px solid #E2E8F0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        }
-    </style>
-}
-
-@section Scripts {
-}

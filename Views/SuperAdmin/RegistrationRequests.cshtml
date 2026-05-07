@@ -1,6 +1,6 @@
 @using VMSProject.Models
 @{
-    Layout = "_SuperAdminLayout";
+    Layout = "SuperAdminLayout";
     ViewData["Title"] = "Registration Requests";
     var requests = ViewBag.Requests as List<CompanyRegistrationRequest> ?? new List<CompanyRegistrationRequest>();
     var totalCount = (int)ViewBag.TotalCount;

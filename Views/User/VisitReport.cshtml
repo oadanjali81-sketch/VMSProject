@@ -1,133 +1,147 @@
+@model List<VMSProject.Models.Visit>
 @{
     Layout = "UserLayout";
-    ViewData["Title"] = "Visit Reports";
-    string dateFrom = ViewBag.DateFrom ?? DateTime.Today.ToString("yyyy-MM-dd");
-    string dateTo   = ViewBag.DateTo   ?? DateTime.Today.ToString("yyyy-MM-dd");
-    var grouped = ViewBag.GroupedVisits as IEnumerable<IGrouping<DateTime, VMSProject.Models.Visit>>;
-    double avgMins = ViewBag.AvgDurationMins ?? 0.0;
-    string avgDur  = avgMins >= 60 ? $"{(int)avgMins/60}h {(int)avgMins%60}m" : $"{(int)avgMins}m";
+    ViewData["Title"] = "Visitor Analytics Report";
 }
 
-<div class="stat-card-row">
-    <div class="user-stat-card">
-        <div class="stat-info">
-            <span class="stat-label">Total Visits</span>
-            <span class="stat-value">@(ViewBag.TotalInRange ?? 0)</span>
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="section-card animate-fade-up">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width: 50px; height: 50px; background: rgba(99, 102, 241, 0.1); color: #6366f1; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                    <i class="fas fa-file-invoice"></i>
+                </div>
+                <div>
+                    <h5 class="fw-800 text-dark mb-1" style="letter-spacing: -0.5px;">Visitation Report</h5>
+                    <p class="text-muted small mb-0">Detailed breakdown of visitor traffic and security logs.</p>
+                </div>
+            </div>
         </div>
-        <div class="stat-icon" style="background: #3B82F6;"><i class="fas fa-chart-line"></i></div>
     </div>
-    <div class="user-stat-card">
-        <div class="stat-info">
-            <span class="stat-label">Check-Ins</span>
-            <span class="stat-value">@(ViewBag.CheckedIn ?? 0)</span>
-        </div>
-        <div class="stat-icon" style="background: #10B981;"><i class="fas fa-fingerprint"></i></div>
-    </div>
-    <div class="user-stat-card">
-        <div class="stat-info">
-            <span class="stat-label">Check-Outs</span>
-            <span class="stat-value">@(ViewBag.CheckedOut ?? 0)</span>
-        </div>
-        <div class="stat-icon" style="background: #EF4444;"><i class="fas fa-door-open"></i></div>
-    </div>
-    <div class="user-stat-card">
-        <div class="stat-info">
-            <span class="stat-label">Avg Duration</span>
-            <span class="stat-value">@avgDur</span>
-        </div>
-        <div class="stat-icon" style="background: #06b6d4;"><i class="fas fa-stopwatch"></i></div>
+    <div class="col-md-6 d-flex align-items-center justify-content-end gap-3">
+        <button onclick="window.print()" class="premium-btn">
+            <i class="fas fa-print me-2"></i>Export PDF
+        </button>
+        <a href="/User/Visit" class="premium-btn secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Logs
+        </a>
     </div>
 </div>
 
-<!-- Standardized Filter Section -->
-<form method="get" action="/User/VisitReport" class="filter-section print-hide">
-    <div class="filter-grid">
-        <div class="filter-group">
-            <label>Start Date</label>
-            <input type="date" name="dateFrom" value="@dateFrom" class="filter-control">
-        </div>
-        <div class="filter-group">
-            <label>End Date</label>
-            <input type="date" name="dateTo" value="@dateTo" class="filter-control">
-        </div>
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-primary fw-bold px-4 rounded-3 shadow-sm"><i class="fas fa-sync-alt me-2"></i>Apply</button>
-            <button type="button" onclick="window.print()" class="btn btn-light fw-bold px-4 rounded-3 border"><i class="fas fa-print me-2"></i>Print</button>
-            <a href="/User/ExportCsv?dateFrom=@dateFrom&dateTo=@dateTo" class="btn btn-success fw-bold px-4 rounded-3 text-white shadow-sm"><i class="fas fa-file-csv me-2"></i>CSV</a>
-        </div>
-    </div>
-</form>
-
-@if (grouped != null && grouped.Any())
+@if (Model != null && Model.Count > 0)
 {
-    foreach (var day in grouped)
+    var groupedByDay = Model.GroupBy(x => x.VisitDate.Date).OrderByDescending(x => x.Key);
+    
+    foreach (var day in groupedByDay)
     {
-        <div class="table-section mb-4">
-            <div class="table-header-title" style="background: #f8fafc;">
-                <span><i class="fas fa-calendar-day me-2 text-primary"></i>@day.Key.ToString("dddd, dd MMMM yyyy")</span>
-                <span class="badge bg-primary rounded-pill px-3">@day.Count() VISITS</span>
+        <div class="section-card mb-5 animate-fade-up">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width: 40px; height: 40px; background: #f8fafc; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #6366f1; border: 1px solid #e2e8f0;">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-800 text-dark mb-0">@day.Key.ToString("dddd, dd MMMM yyyy")</h6>
+                        <span class="text-muted small fw-600">@day.Count() Records recorded</span>
+                    </div>
+                </div>
+                <span class="nexus-badge nexus-badge-success">DAILY SUMMARY</span>
             </div>
-            <div style="overflow-x: auto;">
-                <table class="user-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Visitor</th>
-                            <th>Host Person</th>
-                            <th>In / Out</th>
-                            <th>Duration</th>
-                            <th>Status</th>
-                            <th class="text-end">Pass</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @{ int ri = 1; }
-                        @foreach (var v in day.OrderBy(x => x.CheckInTime))
-                        {
-                            string dur = "—";
-                            if (v.CheckOutTime.HasValue) {
-                                int mins = (int)(v.CheckOutTime.Value - v.CheckInTime).TotalMinutes;
-                                dur = mins >= 60 ? $"{mins/60}h {mins%60}m" : $"{mins}m";
-                            }
+
+            <div class="nexus-table-wrapper">
+                <div class="table-responsive">
+                    <table class="nexus-table">
+                        <thead>
                             <tr>
-                                <td>@ri</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold me-2" style="width: 32px; height: 32px; font-size: 0.75rem;">
-                                            @(!string.IsNullOrEmpty(v.Visitor?.Name) ? v.Visitor.Name[0].ToString().ToUpper() : "?")
-                                        </div>
-                                        <span class="fw-bold">@(v.Visitor?.Name ?? "UNKNOWN")</span>
-                                    </div>
-                                </td>
-                                <td>@(v.Employee?.Name ?? v.Visitor?.WhomeToMeet ?? "—")</td>
-                                <td>
-                                    <div class="small">
-                                        <span class="text-success">@(v.Status != "Pending" ? v.CheckInTime.ToString("hh:mm tt") : "—")</span>
-                                        <span class="mx-1 text-muted">|</span>
-                                        <span class="text-danger">@(v.CheckOutTime.HasValue ? v.CheckOutTime.Value.ToString("hh:mm tt") : "—")</span>
-                                    </div>
-                                </td>
-                                <td><span class="font-monospace">@dur</span></td>
-                                <td>
-                                    @{
-                                        var badgeBg = v.Status == "Active" ? "bg-success" : v.Status == "Pending" ? "bg-warning" : "bg-secondary";
-                                    }
-                                    <span class="badge @badgeBg px-2 py-1 rounded-pill" style="font-size: 0.65rem;">@(v.Status?.ToUpper() ?? "UNKNOWN")</span>
-                                </td>
-                                <td class="text-end"><span class="font-monospace small bg-light p-1 px-2 border rounded">@(v.PassNumber ?? "—")</span></td>
+                                <th>#</th>
+                                <th>Visitor Details</th>
+                                <th>Host / Department</th>
+                                <th>Timing (In/Out)</th>
+                                <th>Duration</th>
+                                <th>Status</th>
+                                <th class="text-end">Pass ID</th>
                             </tr>
-                            ri++;
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @{ int ri = 1; }
+                            @foreach (var v in day.OrderBy(x => x.CheckInTime))
+                            {
+                                string dur = "—";
+                                if (v.CheckOutTime.HasValue) {
+                                    int mins = (int)(v.CheckOutTime.Value - v.CheckInTime).TotalMinutes;
+                                    dur = mins >= 60 ? $"{mins/60}h {mins%60}m" : $"{mins}m";
+                                }
+                                var (badge, text) = v.Status switch {
+                                    "Active" => ("nexus-badge-success", "Inside"),
+                                    "Pending" => ("nexus-badge-warning", "Pending"),
+                                    _ => ("nexus-badge-danger", "Completed")
+                                };
+
+                                <tr class="hover-row">
+                                    <td style="width: 50px;"><span class="text-muted small fw-800">@ri</span></td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-800" style="width: 32px; height: 32px; font-size: 0.75rem;">
+                                                @(string.IsNullOrEmpty(v.Visitor?.Name) ? "?" : v.Visitor.Name[0].ToString().ToUpper())
+                                            </div>
+                                            <div>
+                                                <div class="fw-700 text-dark mb-0">@(v.Visitor?.Name ?? "UNKNOWN")</div>
+                                                <small class="text-muted" style="font-size: 0.7rem;">@(v.Visitor?.Phone ?? "—")</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-700 text-primary mb-1">@(v.Employee?.Name ?? v.Visitor?.WhomeToMeet ?? "—")</div>
+                                        <span class="nexus-badge nexus-badge-info" style="font-size: 0.6rem;">@(v.Employee?.Department?.DepartmentName ?? "General")</span>
+                                    </td>
+                                    <td>
+                                        @if (v.Status != "Pending")
+                                        {
+                                            <div class="d-flex flex-column gap-1">
+                                                <span class="text-success small fw-800"><i class="fas fa-sign-in-alt me-1"></i> @v.CheckInTime.ToString("hh:mm tt")</span>
+                                                @if (v.CheckOutTime.HasValue)
+                                                {
+                                                    <span class="text-danger small fw-800"><i class="fas fa-sign-out-alt me-1"></i> @v.CheckOutTime.Value.ToString("hh:mm tt")</span>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic small">Pending Entry</span>
+                                        }
+                                    </td>
+                                    <td><span class="fw-800 text-dark font-monospace">@dur</span></td>
+                                    <td>
+                                        <span class="nexus-badge @badge">@text</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <span class="font-monospace fw-800 text-muted" style="font-size: 0.8rem;">@v.PassNumber</span>
+                                    </td>
+                                </tr>
+                                ri++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     }
 }
 else
 {
-    <div class="table-section p-5 text-center text-muted">
-        <i class="fas fa-ghost fa-4x mb-3 opacity-25"></i>
-        <p>No visit data found for the selected period.</p>
+    <div class="section-card text-center py-5 animate-fade-up">
+        <div class="opacity-25 mb-3"><i class="fas fa-folder-open fa-4x text-muted"></i></div>
+        <h5 class="fw-800 text-dark">No Report Data Available</h5>
+        <p class="text-muted small fw-600">Please adjust your filters or ensure visits have been recorded for the selected period.</p>
     </div>
 }
+
+<style>
+    @@media print {
+        .top-navbar, .sidebar, .premium-btn, .secondary, a[href] { display: none !important; }
+        .main-content { margin: 0 !important; padding: 0 !important; }
+        .section-card { box-shadow: none !important; border: 1px solid #eee !important; margin-bottom: 20px !important; break-inside: avoid; }
+        .nexus-table th { background: #eee !important; color: #000 !important; }
+        body { background: #fff !important; }
+    }
+</style>
