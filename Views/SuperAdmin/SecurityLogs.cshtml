@@ -1,0 +1,351 @@
+@{
+    Layout = "_SuperAdminLayout";
+    ViewData["Title"] = "Security Intelligence Center";
+    string activeTab = ViewBag.ActiveTab ?? "Login";
+    
+    var trendLabels = System.Text.Json.JsonSerializer.Serialize(ViewBag.TrendLabels);
+    var loginTrend = System.Text.Json.JsonSerializer.Serialize(ViewBag.LoginTrend);
+    var scanTrend = System.Text.Json.JsonSerializer.Serialize(ViewBag.ScanTrend);
+}
+
+@section Styles {
+    <style>
+        /* Component Library Overrides to ensure 1:1 consistency */
+        .sa-filter-plexus {
+            background: var(--sa-white);
+            border: 1px solid var(--sa-border);
+            border-radius: 20px;
+            padding: 25px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 120px;
+            gap: 15px;
+            margin-bottom: 30px;
+            align-items: end;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        @@media (max-width: 1200px) {
+            .sa-filter-plexus { grid-template-columns: 1fr; }
+        }
+
+        .sa-filter-group { display: flex; flex-direction: column; gap: 8px; }
+        .sa-filter-label { font-size: 0.7rem; font-weight: 800; color: var(--sa-primary); text-transform: uppercase; letter-spacing: 1px; }
+        
+        /* Stats System (Match Dashboard/User Stats) */
+        .sa-stats-plexus { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 32px; }
+        .sa-stat-card {
+            background: #fff; border: 1px solid var(--sa-border); border-radius: 24px; padding: 24px;
+            display: flex; align-items: center; gap: 20px; transition: 0.3s;
+        }
+        .sa-stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.04); }
+        .sa-stat-icon { width: 56px; height: 56px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .sa-stat-val { font-size: 1.8rem; font-weight: 800; color: var(--sa-text-main); line-height: 1; }
+        .sa-stat-lbl { font-size: 0.8rem; font-weight: 700; color: var(--sa-text-muted); text-transform: uppercase; margin-top: 5px; letter-spacing: 0.5px; }
+
+        /* Security Charts */
+        .sa-charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+        .sa-chart-container { background: #fff; border: 1px solid var(--sa-border); border-radius: 24px; padding: 24px; display: flex; flex-direction: column; height: 350px; }
+        .sa-chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .sa-chart-title { font-size: 0.9rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 10px; text-transform: uppercase; }
+
+        /* Tabs System (Matching Design Ethos) */
+        .sa-tabs-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .sa-tabs-list { display: flex; gap: 10px; background: #f1f5f9; padding: 6px; border-radius: 16px; width: fit-content; }
+        .sa-tab-btn {
+            padding: 10px 24px; border-radius: 12px; font-weight: 700; font-size: 0.85rem; cursor: pointer;
+            transition: 0.3s; color: var(--sa-text-muted); text-decoration: none; display: flex; align-items: center; gap: 10px;
+        }
+        .sa-tab-btn.active { background: white; color: var(--sa-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+        /* Status Pills */
+        .sa-pill { font-size: 0.65rem; font-weight: 800; padding: 4px 12px; border-radius: 50px; text-transform: uppercase; }
+        .sa-pill-success { background: rgba(16, 185, 129, 0.1); color: #10B981; }
+        .sa-pill-danger { background: rgba(239, 68, 68, 0.1); color: #EF4444; }
+        .sa-pill-info { background: rgba(59, 130, 246, 0.1); color: #3B82F6; }
+
+        @@media print {
+            .sa-tabs-container, .sa-filter-plexus, .sa-sidebar, .header-vision-sa { display: none !important; }
+            .sa-main-content { margin: 0 !important; padding: 0 !important; }
+        }
+
+        .sa-btn-plexus {
+            background: #fff;
+            color: #6366f1;
+            border: 1px solid #6366f1;
+            border-radius: 12px;
+            height: 46px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem;
+        }
+        .sa-btn-plexus:hover {
+            background: #6366f1;
+            color: #fff;
+        }
+    </style>
+}
+
+<!-- SUMMARY HIGHLIGHTS (Global Component Style) -->
+<div class="sa-stats-plexus">
+    <div class="sa-stat-card">
+        <div class="sa-stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;"><i class="fas fa-user-check"></i></div>
+        <div>
+            <div class="sa-stat-val">@ViewBag.TodayLogins</div>
+            <div class="sa-stat-lbl">Today's Logins</div>
+        </div>
+    </div>
+    <div class="sa-stat-card">
+        <div class="sa-stat-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;"><i class="fas fa-biohazard"></i></div>
+        <div>
+            <div class="sa-stat-val">@ViewBag.FailedAttemptsCount</div>
+            <div class="sa-stat-lbl">Failed Attempts</div>
+        </div>
+    </div>
+    <div class="sa-stat-card">
+        <div class="sa-stat-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--sa-primary);"><i class="fas fa-qrcode"></i></div>
+        <div>
+            <div class="sa-stat-val">@ViewBag.TotalScansToday</div>
+            <div class="sa-stat-lbl">Total Scans</div>
+        </div>
+    </div>
+</div>
+
+<!-- TREND CHARTS -->
+<div class="sa-charts-grid">
+    <div class="sa-chart-container">
+        <div class="sa-chart-header">
+            <div class="sa-chart-title"><i class="fas fa-chart-line" style="color: var(--sa-primary);"></i> Login Intensity</div>
+            <span style="font-size: 0.65rem; font-weight: 800; color: var(--sa-text-muted);">REAL-TIME</span>
+        </div>
+        <div style="flex-grow: 1; position: relative;"><canvas id="loginChart"></canvas></div>
+    </div>
+    <div class="sa-chart-container">
+        <div class="sa-chart-header">
+            <div class="sa-chart-title"><i class="fas fa-chart-bar" style="color: #10b981;"></i> Scan Activity</div>
+            <span style="font-size: 0.65rem; font-weight: 800; color: var(--sa-text-muted);">STREAM</span>
+        </div>
+        <div style="flex-grow: 1; position: relative;"><canvas id="scanChart"></canvas></div>
+    </div>
+</div>
+
+<!-- FILTERS & TABS (Standardized 1:1) -->
+<form method="get" action="/SuperAdmin/SecurityLogs">
+    <input type="hidden" name="type" value="@activeTab">
+    <div class="sa-filter-plexus">
+        <div class="sa-filter-group">
+            <label class="sa-filter-label">Historical View</label>
+            <div class="sa-tabs-list" style="margin: 0; padding: 4px;">
+                <a href="?type=Login" class="sa-tab-btn @(activeTab == "Login" ? "active" : "")">Login Logs</a>
+                <a href="?type=QR" class="sa-tab-btn @(activeTab == "QR" ? "active" : "")">QR Logs</a>
+                <a href="?type=Failed" class="sa-tab-btn @(activeTab == "Failed" ? "active" : "")">Failed</a>
+            </div>
+        </div>
+        <div class="sa-filter-group">
+            <label class="sa-filter-label">Timeline Start</label>
+            <input type="date" name="from" value="@ViewBag.FromDate" class="sa-filter-input">
+        </div>
+        <div class="sa-filter-group">
+            <label class="sa-filter-label">Timeline End</label>
+            <input type="date" name="to" value="@ViewBag.ToDate" class="sa-filter-input">
+        </div>
+        <div class="sa-filter-group">
+            <button type="submit" class="sa-btn-plexus">
+                <i class="fas fa-search-plus"></i> Execute
+            </button>
+        </div>
+    </div>
+</form>
+
+<!-- LOGS TABLE (Global Component Style) -->
+<div class="sa-table-container">
+    <div class="sa-table-header" style="background: #1e293b; color: white; display: flex; justify-content: space-between; align-items: center; padding: 22px 30px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <i class="fas @(activeTab == "Login" ? "fa-shield-alt" : activeTab == "QR" ? "fa-qrcode" : "fa-user-lock")" style="font-size: 1.3rem; color: #60a5fa;"></i>
+            <span style="font-weight: 700; letter-spacing: 1px; font-size: 1rem;">
+                @(activeTab == "Login" ? "AUTHENTICATION HISTORY AUDIT" : activeTab == "QR" ? "PERIMETER SCANNING REGISTRY" : "SECURITY VIOLATION LOGS")
+            </span>
+        </div>
+        <div style="font-size: 0.7rem; font-weight: 800; background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 50px; text-transform: uppercase; letter-spacing: 1px;">
+            @activeTab Activity Stream
+        </div>
+    </div>
+
+    <table class="sa-table" style="border-collapse: collapse;">
+        @if (activeTab == "Login")
+        {
+            <thead>
+                <tr>
+                    <th>User Identity</th>
+                    <th>Email Address</th>
+                    <th>Role</th>
+                    <th>Timestamp</th>
+                    <th>Remote IP</th>
+                    <th style="text-align: right;">Outcome</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (ViewBag.LoginLogs != null)
+                {
+                    foreach (var log in ViewBag.LoginLogs)
+                    {
+                        <tr>
+                            <td style="padding-left: 30px; font-weight: 700; color: var(--sa-text-main);">@log.User</td>
+                            <td style="color: var(--sa-text-muted); font-weight: 500;">@log.Email</td>
+                            <td><span class="sa-badge-nexus @(log.Role == "Super Admin" ? "sa-role-super" : "sa-role-admin")">@log.Role</span></td>
+                            <td style="font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">@log.Time</td>
+                            <td><code style="font-size: 0.75rem; color: var(--sa-primary); font-weight: 600;">@log.IP</code></td>
+                            <td style="text-align: right; padding-right: 30px;">
+                                <span class="sa-pill @(log.Status == "Success" ? "sa-pill-success" : "sa-pill-danger")">@log.Status</span>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        }
+        else if (activeTab == "QR")
+        {
+            <thead>
+                <tr>
+                    <th>Visitor Name</th>
+                    <th>QR Token</th>
+                    <th>Scan Time</th>
+                    <th>Duration</th>
+                    <th style="text-align: right;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (ViewBag.QRLogs != null)
+                {
+                    foreach (var log in ViewBag.QRLogs)
+                    {
+                        <tr>
+                            <td style="padding-left: 30px; font-weight: 700; color: var(--sa-text-main);">@log.Visitor</td>
+                            <td style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--sa-primary); font-size: 0.85rem;">@log.Token</td>
+                            <td style="font-weight: 600;">@log.Time</td>
+                            <td style="font-weight: 500; color: var(--sa-text-muted);">@log.Duration</td>
+                            <td style="text-align: right; padding-right: 30px;">
+                                <span class="sa-pill @(log.Action == "Check-In" ? "sa-pill-success" : "sa-pill-info")">@log.Action</span>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        }
+        else if (activeTab == "Failed")
+        {
+            <thead>
+                <tr style="background: #f1f5f9;">
+                    <th style="padding-left: 30px; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; color: #475569; font-weight: 800;">User / Visitor</th>
+                    <th style="text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; color: #475569; font-weight: 800;">Action Type</th>
+                    <th style="text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; color: #475569; font-weight: 800;">Attempt Time</th>
+                    <th style="text-align: right; padding-right: 30px; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; color: #475569; font-weight: 800;">Reason</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (ViewBag.FailedLogs != null)
+                {
+                    foreach (var log in ViewBag.FailedLogs)
+                    {
+                        <tr>
+                            <td style="padding-left: 30px; font-weight: 800; color: #ef4444;">@log.Target</td>
+                            <td style="font-weight: 700;">@log.Action</td>
+                            <td style="font-weight: 600;">@log.Time</td>
+                            <td style="text-align: right; padding-right: 30px;">
+                                <span class="sa-pill sa-pill-danger">@log.Reason</span>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        }
+    </table>
+
+    <!-- SYSTEMATIC PAGINATION (Matching Layout Styles) -->
+    @if (ViewBag.Pagination != null)
+    {
+        var pg = (VMSProject.Models.PaginationViewModel)ViewBag.Pagination;
+        <div class="sa-table-footer">
+            <div class="sa-pg-info">
+                Displaying <b>@(((pg.CurrentPage - 1) * pg.PageSize) + 1)</b> - <b>@(Math.Min(pg.CurrentPage * pg.PageSize, pg.TotalItems))</b> of <b>@pg.TotalItems</b> audit entries
+            </div>
+            
+            <div class="sa-pg-controls">
+                <div class="sa-pg-jump">
+                    Jump to Page:
+                    <input type="number" class="sa-pg-input" value="@pg.CurrentPage" min="1" max="@pg.TotalPages" 
+                           onkeydown="if(event.key==='Enter'){ window.location.search = '?type=@activeTab&page='+this.value; }">
+                </div>
+                
+                <div class="sa-pagination">
+                    @if (pg.HasPreviousPage)
+                    {
+                        <a href="?type=@activeTab&page=@(pg.CurrentPage - 1)" class="sa-pg-btn"><i class="fas fa-chevron-left"></i></a>
+                    }
+                    else
+                    {
+                        <div class="sa-pg-btn disabled"><i class="fas fa-chevron-left"></i></div>
+                    }
+
+                    @{
+                        int startPage = Math.Max(1, pg.CurrentPage - 2);
+                        int endPage = Math.Min(pg.TotalPages, startPage + 4);
+                        if (endPage - startPage < 4) startPage = Math.Max(1, endPage - 4);
+                    }
+
+                    @for (int i = startPage; i <= endPage; i++)
+                    {
+                        <a href="?type=@activeTab&page=@i" class="sa-pg-btn @(i == pg.CurrentPage ? "active" : "")">@i</a>
+                    }
+
+                    @if (pg.HasNextPage)
+                    {
+                        <a href="?type=@activeTab&page=@(pg.CurrentPage + 1)" class="sa-pg-btn"><i class="fas fa-chevron-right"></i></a>
+                    }
+                    else
+                    {
+                        <div class="sa-pg-btn disabled"><i class="fas fa-chevron-right"></i></div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Charts initialization with standard colors
+            const trendLabels = @Html.Raw(trendLabels);
+            
+            new Chart(document.getElementById('loginChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: trendLabels,
+                    datasets: [{
+                        label: 'Logins',
+                        data: @Html.Raw(loginTrend),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            new Chart(document.getElementById('scanChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: trendLabels,
+                    datasets: [{
+                        data: @Html.Raw(scanTrend),
+                        backgroundColor: '#10b981',
+                        borderRadius: 6
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        });
+    </script>
+}

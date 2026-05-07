@@ -1,0 +1,507 @@
+@{
+    Layout = "UserLayout";
+    ViewData["Title"] = "Visitor Management";
+}
+
+<div class="table-section">
+    <div class="table-header-title d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-users-viewfinder me-2 text-primary"></i>
+            <span class="fw-800 text-dark" style="font-size: 1.1rem; letter-spacing: -0.5px;">Visitor Directory</span>
+        </div>
+        
+        <div class="d-flex align-items-center gap-2 flex-wrap ms-auto">
+            <span class='badge bg-primary bg-opacity-10 text-primary fw-800 px-3 py-2 rounded-pill me-2' style='font-size:0.75rem;'>
+                <i class='fas fa-users me-1'></i> Total: @ViewBag.TotalVisitors
+            </span>
+            <div class="input-group input-group-sm" style="width: 280px;">
+                <span class="input-group-text bg-light border-end-0 border-light"><i class="fas fa-search text-muted"></i></span>
+                <input type="text" class="form-control border-start-0 ps-0 shadow-none bg-light border-light" id="tableSearchInput" placeholder="Search name, phone or company..." onkeyup="filterTable()">
+            </div>
+            <div class="d-flex gap-2">
+                <a href='/User/AddVisitor' class='btn btn-primary btn-sm fw-bold px-3 rounded-pill shadow-sm'>
+                    <i class='fas fa-plus me-1'></i> New Visitor
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table class="user-table" id="standardTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Visitor</th>
+                    <th>Contact</th>
+                    <th>Company</th>
+                    <th>Who to Meet</th>
+                    <th>Department</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Count > 0)
+                {
+                    int i = 1;
+                    foreach (var v in Model)
+                    {
+                        <tr onclick="if(!event.target.closest('.acts-group')) { openViewModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(v).Replace("'", "\\'"))); }" style="cursor: pointer;" class="hover-row">
+                            <td><span class="badge bg-light text-secondary border rounded-pill">@i</span></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    @if (!string.IsNullOrEmpty(v.CapturePhoto))
+                                    {
+                                        <div class="rounded-circle overflow-hidden me-3 shadow-sm" style="width: 38px; height: 38px; min-width: 38px; border: 2px solid rgba(59,130,246,0.2);">
+                                            <img src="@v.CapturePhoto" class="w-100 h-100" style="object-fit: cover;" />
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold me-3 shadow-sm" style="width: 38px; height: 38px; min-width: 38px; font-size: 0.85rem; border: 1px solid rgba(59, 130, 246, 0.2);">
+                                            @(string.IsNullOrEmpty(v.Name) ? "?" : v.Name!.Substring(0, 1).ToUpper())
+                                        </div>
+                                    }
+                                    <div>
+                                        <div class="fw-bold text-dark">@(v.Name ?? "Anonymous")</div>
+                                        <small class="text-muted">@(v.Email ?? "—")</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><div class="fw-semibold text-dark">@(v.Phone ?? "—")</div></td>
+                            <td><div class="fw-semibold text-dark">@(v.CompanyName ?? "—")</div></td>
+                            <td><div class="fw-bold text-primary">@(v.WhomeToMeet ?? "—")</div></td>
+                            <td>
+                                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill shadow-sm" style="font-size: 0.7rem;">
+                                    @(v.Department ?? "General")
+                                </span>
+                            </td>
+                            <td>
+                                <div class="acts-group">
+                                    <button type="button" class="act-btn act-edit" title="Edit Visitor" onclick='openEditModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(v).Replace("'", "\\'")))'><i class="fas fa-pen-to-square"></i></button>
+                                    <button class="act-btn act-qr" title="View QR Pass" onclick="openQRPassModal('@v.VisitorId', '@Html.Raw(v.Name?.Replace("'","\'") ?? "Visitor")', '@(v.QRCode ?? "")', '@(v.CapturePhoto ?? "")', '@Html.Raw(v.CompanyName?.Replace("'","\'") ?? "INDIVIDUAL")')">
+                                        <i class="fas fa-qrcode"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        i++;
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="fas fa-users-slash fs-2 mb-3 d-block opacity-25"></i>
+                            No visitors registered yet.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (ViewBag.Pagination != null)
+    {
+        var pModel = (VMSProject.Models.PaginationViewModel)ViewBag.Pagination;
+        @if (pModel.TotalPages > 0)
+        {
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    Showing @(((pModel.CurrentPage - 1) * pModel.PageSize) + 1) to @(Math.Min(pModel.CurrentPage * pModel.PageSize, pModel.TotalItems)) of @pModel.TotalItems entries
+                </div>
+                <div class="pagination-controls">
+                    <div class="page-size-selector">
+                        <select class="page-size-select" onchange="updatePageSize(this.value)">
+                            <option value="10" selected="@(pModel.PageSize == 10)">10</option>
+                            <option value="20" selected="@(pModel.PageSize == 20)">20</option>
+                            <option value="50" selected="@(pModel.PageSize == 50)">50</option>
+                            <option value="100" selected="@(pModel.PageSize == 100)">100</option>
+                        </select>
+                    </div>
+                    <div class="custom-pagination">
+                        @if (pModel.HasPreviousPage) {
+                            var prevVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage - 1).ToString() };
+                            <a href="@Url.Action(pModel.Action, pModel.Controller, prevVals)" class="page-link-custom">Previous</a>
+                        } else { <span class="page-link-custom disabled">Previous</span> }
+                        @{
+                            int startPage = Math.Max(1, pModel.CurrentPage - 2);
+                            int endPage = Math.Min(pModel.TotalPages, startPage + 4);
+                            if (endPage - startPage < 4) startPage = Math.Max(1, endPage - 4);
+                        }
+                        @for (int i = startPage; i <= endPage; i++) {
+                            var pageVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = i.ToString() };
+                            <a href="@Url.Action(pModel.Action, pModel.Controller, pageVals)" class="page-link-custom @(i == pModel.CurrentPage ? "active" : "")">@i</a>
+                        }
+                        @if (pModel.HasNextPage) {
+                            var nextVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage + 1).ToString() };
+                            <a href="@Url.Action(pModel.Action, pModel.Controller, nextVals)" class="page-link-custom">Next</a>
+                        } else { <span class="page-link-custom disabled">Next</span> }
+                    </div>
+                </div>
+            </div>
+            <script>
+                function updatePageSize(size) {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('pageSize', size);
+                    url.searchParams.set('page', '1');
+                    window.location.href = url.toString();
+                }
+            </script>
+        }
+    }
+</div>
+
+<!-- MODALS -->
+<!-- MODAL 1: VIEW VISITOR DETAILS -->
+<div class="modal fade" id="modalView" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-body p-0">
+                <div style="height: 120px; background: linear-gradient(135deg, #4f46e5, #3b82f6); position: relative;">
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="px-4 pb-4">
+                    <div class="d-flex align-items-center gap-3" style="margin-top: -50px; margin-bottom: 25px; position: relative; z-index: 5;">
+                        <div class="rounded-4 border border-4 border-white shadow-sm overflow-hidden bg-white d-flex align-items-center justify-content-center shadow-lg" style="width: 100px; height: 100px; min-width: 100px;">
+                            <img id="v_photo" src="" class="w-100 h-100 object-fit-cover d-none" />
+                            <span id="v_initial" class="fw-800 text-primary fs-2">?</span>
+                        </div>
+                        <div class="pt-4 mt-2">
+                            <h2 id="v_name_top" class="fw-800 text-dark mb-0" style="letter-spacing: -0.5px; font-size: 1.5rem;">Visitor Name</h2>
+                            <p id="v_company_top" class="text-primary small fw-800 uppercase letter-spacing-1 mb-0" style="font-size: 0.7rem;">COMPANY NAME</p>
+                        </div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="p-2 px-3 bg-light rounded-4 border border-light h-100" style="background: #f8fafc !important;">
+                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.55rem; opacity: 0.6;">EMAIL</label>
+                                <div id="v_email" class="fw-700 text-dark small d-flex align-items-center">
+                                    <i class="fas fa-envelope me-2 opacity-50" style="font-size: 0.8rem;"></i>
+                                    <span>—</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 px-3 bg-light rounded-4 border border-light h-100" style="background: #f8fafc !important;">
+                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.55rem; opacity: 0.6;">PHONE</label>
+                                <div id="v_phone" class="fw-700 text-dark small d-flex align-items-center">
+                                    <i class="fas fa-phone me-2 opacity-50" style="font-size: 0.8rem;"></i>
+                                    <span>—</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 px-3 bg-light rounded-4 border border-light h-100" style="background: #f8fafc !important;">
+                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.55rem; opacity: 0.6;">HOST</label>
+                                <div id="v_host" class="fw-800 text-primary small d-flex align-items-center">
+                                    <i class="fas fa-user-tie me-2" style="font-size: 0.8rem;"></i>
+                                    <span>—</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 px-3 bg-light rounded-4 border border-light h-100" style="background: #f8fafc !important;">
+                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.55rem; opacity: 0.6;">DEPARTMENT</label>
+                                <div id="v_department" class="fw-700 text-dark small d-flex align-items-center">
+                                    <i class="fas fa-building me-2 opacity-50" style="font-size: 0.8rem;"></i>
+                                    <span>—</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-2 px-3 bg-light rounded-4 border border-light" style="background: #f8fafc !important;">
+                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.55rem; opacity: 0.6;">PURPOSE OF VISIT</label>
+                                <div id="v_purpose" class="fw-700 text-dark small d-flex align-items-center">
+                                    <i class="fas fa-clipboard-list me-2 opacity-50" style="font-size: 0.8rem;"></i>
+                                    <span>—</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 px-3 bg-light rounded-4 border border-light h-100" style="background: #f8fafc !important;">
+                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.55rem; opacity: 0.6;">VEHICLE</label>
+                                <div id="v_vehicle" class="fw-700 text-dark small d-flex align-items-center">
+                                    <i class="fas fa-car me-2 opacity-50" style="font-size: 0.8rem;"></i>
+                                    <span>—</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 px-3 bg-light rounded-4 border border-light h-100" style="background: #f8fafc !important;">
+                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.55rem; opacity: 0.6;">QR PASS TOKEN</label>
+                                <div id="v_qr_pass" class="fw-800 text-primary small d-flex align-items-center">
+                                    <i class="fas fa-qrcode me-2 opacity-50" style="font-size: 0.8rem;"></i>
+                                    <span>—</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-2 px-3 bg-light rounded-4 border border-light" style="background: #f8fafc !important;">
+                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.55rem; opacity: 0.6;">COMPANY ADDRESS</label>
+                                <div id="v_address" class="fw-700 text-dark small d-flex align-items-center">
+                                    <i class="fas fa-location-dot me-2 opacity-50" style="font-size: 0.8rem;"></i>
+                                    <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">—</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-2 px-3 bg-light rounded-4 border border-light" style="background: #f8fafc !important;">
+                                <label class="text-muted small fw-800 uppercase d-block mb-1" style="font-size: 0.55rem; opacity: 0.6;">IDENTITY DOCUMENT (ID PROOF)</label>
+                                <div id="v_id_proof_status" class="fw-700 text-dark small d-flex align-items-center">
+                                    <i class="fas fa-id-card me-2 opacity-50" style="font-size: 0.8rem;"></i>
+                                    <span id="v_id_proof_text">No Document Uploaded</span>
+                                    <a id="v_id_proof_link" href="#" target="_blank" class="ms-auto btn btn-link p-0 text-primary fw-800 d-none" style="font-size: 0.65rem; text-decoration: none;">
+                                        VIEW ATTACHMENT <i class="fas fa-external-link-alt ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-4 pt-0 d-flex justify-content-center gap-2">
+                <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-800 small text-muted border shadow-sm" data-bs-dismiss="modal" style="font-size: 0.7rem; min-width: 120px;">CLOSE</button>
+                <button type="button" id="v_edit_btn" class="btn btn-primary rounded-pill px-4 py-2 fw-800 small shadow" style="background: #4f46e5; border: none; font-size: 0.7rem; min-width: 120px;">
+                    <i class="fas fa-edit me-1"></i> EDIT
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 2: EDIT VISITOR -->
+<div class="modal fade" id="modalEdit" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-bottom py-3 bg-light bg-opacity-50">
+                <h5 class="modal-title fw-800 text-dark"><i class="fas fa-edit text-warning me-2"></i>Edit Visitor Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/User/EditVisitor" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body p-4">
+                    <input type="hidden" name="VisitorId" id="e_id">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-800 small text-muted uppercase letter-spacing-1">FULL NAME</label>
+                            <input type="text" name="Name" id="e_name" class="form-control rounded-3 bg-light border-0 py-2" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-800 small text-muted uppercase letter-spacing-1">EMAIL ADDRESS</label>
+                            <input type="email" name="Email" id="e_email" class="form-control rounded-3 bg-light border-0 py-2">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-800 small text-muted uppercase letter-spacing-1">PHONE NUMBER</label>
+                            <input type="text" name="Phone" id="e_phone" class="form-control rounded-3 bg-light border-0 py-2" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-800 small text-muted uppercase letter-spacing-1">VEHICLE NUMBER</label>
+                            <input type="text" name="VehicleNumber" id="e_vehicle" class="form-control rounded-3 bg-light border-0 py-2">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-800 small text-muted uppercase letter-spacing-1">COMPANY NAME</label>
+                            <input type="text" name="CompanyName" id="e_company" class="form-control rounded-3 bg-light border-0 py-2">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-800 small text-muted uppercase letter-spacing-1">DEPARTMENT</label>
+                            <input type="text" name="Department" id="e_dept" class="form-control rounded-3 bg-light border-0 py-2">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-800 small text-muted uppercase letter-spacing-1">HOST PERSON</label>
+                            <input type="text" name="WhomeToMeet" id="e_host" class="form-control rounded-3 bg-light border-0 py-2">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-800 small text-muted uppercase letter-spacing-1">PURPOSE OF VISIT</label>
+                            <input type="text" name="PurposeOfVisit" id="e_purpose" class="form-control rounded-3 bg-light border-0 py-2">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-800 small text-muted uppercase letter-spacing-1">COMPANY ADDRESS</label>
+                            <textarea name="CompanyAddress" id="e_address" class="form-control rounded-3 bg-light border-0 py-2" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light fw-800 px-4 rounded-pill small text-muted border shadow-sm" data-bs-dismiss="modal">Discard</button>
+                    <button type="submit" class="btn btn-warning fw-800 px-4 rounded-pill shadow text-white">Save Profile Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 4: QR PASS CARD -->
+<div class="modal fade" id="modalQRPass" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 340px;">
+        <div class="modal-content border-0 shadow-lg rounded-5 overflow-hidden">
+            <div class="modal-body p-4 text-center bg-white">
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="d-inline-block position-relative mb-4">
+                    <div class="rounded-circle border border-4 border-primary border-opacity-25 p-1 shadow-sm" style="width: 100px; height: 100px;">
+                        <div class="rounded-circle w-100 h-100 overflow-hidden bg-light d-flex align-items-center justify-content-center">
+                            <img id="qrp_photo" src="" class="w-100 h-100 object-fit-cover d-none" />
+                            <span id="qrp_initial" class="fw-bold text-primary fs-1">?</span>
+                        </div>
+                    </div>
+                </div>
+                <h3 id="qrp_name" class="fw-800 text-dark mb-1" style="font-size: 1.5rem;">Visitor Name</h3>
+                <p id="qrp_company" class="fw-bold text-muted text-uppercase mb-4" style="font-size: 0.85rem; letter-spacing: 1px;">COMPANY</p>
+                <div class="bg-white rounded-5 shadow-sm border border-light p-3 mb-4 d-inline-block mx-auto">
+                    <div id="qrp_img_container" style="width: 180px; height: 180px; position: relative;">
+                        <img id="qrp_img" src="" width="180" height="180" class="d-block mx-auto" />
+                        <div id="qrp_loading" class="position-absolute top-50 start-50 translate-middle text-muted opacity-25">
+                            <i class="fas fa-qrcode fa-5x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-5">
+                    <span id="qrp_token" class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-4 py-3 fw-bold" style="font-size: 0.9rem; min-width: 180px;">
+                        TOKEN
+                    </span>
+                </div>
+                <div class="d-flex align-items-center justify-content-center gap-3">
+                    <button onclick="printCurrentQR()" class="btn btn-primary fw-bold px-5 py-3 rounded-pill shadow d-flex align-items-center gap-2 flex-grow-1 justify-content-center" style="background: #0d6efd; font-size: 1.1rem;">
+                        <i class="fas fa-print"></i> PRINT
+                    </button>
+                    <button onclick="shareQRDirect()" class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 60px; height: 60px;">
+                        <i class="fas fa-share-nodes fs-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // ── MODAL 1: 👁 VIEW VISITOR ──
+        function openViewModal(v) {
+            try {
+                const name = v.Name || v.name || 'Anonymous';
+                const company = v.CompanyName || v.companyName || 'GUEST';
+                const email = v.Email || v.email || '—';
+                const phone = v.Phone || v.phone || '—';
+                const host = v.WhomeToMeet || v.whomeToMeet || '—';
+                const dept = v.Department || v.department || 'General';
+                const purpose = v.PurposeOfVisit || v.purposeOfVisit || '—';
+                const vehicle = v.VehicleNumber || v.vehicleNumber || '—';
+                const address = v.CompanyAddress || v.companyAddress || '—';
+                const qrPass = v.QRCode || v.qrCode || '—';
+                const photoPath = v.CapturePhoto || v.capturePhoto;
+
+                document.getElementById('v_name_top').textContent = name;
+                document.getElementById('v_company_top').textContent = company.toUpperCase();
+                
+                const setSpan = (id, val) => {
+                    const el = document.getElementById(id);
+                    if (el && el.querySelector('span')) el.querySelector('span').textContent = val;
+                };
+                
+                setSpan('v_email', email);
+                setSpan('v_phone', phone);
+                setSpan('v_host', host);
+                setSpan('v_department', dept);
+                setSpan('v_purpose', purpose);
+                setSpan('v_vehicle', vehicle);
+                setSpan('v_address', address);
+                setSpan('v_qr_pass', qrPass);
+                
+                const photo = document.getElementById('v_photo');
+                const initial = document.getElementById('v_initial');
+                if (photoPath) {
+                    photo.src = photoPath;
+                    photo.classList.remove('d-none');
+                    initial.classList.add('d-none');
+                } else {
+                    photo.classList.add('d-none');
+                    initial.classList.remove('d-none');
+                    initial.textContent = name.charAt(0).toUpperCase();
+                }
+                
+                document.getElementById('v_edit_btn').onclick = () => {
+                    closeModal('modalView');
+                    openEditModal(v);
+                };
+                
+                openModal('modalView');
+            } catch (err) { console.error(err); }
+        }
+
+        // ── MODAL 2: ✏ EDIT VISITOR ──
+        function openEditModal(v) {
+            document.getElementById('e_id').value = v.VisitorId || v.visitorId;
+            document.getElementById('e_name').value = v.Name || v.name || '';
+            document.getElementById('e_email').value = v.Email || v.email || '';
+            document.getElementById('e_phone').value = v.Phone || v.phone || '';
+            document.getElementById('e_vehicle').value = v.VehicleNumber || v.vehicleNumber || '';
+            document.getElementById('e_company').value = v.CompanyName || v.companyName || '';
+            document.getElementById('e_dept').value = v.Department || v.department || '';
+            document.getElementById('e_host').value = v.WhomeToMeet || v.whomeToMeet || '';
+            document.getElementById('e_purpose').value = v.PurposeOfVisit || v.purposeOfVisit || '';
+            document.getElementById('e_address').value = v.CompanyAddress || v.companyAddress || '';
+            openModal('modalEdit');
+        }
+
+        // ── MODAL 4: 🎫 QR PASS CARD ──
+        let _currentQRData = { id: '', name: '', code: '', photo: '', company: '' };
+        function openQRPassModal(visitorId, name, qrCode, photoPath, companyName) {
+            _currentQRData = { id: visitorId, name, code: qrCode, photo: photoPath, company: companyName || 'INDIVIDUAL' };
+            document.getElementById('qrp_name').textContent = name || 'Visitor';
+            document.getElementById('qrp_company').textContent = (companyName || 'INDIVIDUAL').toUpperCase();
+
+            const photo = document.getElementById('qrp_photo');
+            const initial = document.getElementById('qrp_initial');
+            if (photoPath) {
+                photo.src = photoPath;
+                photo.classList.remove('d-none');
+                initial.classList.add('d-none');
+            } else {
+                photo.classList.add('d-none');
+                initial.classList.remove('d-none');
+                initial.textContent = (name || '?').charAt(0).toUpperCase();
+            }
+
+            const img = document.getElementById('qrp_img');
+            const loading = document.getElementById('qrp_loading');
+            if (qrCode) {
+                img.src = `https://api.qrserver.com/v1/create-qr-code/?size=360x360&data=${encodeURIComponent(qrCode)}`;
+                img.classList.remove('d-none');
+                loading.classList.add('d-none');
+                document.getElementById('qrp_token').textContent = qrCode;
+            } else {
+                img.classList.add('d-none');
+                loading.classList.remove('d-none');
+                document.getElementById('qrp_token').textContent = '— No Pass —';
+            }
+            openModal('modalQRPass');
+        }
+
+        function printCurrentQR() {
+            if (!_currentQRData.code) return;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(_currentQRData.code)}`;
+            const w = window.open('', '_blank');
+            w.document.write(`<html><body><div style="text-align:center;padding:20px;border:2px solid #eee;border-radius:20px;display:inline-block;"><h3>${_currentQRData.name}</h3><p>${_currentQRData.company}</p><img src="${qrUrl}" width="200"/><br/><br/><b>${_currentQRData.code}</b></div><script>setTimeout(()=> {window.print(); window.close();},500);<\/script></body></html>`);
+            w.document.close();
+        }
+
+        function shareQRDirect() {
+            if (!_currentQRData.code) return;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(_currentQRData.code)}`;
+            if (navigator.share) navigator.share({ title: 'Visitor Pass', url: qrUrl });
+            else window.open(qrUrl, '_blank');
+        }
+
+        function filterTable() {
+            var input = document.getElementById("tableSearchInput");
+            var filter = input.value.toUpperCase();
+            var tr = document.getElementById("standardTable").getElementsByTagName("tr");
+            for (var i = 1; i < tr.length; i++) {
+                var found = false;
+                var td = tr[i].getElementsByTagName("td");
+                for (var j = 0; j < td.length; j++) {
+                    if (td[j] && td[j].textContent.toUpperCase().indexOf(filter) > -1) { found = true; break; }
+                }
+                tr[i].style.display = found ? "" : "none";
+            }
+        }
+    </script>
+}

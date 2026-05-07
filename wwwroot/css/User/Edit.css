@@ -1,0 +1,367 @@
+:root {
+    --navy: var(--vision-primary);
+    --blue: var(--secondary-blue);
+    --sky: var(--vision-primary);
+    --accent: var(--vision-primary);
+    --bg: var(--vision-bg);
+    --card: var(--vision-card-bg);
+    --border: var(--vision-border);
+    --text: var(--vision-text);
+    --muted: var(--vision-text-muted);
+    --shadow: var(--vision-shadow);
+    --radius: var(--vision-radius);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+}
+
+.main-wrapper {
+    display: flex;
+    width: 1000px;
+    height: 90vh;
+    background: var(--card);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+}
+
+.left-section {
+    width: 40%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    overflow: hidden;
+}
+
+    .left-section img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+.container {
+    width: 60%;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+.step-indicator {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.step-item {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    font-weight: 600;
+    color: #9ca3af;
+    transition: 0.3s;
+}
+
+    .step-item.active {
+        color: var(--navy);
+    }
+
+    .step-item:hover {
+        color: var(--blue);
+        cursor: pointer;
+    }
+
+.progress {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 50px;
+    margin-bottom: 30px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 50%;
+    background: linear-gradient(90deg, var(--navy), var(--blue));
+    transition: 0.4s ease;
+}
+
+.form-step {
+    display: none;
+    animation: fadeSlide 0.4s ease;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+    .form-step.active {
+        display: block;
+    }
+
+@keyframes fadeSlide {
+    from {
+        opacity: 0;
+        transform: translateX(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+h2 {
+    margin-bottom: 25px;
+    font-size: 20px;
+    color: var(--navy);
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 18px;
+}
+
+    .form-group input,
+    .form-group select,
+    .form-group input[type="file"] {
+        width: 100%;
+        padding: 15px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+        outline: none;
+        background: #fff;
+        transition: 0.3s;
+    }
+
+    .form-group label {
+        position: absolute;
+        left: 12px;
+        top: 15px;
+        font-size: 14px;
+        color: #6b7280;
+        background: #fff;
+        padding: 0 5px;
+        transition: 0.3s;
+        pointer-events: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group input[type="file"]:focus ~ .file-name {
+        border-color: var(--sky);
+    }
+
+        .form-group input:not([type="file"]):focus + label,
+        .form-group input:not([type="file"]):not(:placeholder-shown) + label,
+        .form-group.file-filled label,
+        .form-group select:focus + label,
+        .form-group select:valid + label {
+            top: -9px;
+            font-size: 12px;
+            color: var(--sky);
+        }
+
+    .form-group input:hover,
+    .form-group select:hover,
+    .form-group input[type="file"]:hover ~ .file-name {
+        border-color: black;
+    }
+
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 25px;
+}
+
+button {
+    padding: 12px 22px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.next {
+    background: linear-gradient(90deg, var(--navy), var(--blue));
+    color: white;
+}
+
+    .next:hover {
+        transform: translateY(-2px);
+    }
+
+.prev {
+    background: #e5e7eb;
+}
+
+    .prev:hover {
+        background: #d1d5db;
+        transform: translateY(-2px);
+    }
+
+@media(max-width:900px) {
+    .main-wrapper {
+        flex-direction: column;
+        width: 95%;
+    }
+
+    .left-section {
+        width: 100%;
+        height: 300px;
+    }
+
+    .container {
+        width: 100%;
+    }
+}
+
+.form-group.file-filled label {
+    top: -9px;
+    font-size: 12px;
+    color: var(--sky);
+}
+
+.file-group input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.file-group .file-name {
+    display: block;
+    padding: 15px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #6b7280;
+    background: #fff;
+    transition: 0.3s;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.form-group.file-filled .file-name {
+    color: #000;
+}
+
+.eye {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 16px;
+    color: #6b7280;
+}
+
+/* =========================
+   SUCCESS MODAL
+========================= */
+
+.success-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    visibility: hidden;
+    opacity: 0;
+    transition: 0.4s ease;
+    z-index: 9999;
+}
+
+    .success-modal.active {
+        visibility: visible;
+        opacity: 1;
+    }
+
+.success-box {
+    background: #fff;
+    padding: 35px 45px;
+    border-radius: 18px;
+    text-align: center;
+    position: relative;
+    min-width: 320px;
+    animation: popIn .4s ease;
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(.6);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.success-box h3 {
+    color: var(--navy);
+    margin-bottom: 10px;
+}
+
+.success-box p {
+    color: #6b7280;
+    margin-bottom: 20px;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 22px;
+    cursor: pointer;
+    color: #999;
+    transition: .3s;
+}
+
+    .close-btn:hover {
+        color: var(--navy);
+        transform: rotate(90deg);
+    }
+
+.confirm-btn {
+    background: linear-gradient(90deg, var(--navy), var(--blue));
+    border: none;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+    .confirm-btn:hover {
+        transform: translateY(-2px);
+    }

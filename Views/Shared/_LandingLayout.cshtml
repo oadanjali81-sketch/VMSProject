@@ -1,0 +1,120 @@
+@using Microsoft.AspNetCore.Http
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>@ViewData["Title"]</title>
+    
+    <!-- Unified Design System -->
+    <link rel="stylesheet" href="~/css/Home/Landing.css" asp-append-version="true" />
+    
+    <!-- Google Fonts + Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+
+<!-- Preloader -->
+<div class="preloader" id="preloader">
+    <div class="preloader-content">
+        <div class="preloader-logo"><i class="fas fa-crown"></i></div>
+        <div class="preloader-text">VISION VMS</div>
+        <div style="margin-top: 20px;"><i class="fas fa-spinner fa-spin"></i> Loading experience...</div>
+    </div>
+</div>
+
+<!-- Navigation -->
+<nav class="navbar @ViewData["NavbarClass"]" id="navbar">
+    <div class="nav-container">
+        <div class="logo" onclick="window.location.href='/Home/Index'" style="cursor:pointer">
+            <i class="fas fa-crown"></i>
+            <span>VISION VMS</span>
+        </div>
+        <div class="nav-links">
+            <a href="/Home/Index#home">Home</a>
+            <a href="/Home/Index#features">Feature</a>
+            <a href="/Home/Index#why-choose">Why Us</a>
+            <a href="/Home/About">About</a>
+            <a href="/Home/Contact">Contact</a>
+            @if (!string.IsNullOrEmpty(Context.Session.GetString("UserRole")))
+            {
+                <button class="btn-solid" onclick="window.location.href='/Home/Dashboard'">Go to Dashboard</button>
+            }
+            else
+            {
+                <button class="btn-outline" onclick="window.location.href='/Account/Login'">Login</button>
+                <button class="btn-solid" onclick="window.location.href='/Account/Register'">Get Started</button>
+            }
+        </div>
+    </div>
+</nav>
+
+@RenderBody()
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="footer-grid">
+        <div class="footer-col-desc">
+            <div class="footer-logo">
+                <i class="fas fa-crown"></i>
+                <span class="footer-logo-text">VISION VMS</span>
+            </div>
+            <p>The next-generation visitor management platform trusted by 500+ enterprises worldwide.</p>
+        </div>
+        <div class="footer-col">
+            <h4>Product</h4>
+            <ul>
+                <li><a href="/Home/Index#features">Features</a></li>
+                <li><a href="/Home/Index#why-choose">Why Us</a></li>
+                <li><a href="/Home/Index#testimonials">Testimonials</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>Company</h4>
+            <ul>
+                <li><a href="/Home/About">About Us</a></li>
+                <li><a href="/Home/Contact">Contact Us</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>Legal</h4>
+            <ul>
+                <li><a href="/Home/Privacy">Privacy Policy</a></li>
+                <li><a href="/Home/Terms">Terms of Service</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2026 VISION VMS. All rights reserved.</p>
+    </div>
+</footer>
+
+<!-- Scripts -->
+<script>
+    // Preloader Logic
+    window.addEventListener('load', () => {
+        const preloader = document.getElementById('preloader');
+        if(preloader) {
+            setTimeout(() => {
+                preloader.style.opacity = '0';
+                setTimeout(() => { preloader.style.display = 'none'; }, 500);
+            }, 500);
+        }
+    });
+
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+        const navbar = document.getElementById('navbar');
+        if (navbar) {
+            navbar.classList.toggle('scrolled', window.scrollY > 50);
+        }
+    });
+</script>
+
+@RenderSection("Scripts", required: false)
+
+</body>
+</html>

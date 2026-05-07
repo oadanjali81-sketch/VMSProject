@@ -1,0 +1,253 @@
+@model IEnumerable<VMSProject.Controllers.SuperAdminController.SystemLogModel>
+@{
+    Layout = "_SuperAdminLayout";
+    ViewData["Title"] = "System Logs";
+    var currentType = ViewBag.CurrentType?.ToString() ?? "All";
+}
+
+@section Styles {
+    <style>
+        body { background: #f8fafc; }
+
+        .log-container {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .log-header {
+            background: #0d6efd;
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .log-header h4 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-toggle-error {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .btn-toggle-error:hover { background: #bb2d3b; color: white; }
+        .btn-toggle-all {
+            background: #198754;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .log-table th {
+            padding: 12px 20px;
+            text-align: left;
+            font-weight: 700;
+            color: #000;
+            border-bottom: 2px solid #dee2e6;
+            font-size: 0.95rem;
+            background: #fff;
+        }
+
+        .log-table td {
+            padding: 12px 20px;
+            vertical-align: middle;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 0.9rem;
+            color: #334155;
+        }
+
+        .log-table tr:hover { background-color: #f8f9fa; }
+
+        .file-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+        .file-icon { color: #6c757d; }
+
+        .badge-type {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            text-transform: capitalize;
+        }
+        .bg-general { background: #0dcaf0; }
+        .bg-error { background: #dc3545; }
+
+        .action-group {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-act {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fff;
+        }
+        
+        .btn-view { color: #0d6efd; border: 1px solid #0d6efd; }
+        .btn-view:hover { background: #0d6efd; color: #fff; }
+        
+        .btn-download { color: #198754; border: 1px solid #198754; }
+        .btn-download:hover { background: #198754; color: #fff; }
+        
+        .btn-delete { color: #dc3545; border: 1px solid #dc3545; }
+        .btn-delete:hover { background: #dc3545; color: #fff; }
+    </style>
+}
+
+<div class="container-fluid px-4 mt-3">
+    <div class="log-container">
+        <!-- HEADER -->
+        <div class="log-header">
+            <h4><i class="fas fa-file-alt"></i> System Logs</h4>
+            @if (currentType == "Error")
+            {
+                <a href="/SuperAdmin/SystemLogs?type=All" class="btn-toggle-all">
+                    <i class="fas fa-list"></i> Show All Logs
+                </a>
+            }
+            else
+            {
+                <a href="/SuperAdmin/SystemLogs?type=Error" class="btn-toggle-error">
+                    <i class="fas fa-exclamation-triangle"></i> Errors Only
+                </a>
+            }
+        </div>
+
+        <!-- TABLE -->
+        <table class="log-table">
+            <thead>
+                <tr>
+                    <th style="width: 30%;">File Name</th>
+                    <th style="width: 15%;">Type</th>
+                    <th style="width: 15%;">Size</th>
+                    <th style="width: 20%;">Last Modified</th>
+                    <th style="width: 20%;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var log in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="file-name">
+                                    <i class="fas fa-file file-icon"></i>
+                                    @log.FileName
+                                </div>
+                            </td>
+                            <td>
+                                @if (log.Type == "Error")
+                                {
+                                    <span class="badge-type bg-error"><i class="fas fa-exclamation-triangle"></i> Errors</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-type bg-general"><i class="fas fa-info-circle"></i> General</span>
+                                }
+                            </td>
+                            <td>@log.Size</td>
+                            <td>@log.LastModified.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                            <td>
+                                <div class="action-group">
+                                    <a href="@Url.Action("ViewLog", new { fileName = log.FileName })" class="btn-act btn-view">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    <a href="@Url.Action("DownloadLog", new { fileName = log.FileName })" class="btn-act btn-download">
+                                        <i class="fas fa-download"></i> Download
+                                    </a>
+                                    <button class="btn-act btn-delete" onclick="deleteLog('@log.FileName')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 40px; color: #6c757d;">
+                            No log files found.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function deleteLog(fileName) {
+            if (confirm(`Are you sure you want to delete ${fileName}?`)) {
+                try {
+                    const formData = new FormData();
+                    formData.append("fileName", fileName);
+
+                    const response = await fetch('/SuperAdmin/DeleteLog', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert("Failed to delete the log file.");
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert("An error occurred.");
+                }
+            }
+        }
+    </script>
+}

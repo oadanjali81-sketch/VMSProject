@@ -1,0 +1,460 @@
+@model IEnumerable<VMSProject.Models.UserActivityLog>
+@{
+    Layout = "_SuperAdminLayout";
+    ViewData["Title"] = "System Usage Analytics";
+}
+
+@section Styles {
+    <style>
+        .filter-section {
+            background: #FFFFFF;
+            border-radius: 6px;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+        }
+
+        .filter-grid {
+            display: flex;
+            gap: 20px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .filter-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: #475569;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .filter-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            outline: none;
+            color: #334155;
+            transition: all 0.2s;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-filter {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .btn-search { 
+            background: #fff; 
+            color: #3B82F6; 
+            border: 1px solid #3B82F6; 
+        }
+        .btn-search:hover { background: #3B82F6; color: #fff; }
+        
+        .btn-export { 
+            background: #fff; 
+            color: #10B981; 
+            border: 1px solid #10B981; 
+            text-decoration: none; 
+        }
+        .btn-export:hover { background: #10B981; color: #fff; }
+
+        /* Stats Cards */
+        .stat-card-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .users-stat-card {
+            background: #FFFFFF;
+            border-radius: 6px;
+            padding: 20px 24px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-info { display: flex; flex-direction: column; gap: 8px; }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .lbl-total { color: #3B82F6; }
+        .lbl-active { color: #10B981; }
+        .lbl-pending { color: #EF4444; }
+        .lbl-completed { color: #8b5cf6; }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1;
+        }
+
+        .stat-icon {
+            width: 38px;
+            height: 38px;
+            background: #1e293b;
+            color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Table Section */
+        .table-section {
+            background: #FFFFFF;
+            border-radius: 6px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .table-header-title {
+            padding: 20px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #3B82F6;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .users-table th {
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 14px 24px;
+            font-weight: 600;
+            text-align: left;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+            font-size: 0.8rem;
+        }
+        
+        .users-table th:not(:last-child) { border-right: 1px solid rgba(255, 255, 255, 0.1); }
+
+        .users-table td {
+            padding: 16px 24px;
+            color: #334155;
+            vertical-align: middle;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .users-table td:not(:last-child) { border-right: 1px solid #e2e8f0; }
+        .users-table tr.striped-row td { background: #f8fafc; }
+        .users-table tr:hover td { background: #f1f5f9; }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: white;
+            display: inline-block;
+        }
+    </style>
+}
+
+<div class="container-fluid px-4">
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-left: 4px solid #3B82F6; margin-top: 20px;">
+        <div>
+            <h4 class="fw-bold mb-0" style="color: #0f172a;"><i class="fas fa-chart-line me-2 text-primary"></i>System Usage Analytics</h4>
+            <p class="text-muted small mb-0">Monitor administrator activity and system interaction logs</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary btn-sm px-3" style="border-radius: 6px;"><i class="fas fa-sync me-2"></i>Auto Refresh</button>
+            <button class="btn btn-success btn-sm px-3" style="border-radius: 6px; background: #10B981; border: none;"><i class="fas fa-file-csv me-2"></i>Export CSV</button>
+        </div>
+    </div>
+
+    <!-- FILTERS -->
+    <form method="get" action="@Url.Action("SystemUsage", "SuperAdmin")" class="filter-section">
+        <div class="filter-grid">
+            <div class="filter-group">
+                <label>From Date</label>
+                <input type="date" name="from" value="@ViewBag.FromDate" class="filter-control">
+            </div>
+            <div class="filter-group">
+                <label>To Date</label>
+                <input type="date" name="to" value="@ViewBag.ToDate" class="filter-control">
+            </div>
+            <div class="filter-group">
+                <label>Company</label>
+                <select name="companyId" class="filter-control">
+                    <option value="">All Companies</option>
+                    @foreach (var company in (List<VMSProject.Models.CompanyModel>)ViewBag.Companies)
+                    {
+                        <option value="@company.CompanyId" selected="@(ViewBag.SelectedCompanyId == company.CompanyId)">@company.CompanyName</option>
+                    }
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>User Role</label>
+                <select name="role" class="filter-control">
+                    <option value="All" selected="@(ViewBag.SelectedRole == "All")">All Roles</option>
+                    <option value="Superadmin" selected="@(ViewBag.SelectedRole == "Superadmin")">Super Admin</option>
+                    <option value="Receptionist" selected="@(ViewBag.SelectedRole == "Receptionist")">Admin</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Action Type</label>
+                <select name="actionType" class="filter-control">
+                    <option value="All Actions" selected="@(ViewBag.SelectedAction == "All Actions")">All Actions</option>
+                    <option value="Login" selected="@(ViewBag.SelectedAction == "Login")">Login</option>
+                    <option value="Logout" selected="@(ViewBag.SelectedAction == "Logout")">Logout</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Status</label>
+                <select name="status" class="filter-control">
+                    <option value="All Status" selected="@(ViewBag.SelectedStatus == "All Status")">All Status</option>
+                    <option value="Success" selected="@(ViewBag.SelectedStatus == "Success")">Success</option>
+                    <option value="Failed" selected="@(ViewBag.SelectedStatus == "Failed")">Failed</option>
+                </select>
+            </div>
+            <div class="filter-actions">
+                <button type="submit" class="btn-filter btn-search"><i class="fas fa-filter"></i> Apply</button>
+                <a href="@Url.Action("SystemUsage", "SuperAdmin")" class="btn-filter btn-search" style="background: #f1f5f9; color: #475569; border-color: #e2e8f0; text-decoration: none;">Clear</a>
+            </div>
+        </div>
+    </form>
+
+    <!-- STATS -->
+    <div class="stat-card-row">
+        <div class="users-stat-card">
+            <div class="stat-info">
+                <span class="stat-label lbl-total">TOTAL SESSIONS</span>
+                <span class="stat-value">@ViewBag.TotalSessions</span>
+            </div>
+            <div class="stat-icon" style="background: #3B82F6;"><i class="fas fa-history"></i></div>
+        </div>
+        <div class="users-stat-card">
+            <div class="stat-info">
+                <span class="stat-label lbl-active">SUCCESSFUL LOGINS</span>
+                <span class="stat-value">@ViewBag.SuccessfulLogins</span>
+            </div>
+            <div class="stat-icon" style="background: #10B981;"><i class="fas fa-check-circle"></i></div>
+        </div>
+        <div class="users-stat-card">
+            <div class="stat-info">
+                <span class="stat-label lbl-pending">FAILED LOGINS</span>
+                <span class="stat-value">@ViewBag.FailedLogins</span>
+            </div>
+            <div class="stat-icon" style="background: #EF4444;"><i class="fas fa-exclamation-triangle"></i></div>
+        </div>
+        <div class="users-stat-card">
+            <div class="stat-info">
+                <span class="stat-label lbl-completed">ACTIVE USERS</span>
+                <span class="stat-value">@ViewBag.ActiveUsers</span>
+            </div>
+            <div class="stat-icon" style="background: #8b5cf6;"><i class="fas fa-user-shield"></i></div>
+        </div>
+    </div>
+
+    <!-- DATA TABLE -->
+    <div class="table-section">
+        <div class="table-header-title">
+            System Activity Log Stream
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>User Identity</th>
+                        <th>Company</th>
+                        <th>System Role</th>
+                        <th>Activity</th>
+                        <th>Target Module</th>
+                        <th style="text-align: center;">Status</th>
+                        <th style="text-align: center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        bool isEven = false;
+                        foreach (var log in Model)
+                        {
+                            <tr class="@(isEven ? "striped-row" : "")">
+                                <td>
+                                    <div class="fw-bold" style="color: #0f172a;">@log.Timestamp.ToString("MMM dd, yyyy")</div>
+                                    <div class="small text-muted">@log.Timestamp.ToString("hh:mm tt")</div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold" style="color: #3B82F6;">@log.UserName</div>
+                                    <div class="small text-muted">@log.UserEmail</div>
+                                </td>
+                                <td><span style="font-weight: 600; color: #475569;">@(log.Company?.CompanyName ?? "-")</span></td>
+                                <td>
+                                    @if (log.Role == "Superadmin")
+                                    {
+                                        <span class="badge bg-indigo-soft text-indigo fw-bold" style="background: #EEF2FF; color: #6366f1; padding: 4px 10px; border-radius: 50px; font-size: 0.7rem;">SUPER ADMIN</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-slate-soft text-slate fw-bold" style="background: #F1F5F9; color: #64748b; padding: 4px 10px; border-radius: 50px; font-size: 0.7rem;">ADMIN</span>
+                                    }
+                                </td>
+                                <td>
+                                    @{
+                                        string actionClass = log.Action == "Login" ? "bg-primary" : (log.Action == "Logout" ? "bg-warning text-dark" : "bg-dark");
+                                    }
+                                    <span class="badge @actionClass px-3 py-2" style="font-weight: 700; border-radius: 4px; font-size: 0.7rem;">@log.Action</span>
+                                </td>
+                                <td><span style="font-weight: 500;">@(log.Module ?? "-")</span></td>
+                                <td style="text-align: center;">
+                                    @if (log.Status == "Failed")
+                                    {
+                                        <span class="status-badge" style="background: #EF4444;">Failed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge" style="background: #10B981;">Success</span>
+                                    }
+                                </td>
+                                <td style="text-align: center;">
+                                    <button class="btn btn-sm btn-info text-white shadow-sm" style="border-radius: 6px; padding: 5px 10px;"
+                                            onclick="showActivityDetails('@log.UserName', '@log.Action', '@log.Status', '@log.Details')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            isEven = !isEven;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 60px; color: #94a3b8;">
+                                <div style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"><i class="fas fa-database"></i></div>
+                                <h4 style="font-weight: 700;">No Activity Logs Found</h4>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <!-- PAGINATION FOOTER -->
+        <div class="table-footer px-4 py-3 bg-light border-top d-flex justify-content-between align-items-center">
+            <div class="text-muted small fw-bold">
+                Showing @(Model?.Count() ?? 0) of @(ViewBag.Pagination?.TotalItems ?? 0) Activities
+            </div>
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0">
+                    @if (ViewBag.Pagination != null)
+                    {
+                        var pag = (VMSProject.Models.PaginationViewModel)ViewBag.Pagination;
+                        int totalPages = (int)Math.Ceiling((double)pag.TotalItems / (pag.PageSize > 0 ? pag.PageSize : 20));
+
+                        <li class="page-item @(pag.CurrentPage == 1 ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action(pag.Action, pag.Controller, new { page = pag.CurrentPage - 1, from = pag.RouteValues["from"], to = pag.RouteValues["to"], companyId = pag.RouteValues["companyId"], role = pag.RouteValues["role"], actionType = pag.RouteValues["actionType"], status = pag.RouteValues["status"] })">Previous</a>
+                        </li>
+
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            if (i == 1 || i == totalPages || (i >= pag.CurrentPage - 2 && i <= pag.CurrentPage + 2))
+                            {
+                                <li class="page-item @(i == pag.CurrentPage ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action(pag.Action, pag.Controller, new { page = i, from = pag.RouteValues["from"], to = pag.RouteValues["to"], companyId = pag.RouteValues["companyId"], role = pag.RouteValues["role"], actionType = pag.RouteValues["actionType"], status = pag.RouteValues["status"] })">@i</a>
+                                </li>
+                            }
+                            else if (i == pag.CurrentPage - 3 || i == pag.CurrentPage + 3)
+                            {
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            }
+                        }
+
+                        <li class="page-item @(pag.CurrentPage == totalPages || totalPages == 0 ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action(pag.Action, pag.Controller, new { page = pag.CurrentPage + 1, from = pag.RouteValues["from"], to = pag.RouteValues["to"], companyId = pag.RouteValues["companyId"], role = pag.RouteValues["role"], actionType = pag.RouteValues["actionType"], status = pag.RouteValues["status"] })">Next</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- ACTIVITY DETAILS MODAL -->
+<div class="modal fade" id="activityModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header border-0 bg-light px-4 py-3">
+                <h5 class="modal-title fw-bold" style="color: #1e293b;"><i class="fas fa-info-circle me-2 text-info"></i>Log Intelligence</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div id="modalIcon" class="mb-4">
+                    <!-- Icon injected by JS -->
+                </div>
+                <h4 id="modalUser" class="fw-bold mb-2"></h4>
+                <p id="modalActionText" class="text-muted mb-4"></p>
+                
+                <div class="p-3 bg-light rounded-3 text-start mb-0 border border-1">
+                    <label class="small text-muted fw-bold text-uppercase d-block mb-1">Detailed Intelligence</label>
+                    <span id="modalDetailsText" class="fw-semibold text-dark"></span>
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light px-4 py-3">
+                <button type="button" class="btn btn-secondary px-4 fw-bold" style="border-radius: 10px;" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showActivityDetails(user, action, status, details) {
+            document.getElementById('modalUser').textContent = user;
+            
+            const actionText = status === 'Success' ? `${action} Successful` : `${action} Failed`;
+            document.getElementById('modalActionText').textContent = actionText;
+            
+            document.getElementById('modalDetailsText').textContent = details || 'No additional details available for this event.';
+            
+            const iconDiv = document.getElementById('modalIcon');
+            if (status === 'Success') {
+                iconDiv.innerHTML = '<div style="width: 70px; height: 70px; background: #dcfce7; color: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto;"><i class="fas fa-check-circle"></i></div>';
+            } else {
+                iconDiv.innerHTML = '<div style="width: 70px; height: 70px; background: #fee2e2; color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto;"><i class="fas fa-times-circle"></i></div>';
+            }
+            
+            const modal = new bootstrap.Modal(document.getElementById('activityModal'));
+            modal.show();
+        }
+    </script>
+}

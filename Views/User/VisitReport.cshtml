@@ -1,0 +1,133 @@
+@{
+    Layout = "UserLayout";
+    ViewData["Title"] = "Visit Reports";
+    string dateFrom = ViewBag.DateFrom ?? DateTime.Today.ToString("yyyy-MM-dd");
+    string dateTo   = ViewBag.DateTo   ?? DateTime.Today.ToString("yyyy-MM-dd");
+    var grouped = ViewBag.GroupedVisits as IEnumerable<IGrouping<DateTime, VMSProject.Models.Visit>>;
+    double avgMins = ViewBag.AvgDurationMins ?? 0.0;
+    string avgDur  = avgMins >= 60 ? $"{(int)avgMins/60}h {(int)avgMins%60}m" : $"{(int)avgMins}m";
+}
+
+<div class="stat-card-row">
+    <div class="user-stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Total Visits</span>
+            <span class="stat-value">@(ViewBag.TotalInRange ?? 0)</span>
+        </div>
+        <div class="stat-icon" style="background: #3B82F6;"><i class="fas fa-chart-line"></i></div>
+    </div>
+    <div class="user-stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Check-Ins</span>
+            <span class="stat-value">@(ViewBag.CheckedIn ?? 0)</span>
+        </div>
+        <div class="stat-icon" style="background: #10B981;"><i class="fas fa-fingerprint"></i></div>
+    </div>
+    <div class="user-stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Check-Outs</span>
+            <span class="stat-value">@(ViewBag.CheckedOut ?? 0)</span>
+        </div>
+        <div class="stat-icon" style="background: #EF4444;"><i class="fas fa-door-open"></i></div>
+    </div>
+    <div class="user-stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Avg Duration</span>
+            <span class="stat-value">@avgDur</span>
+        </div>
+        <div class="stat-icon" style="background: #06b6d4;"><i class="fas fa-stopwatch"></i></div>
+    </div>
+</div>
+
+<!-- Standardized Filter Section -->
+<form method="get" action="/User/VisitReport" class="filter-section print-hide">
+    <div class="filter-grid">
+        <div class="filter-group">
+            <label>Start Date</label>
+            <input type="date" name="dateFrom" value="@dateFrom" class="filter-control">
+        </div>
+        <div class="filter-group">
+            <label>End Date</label>
+            <input type="date" name="dateTo" value="@dateTo" class="filter-control">
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary fw-bold px-4 rounded-3 shadow-sm"><i class="fas fa-sync-alt me-2"></i>Apply</button>
+            <button type="button" onclick="window.print()" class="btn btn-light fw-bold px-4 rounded-3 border"><i class="fas fa-print me-2"></i>Print</button>
+            <a href="/User/ExportCsv?dateFrom=@dateFrom&dateTo=@dateTo" class="btn btn-success fw-bold px-4 rounded-3 text-white shadow-sm"><i class="fas fa-file-csv me-2"></i>CSV</a>
+        </div>
+    </div>
+</form>
+
+@if (grouped != null && grouped.Any())
+{
+    foreach (var day in grouped)
+    {
+        <div class="table-section mb-4">
+            <div class="table-header-title" style="background: #f8fafc;">
+                <span><i class="fas fa-calendar-day me-2 text-primary"></i>@day.Key.ToString("dddd, dd MMMM yyyy")</span>
+                <span class="badge bg-primary rounded-pill px-3">@day.Count() VISITS</span>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Visitor</th>
+                            <th>Host Person</th>
+                            <th>In / Out</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                            <th class="text-end">Pass</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ int ri = 1; }
+                        @foreach (var v in day.OrderBy(x => x.CheckInTime))
+                        {
+                            string dur = "—";
+                            if (v.CheckOutTime.HasValue) {
+                                int mins = (int)(v.CheckOutTime.Value - v.CheckInTime).TotalMinutes;
+                                dur = mins >= 60 ? $"{mins/60}h {mins%60}m" : $"{mins}m";
+                            }
+                            <tr>
+                                <td>@ri</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold me-2" style="width: 32px; height: 32px; font-size: 0.75rem;">
+                                            @(!string.IsNullOrEmpty(v.Visitor?.Name) ? v.Visitor.Name[0].ToString().ToUpper() : "?")
+                                        </div>
+                                        <span class="fw-bold">@(v.Visitor?.Name ?? "UNKNOWN")</span>
+                                    </div>
+                                </td>
+                                <td>@(v.Employee?.Name ?? v.Visitor?.WhomeToMeet ?? "—")</td>
+                                <td>
+                                    <div class="small">
+                                        <span class="text-success">@(v.Status != "Pending" ? v.CheckInTime.ToString("hh:mm tt") : "—")</span>
+                                        <span class="mx-1 text-muted">|</span>
+                                        <span class="text-danger">@(v.CheckOutTime.HasValue ? v.CheckOutTime.Value.ToString("hh:mm tt") : "—")</span>
+                                    </div>
+                                </td>
+                                <td><span class="font-monospace">@dur</span></td>
+                                <td>
+                                    @{
+                                        var badgeBg = v.Status == "Active" ? "bg-success" : v.Status == "Pending" ? "bg-warning" : "bg-secondary";
+                                    }
+                                    <span class="badge @badgeBg px-2 py-1 rounded-pill" style="font-size: 0.65rem;">@(v.Status?.ToUpper() ?? "UNKNOWN")</span>
+                                </td>
+                                <td class="text-end"><span class="font-monospace small bg-light p-1 px-2 border rounded">@(v.PassNumber ?? "—")</span></td>
+                            </tr>
+                            ri++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="table-section p-5 text-center text-muted">
+        <i class="fas fa-ghost fa-4x mb-3 opacity-25"></i>
+        <p>No visit data found for the selected period.</p>
+    </div>
+}

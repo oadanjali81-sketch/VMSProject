@@ -1,0 +1,227 @@
+@{
+    Layout = "_SuperAdminLayout";
+    ViewData["Title"] = "View Log - " + ViewBag.FileName;
+}
+
+@section Styles {
+    <style>
+        .terminal-wrapper {
+            margin: 30px;
+            background: #1e1e1e;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: 'Consolas', 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 120px);
+        }
+
+        .terminal-header {
+            background: #111111;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+
+        .terminal-title {
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .terminal-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-term-action {
+            padding: 6px 16px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Inter', sans-serif;
+            transition: 0.2s;
+        }
+
+        .btn-term-dl {
+            background: #198754;
+            color: white;
+            border: none;
+        }
+        .btn-term-dl:hover { background: #157347; color: white;}
+
+        .btn-term-back {
+            background: white;
+            color: #212529;
+            border: 1px solid #dee2e6;
+        }
+        .btn-term-back:hover { background: #f8f9fa; color: #212529; }
+
+        .terminal-body {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+            color: #d4d4d4;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .log-line { display: block; }
+        .log-info { color: #4ade80; } /* Green */
+        .log-debug { color: #d1d5db; } /* Gray */
+        .log-error { color: #f87171; } /* Red */
+
+        .terminal-footer {
+            background: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e5e7eb;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .footer-text {
+            color: #6b7280;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-footer {
+            background: white;
+            border: 1px solid #cbd5e1;
+            color: #4b5563;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .btn-footer i { color: #3b82f6; }
+        .btn-footer:hover { background: #f1f5f9; }
+
+        /* Scrollbar for terminal */
+        .terminal-body::-webkit-scrollbar { width: 10px; }
+        .terminal-body::-webkit-scrollbar-track { background: #1e1e1e; }
+        .terminal-body::-webkit-scrollbar-thumb { background: #555; border-radius: 5px; }
+        .terminal-body::-webkit-scrollbar-thumb:hover { background: #777; }
+    </style>
+}
+
+<div class="terminal-wrapper">
+    <div class="terminal-header">
+        <h2 class="terminal-title">
+            <i class="fas fa-code"></i> @ViewBag.FileName
+        </h2>
+        <div class="terminal-actions">
+            <a href="@Url.Action("DownloadLog", new { fileName = ViewBag.FileName })" class="btn-term-action btn-term-dl">
+                <i class="fas fa-download"></i> Download
+            </a>
+            <a href="@(ViewBag.FileName.ToString().StartsWith("errors", StringComparison.OrdinalIgnoreCase) ? Url.Action("ErrorLogs") : Url.Action("SystemLogs"))" class="btn-term-action btn-term-back">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+    
+    <div class="terminal-body" id="logContainer">
+        @* Log content injected via JS below for colorization *@
+    </div>
+
+    <div class="terminal-footer">
+        <div class="footer-text">
+            <i class="fas fa-info-circle"></i> Showing last 1000 lines. Download for full log.
+        </div>
+        <div class="footer-actions">
+            <button class="btn-footer" onclick="searchLog()">
+                <i class="fas fa-search"></i> Search
+            </button>
+            <button class="btn-footer" onclick="scrollToBottom()">
+                <i class="fas fa-arrow-down"></i> Scroll to Bottom
+            </button>
+            <button class="btn-footer" onclick="scrollToTop()">
+                <i class="fas fa-arrow-up"></i> Scroll to Top
+            </button>
+        </div>
+    </div>
+</div>
+
+<script id="rawLogData" type="text/plain">
+@Html.Raw(ViewBag.LogContent)
+</script>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const rawData = document.getElementById('rawLogData').textContent;
+            const container = document.getElementById('logContainer');
+            
+            // Process lines for colorization
+            const lines = rawData.split('\n');
+            let htmlContent = '';
+            
+            lines.forEach(line => {
+                if (!line.trim()) return;
+                
+                let className = 'log-line';
+                if (line.includes('[INF]')) className += ' log-info';
+                else if (line.includes('[DBG]')) className += ' log-debug';
+                else if (line.includes('[ERR]')) className += ' log-error';
+                else className += ' log-debug'; // Default
+                
+                // Escape HTML
+                const safeLine = line.replace(/&/g, '&amp;')
+                                     .replace(/</g, '&lt;')
+                                     .replace(/>/g, '&gt;')
+                                     .replace(/"/g, '&quot;')
+                                     .replace(/'/g, '&#039;');
+                                     
+                htmlContent += `<span class="${className}">${safeLine}</span>\n`;
+            });
+            
+            container.innerHTML = htmlContent;
+        });
+
+        function scrollToBottom() {
+            const container = document.getElementById('logContainer');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function scrollToTop() {
+            const container = document.getElementById('logContainer');
+            container.scrollTop = 0;
+        }
+
+        function searchLog() {
+            const term = prompt("Enter search term:");
+            if (!term) return;
+            
+            // Very basic browser text search
+            window.find(term);
+        }
+    </script>
+}

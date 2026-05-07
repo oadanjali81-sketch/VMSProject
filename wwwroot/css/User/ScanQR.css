@@ -1,0 +1,142 @@
+/* ══════════════════════════════════════════
+   SCAN QR MODERN THEME
+   ══════════════════════════════════════════ */
+
+.fw-800 { font-weight: 800; }
+.fw-700 { font-weight: 700; }
+
+/* Activity Log Styles */
+.activity-item {
+    padding: 15px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.2s;
+    position: relative;
+    border-left: 4px solid transparent;
+}
+
+.activity-item:hover {
+    background: #f8fafc;
+}
+
+.activity-item.checkin { border-left-color: #4f46e5; }
+.activity-item.checkout { border-left-color: #10b981; }
+
+.activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.activity-name {
+    font-weight: 800;
+    color: #1e293b;
+    font-size: 0.9rem;
+}
+
+.activity-time {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-weight: 700;
+}
+
+.activity-details {
+    font-size: 0.8rem;
+    color: #64748b;
+    line-height: 1.4;
+}
+
+.activity-pass {
+    display: inline-block;
+    font-family: monospace;
+    background: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-top: 5px;
+    font-weight: 700;
+    color: #4f46e5;
+}
+
+/* Result Card Styles */
+.result-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+.result-field:last-child {
+    border-bottom: none;
+}
+
+.result-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+}
+
+.result-value {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.result-pass {
+    background: #4f46e5;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    border-radius: 12px;
+    font-family: monospace;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin-top: 20px;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+/* Error States */
+.error-node {
+    padding: 30px;
+    text-align: center;
+}
+
+.error-node i {
+    font-size: 3rem;
+    color: #ef4444;
+    margin-bottom: 15px;
+}
+
+.error-details {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-top: 10px;
+}
+
+.instruction-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    text-align: left;
+    margin-bottom: 12px;
+    padding: 12px;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.step-num {
+    width: 24px;
+    height: 24px;
+    background: #4f46e5;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 800;
+    flex-shrink: 0;
+}

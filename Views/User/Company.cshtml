@@ -1,0 +1,106 @@
+@model List<VMSProject.Models.CompanyModel>
+@{
+    Layout = "UserLayout";
+    ViewData["Title"] = "Companies";
+}
+
+<div class="table-section">
+    <div class="table-header-title d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-building-shield me-2 text-primary"></i>
+            <span class="fw-800 text-dark" style="font-size: 1.1rem; letter-spacing: -0.5px;">Company List</span>
+        </div>
+        
+        <div class="d-flex align-items-center gap-2 flex-wrap ms-auto">
+            <div class="input-group input-group-sm" style="width: 280px;">
+                <span class="input-group-text bg-light border-end-0 border-light"><i class="fas fa-search text-muted"></i></span>
+                <input type="text" class="form-control border-start-0 ps-0 shadow-none bg-light border-light" id="tableSearchInput" placeholder="Search companies..." onkeyup="filterTable()">
+            </div>
+            <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-sm fw-bold px-3 rounded-pill shadow-sm">
+                <i class="fas fa-plus me-1"></i>Add Company
+            </a>
+        </div>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table class="user-table" id="standardTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Company Name</th>
+                    <th>Industry</th>
+                    <th>City</th>
+                    <th>Contact Info</th>
+                    <th>Admin</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Count > 0)
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr class="hover-row">
+                            <td><span class="badge bg-light text-secondary border rounded-pill">#@item.CompanyId</span></td>
+                            <td><span class="fw-bold text-dark">@item.CompanyName</span></td>
+                            <td><span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-pill">@item.Industry</span></td>
+                            <td><span class="fw-semibold">@item.City</span></td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold text-dark small">@item.OfficialEmail</span>
+                                    <small class="text-muted">@item.ContactNumber</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 30px; height: 30px; font-size: 0.75rem;">
+                                        @(item.AdminName?.Substring(0,1).ToUpper() ?? "A")
+                                    </div>
+                                    <span class="fw-bold small">@item.AdminName</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="acts-group">
+                                    <a asp-action="Edit" asp-controller="Company" asp-route-id="@item.CompanyId" class="act-btn act-edit" title="Edit Company"><i class="fas fa-pen-to-square"></i></a>
+                                    <button class="act-btn act-delete" title="Delete Company" onclick="handleDeleteCompany(@item.CompanyId, '@item.CompanyName')">
+                                        <i class="fas fa-trash-can"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">No companies registered yet.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function filterTable() {
+            var input = document.getElementById("tableSearchInput");
+            var filter = input.value.toUpperCase();
+            var tr = document.getElementById("standardTable").getElementsByTagName("tr");
+            for (var i = 1; i < tr.length; i++) {
+                var found = false;
+                var td = tr[i].getElementsByTagName("td");
+                for (var j = 0; j < td.length; j++) {
+                    if (td[j] && td[j].textContent.toUpperCase().indexOf(filter) > -1) { found = true; break; }
+                }
+                tr[i].style.display = found ? "" : "none";
+            }
+        }
+
+        function handleDeleteCompany(id, name) {
+            if (confirm(`Are you sure you want to delete company "${name}"? This action cannot be undone.`)) {
+                window.location.href = `/Company/Delete/${id}`;
+            }
+        }
+    </script>
+}

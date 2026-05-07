@@ -1,0 +1,272 @@
+@{
+    Layout = "UserLayout";
+    ViewData["Title"] = "Departments";
+}
+
+<div class="table-section">
+    <div class="table-header-title d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-sitemap me-2 text-primary"></i>
+            <span class="fw-800 text-dark" style="font-size: 1.1rem; letter-spacing: -0.5px;">Department Registry</span>
+        </div>
+        
+        <div class="d-flex align-items-center gap-2 flex-wrap ms-auto">
+            <div class="input-group input-group-sm" style="width: 280px;">
+                <span class="input-group-text bg-light border-end-0 border-light"><i class="fas fa-search text-muted"></i></span>
+                <input type="text" class="form-control border-start-0 ps-0 shadow-none bg-light border-light" id="tableSearchInput" placeholder="Search by department name..." onkeyup="filterTable()">
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" data-bs-toggle="modal" data-bs-target="#addDepartmentModal" class="btn btn-primary btn-sm fw-bold px-3 rounded-pill shadow-sm">
+                    <i class="fas fa-plus me-1"></i>Add Department
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table class="user-table" id="standardTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Department Name</th>
+                    <th>Employee Count</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Count > 0)
+                {
+                    int i = 1;
+                    foreach (var d in Model)
+                    {
+                        int empCount = 0;
+                        if (ViewBag.EmpCounts != null)
+                        {
+                            var counts = ViewBag.EmpCounts as System.Collections.Generic.Dictionary<int, int>;
+                            counts?.TryGetValue(d.DepartmentId, out empCount);
+                        }
+                        <tr onclick="if(!event.target.closest('.acts-group')) { openViewDepartmentModal(@d.DepartmentId); }" style="cursor: pointer;" class="hover-row">
+                            <td><span class="badge bg-light text-secondary border rounded-pill">@i</span></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold me-3 shadow-sm" style="width: 38px; height: 38px; border: 1px solid rgba(59, 130, 246, 0.2);">
+                                        <i class="fas fa-building small"></i>
+                                    </div>
+                                    <span class="fw-bold text-dark">@d.DepartmentName</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="fw-bold text-primary">@empCount</span>
+                                <small class="text-muted ms-1">Employees</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill shadow-sm" style="font-size: 0.7rem;">Active</span>
+                            </td>
+                            <td>
+                                <div class="acts-group">
+                                    <button type="button" class="act-btn act-edit" title="Edit" onclick="openEditDepartmentModal(@d.DepartmentId)">
+                                        <i class="fas fa-pen-to-square"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        i++;
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">No departments found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (ViewBag.Pagination != null)
+    {
+        var pModel = (VMSProject.Models.PaginationViewModel)ViewBag.Pagination;
+        @if (pModel.TotalPages > 0)
+        {
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    Showing @(((pModel.CurrentPage - 1) * pModel.PageSize) + 1) to @(Math.Min(pModel.CurrentPage * pModel.PageSize, pModel.TotalItems)) of @pModel.TotalItems entries
+                </div>
+                <div class="pagination-controls">
+                    <div class="page-size-selector">
+                        <select class="page-size-select" onchange="updatePageSize(this.value)">
+                            <option value="10" selected="@(pModel.PageSize == 10)">10</option>
+                            <option value="20" selected="@(pModel.PageSize == 20)">20</option>
+                            <option value="50" selected="@(pModel.PageSize == 50)">50</option>
+                            <option value="100" selected="@(pModel.PageSize == 100)">100</option>
+                        </select>
+                    </div>
+                    <div class="custom-pagination">
+                        @if (pModel.HasPreviousPage) {
+                            var prevVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage - 1).ToString() };
+                            <a href="@Url.Action(pModel.Action, pModel.Controller, prevVals)" class="page-link-custom">Previous</a>
+                        } else { <span class="page-link-custom disabled">Previous</span> }
+                        @{
+                            int startPage = Math.Max(1, pModel.CurrentPage - 2);
+                            int endPage = Math.Min(pModel.TotalPages, startPage + 4);
+                            if (endPage - startPage < 4) startPage = Math.Max(1, endPage - 4);
+                        }
+                        @for (int i = startPage; i <= endPage; i++) {
+                            var pageVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = i.ToString() };
+                            <a href="@Url.Action(pModel.Action, pModel.Controller, pageVals)" class="page-link-custom @(i == pModel.CurrentPage ? "active" : "")">@i</a>
+                        }
+                        @if (pModel.HasNextPage) {
+                            var nextVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage + 1).ToString() };
+                            <a href="@Url.Action(pModel.Action, pModel.Controller, nextVals)" class="page-link-custom">Next</a>
+                        } else { <span class="page-link-custom disabled">Next</span> }
+                    </div>
+                </div>
+            </div>
+            <script>
+                function updatePageSize(size) {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('pageSize', size);
+                    url.searchParams.set('page', '1');
+                    window.location.href = url.toString();
+                }
+            </script>
+        }
+    }
+</div>
+
+<!-- MODALS -->
+<!-- ADD DEPARTMENT MODAL -->
+<div class="modal fade" id="addDepartmentModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-bottom-0 pt-4 px-4">
+                <h5 class="fw-800 text-dark mb-0"><i class="fas fa-folder-plus text-primary me-2"></i> Add New Department</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="/User/AddDepartment">
+                @Html.AntiForgeryToken()
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-700 small text-muted uppercase letter-spacing-1">Department Name <span class="text-danger">*</span></label>
+                        <input type="text" name="DepartmentName" class="form-control rounded-3 border-light bg-light" placeholder="e.g. IT, HR, Marketing" required />
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 p-4 pt-0 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-800 small text-muted letter-spacing-1" data-bs-dismiss="modal">CANCEL</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-800 small letter-spacing-1 shadow-sm">CREATE DEPARTMENT</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT DEPARTMENT MODAL -->
+<div class="modal fade" id="editDepartmentModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-bottom-0 pt-4 px-4">
+                <h5 class="fw-800 text-dark mb-0"><i class="fas fa-file-pen text-primary me-2"></i> Edit Department</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="/User/EditDepartment">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="edit_DeptId" name="DepartmentId" />
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-700 small text-muted uppercase letter-spacing-1">Department Name <span class="text-danger">*</span></label>
+                        <input type="text" id="edit_DeptName" name="DepartmentName" class="form-control rounded-3 border-light bg-light" required />
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 p-4 pt-0 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-800 small text-muted letter-spacing-1" data-bs-dismiss="modal">CANCEL</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-800 small letter-spacing-1 shadow-sm">SAVE CHANGES</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- VIEW DEPARTMENT MODAL -->
+<div class="modal fade" id="viewDepartmentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-body p-0">
+                <div style="height: 120px; background: linear-gradient(135deg, #6366f1, #3b82f6); position: relative;">
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="px-4 pb-4 text-center">
+                    <div class="rounded-circle bg-white shadow-sm d-flex align-items-center justify-content-center mx-auto" style="width: 100px; height: 100px; margin-top: -50px; position: relative; z-index: 5; border: 5px solid #fff;">
+                        <i class="fas fa-building text-primary fs-1"></i>
+                    </div>
+                    <div class="mt-3">
+                        <h3 id="view_DeptName" class="fw-800 text-dark mb-1">Department Name</h3>
+                        <p class="text-muted small fw-700 uppercase letter-spacing-1">Organizational Unit</p>
+                    </div>
+                    
+                    <div class="row g-3 mt-2">
+                        <div class="col-12">
+                            <div class="p-3 rounded-4" style="background: #f8fafc;">
+                                <label class="text-muted small fw-800 uppercase letter-spacing-2 d-block mb-1" style="font-size: 0.6rem;">TOTAL EMPLOYEES</label>
+                                <div class="fw-800 text-primary fs-4">
+                                    <i class="fas fa-users me-2 opacity-50"></i>
+                                    <span id="view_DeptCount">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-4 pt-0 d-flex justify-content-center gap-2 bg-white">
+                <button type="button" class="btn btn-light rounded-pill px-4 fw-800 small text-muted letter-spacing-1" data-bs-dismiss="modal" style="border: 1px solid #e2e8f0;">CLOSE</button>
+                <button type="button" id="view_DeptEditBtn" class="btn btn-primary rounded-pill px-4 fw-800 small letter-spacing-1 shadow-sm">
+                    <i class="fas fa-edit me-1"></i> EDIT DEPT
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function openEditDepartmentModal(id) {
+            try {
+                const response = await fetch(`/User/GetDepartment/${id}`);
+                if (!response.ok) throw new Error('Failed to fetch department');
+                const data = await response.json();
+                document.getElementById('edit_DeptId').value = data.id || data.Id;
+                document.getElementById('edit_DeptName').value = data.name || data.Name;
+                openModal('editDepartmentModal');
+            } catch (error) { console.error(error); }
+        }
+
+        async function openViewDepartmentModal(id) {
+            try {
+                const response = await fetch(`/User/GetDepartment/${id}`);
+                if (!response.ok) throw new Error('Failed to fetch department');
+                const data = await response.json();
+                document.getElementById('view_DeptName').textContent = data.name || data.Name;
+                document.getElementById('view_DeptCount').textContent = data.employeeCount || data.EmployeeCount || 0;
+                document.getElementById('view_DeptEditBtn').onclick = () => {
+                    closeModal('viewDepartmentModal');
+                    openEditDepartmentModal(id);
+                };
+                openModal('viewDepartmentModal');
+            } catch (error) { console.error(error); }
+        }
+
+        function filterTable() {
+            var input = document.getElementById("tableSearchInput");
+            var filter = input.value.toUpperCase();
+            var tr = document.getElementById("standardTable").getElementsByTagName("tr");
+            for (var i = 1; i < tr.length; i++) {
+                var found = false;
+                var td = tr[i].getElementsByTagName("td");
+                for (var j = 0; j < td.length; j++) {
+                    if (td[j] && td[j].textContent.toUpperCase().indexOf(filter) > -1) { found = true; break; }
+                }
+                tr[i].style.display = found ? "" : "none";
+            }
+        }
+    </script>
+}

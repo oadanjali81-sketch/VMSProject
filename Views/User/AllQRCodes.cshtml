@@ -1,0 +1,216 @@
+@{
+    Layout = "UserLayout";
+    ViewData["Title"] = "Visitor Passes";
+    string? search = ViewBag.Search;
+}
+
+<div class="container-fluid px-0">
+    <div class="table-section shadow-sm border-0 rounded-4 overflow-hidden">
+        <!-- Header with Title and Page Size Selector -->
+        <div class="table-header-title d-flex align-items-center justify-content-between px-4 py-3 bg-white border-bottom">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-qrcode text-primary me-3 fs-4"></i>
+                <div>
+                    <h5 class="fw-800 mb-0">Visitor Passes</h5>
+                    <p class="text-muted small mb-0">Manage security access codes</p>
+                </div>
+            </div>
+            
+            <div class="d-flex align-items-center gap-3">
+                <div class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2 fw-700">
+                    <i class="fas fa-check-circle me-1"></i> @ViewBag.TotalWithQR Total
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Bar Section -->
+        <div class="p-3 bg-light bg-opacity-25 border-bottom">
+            <form method="get" action="/User/AllQRCodes" class="m-0">
+                <input type="hidden" name="pageSize" value="@ViewBag.PageSize" />
+                <div class="input-group" style="max-width: 450px;">
+                    <span class="input-group-text bg-white border-end-0 shadow-none ps-3"><i class="fas fa-search text-muted small"></i></span>
+                    <input type="text" name="search" value="@search" class="form-control border-start-0 ps-0 shadow-none fw-600" placeholder="Search by name, company or pass code...">
+                    <button type="submit" class="btn btn-primary px-4 fw-800 text-uppercase small" style="letter-spacing: 1px;">Filter</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Cards Content Area -->
+        <div class="p-4 bg-white">
+            <div class="row g-4">
+                @if (Model != null && Model.Count > 0)
+                {
+                    foreach (var item in Model)
+                    {
+                        var v = item.Visitor;
+                        bool hasPass = !string.IsNullOrEmpty(item.LatestPassNumber);
+                        string qrUrl = hasPass
+                            ? $"https://api.qrserver.com/v1/create-qr-code/?size=180x180&color=000000&bgcolor=ffffff&qzone=1&data={Uri.EscapeDataString(item.LatestPassNumber!)}"
+                            : "";
+
+                        <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+                            <div class="card border border-light shadow-sm rounded-4 h-100 pass-card @(hasPass ? "" : "opacity-75")">
+                                <div class="card-body p-4 text-center d-flex flex-column">
+                                    <div class="rounded-circle border border-2 border-primary border-opacity-25 p-1 d-inline-block mb-3 shadow-sm mx-auto">
+                                        <div class="rounded-circle overflow-hidden d-flex align-items-center justify-content-center bg-light" style="width: 65px; height: 65px;">
+                                            @if (!string.IsNullOrEmpty(v.CapturePhoto)) { 
+                                                <img src="@v.CapturePhoto" alt="@v.Name" class="w-100 h-100" style="object-fit: cover;" /> 
+                                            } else { 
+                                                <span class="fw-800 text-primary fs-4">@(v.Name?[0].ToString().ToUpper() ?? "?")</span> 
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <h6 class="fw-800 text-dark mb-1">@v.Name</h6>
+                                    <p class="small text-muted mb-4 text-uppercase fw-700" style="font-size: 0.65rem; letter-spacing: 1px;">@(v.CompanyName ?? "Individual Visitor")</p>
+
+                                    <div class="mt-auto">
+                                        @if (hasPass)
+                                        {
+                                            <div class="qr-wrapper mb-3 p-3 border rounded-4 bg-white d-inline-block shadow-sm">
+                                                <img src="@qrUrl" width="120" height="120" class="rounded-2" alt="Pass QR" />
+                                            </div>
+                                            <div class="mb-4">
+                                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 font-monospace px-3 py-2 rounded-pill small">
+                                                    @item.LatestPassNumber
+                                                </span>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="py-4 mb-3 text-center">
+                                                <div class="bg-light rounded-4 py-4 border border-dashed border-2 opacity-50">
+                                                    <i class="fas fa-qrcode fa-2x text-muted mb-2"></i>
+                                                    <p class="small fw-700 text-muted mb-0 uppercase" style="font-size: 0.6rem; letter-spacing: 1px;">No Pass Active</p>
+                                                </div>
+                                            </div>
+                                        }
+
+                                        <div class="d-flex gap-2">
+                                            @if (hasPass) {
+                                                <button class="btn btn-primary fw-800 rounded-pill flex-grow-1 py-2 shadow-sm text-uppercase small" style="letter-spacing: 1px;" onclick="printPass('@v.Name', '@item.LatestPassNumber', '@qrUrl')">
+                                                    <i class="fas fa-print me-1"></i> Print
+                                                </button>
+                                                <button class="btn btn-outline-primary fw-800 rounded-pill px-3 py-2 shadow-sm" onclick="sharePass('@v.Name', '@item.LatestPassNumber', '@qrUrl')" title="Share QR">
+                                                    <i class="fas fa-share-alt"></i>
+                                                </button>
+                                            } else {
+                                                <a href="/User/GenerateQR/@v.VisitorId" class="btn btn-outline-primary fw-800 rounded-pill w-100 py-2 shadow-sm text-uppercase small" style="letter-spacing: 1px;">
+                                                    <i class="fas fa-plus me-1"></i> Create Pass
+                                                </a>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12">
+                        <div class="text-center py-5 text-muted">
+                            <i class="fas fa-search fa-3x mb-3 opacity-25"></i>
+                            <p>No visitor passes found matching your search.</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @if (ViewBag.Pagination != null)
+        {
+            var pModel = (VMSProject.Models.PaginationViewModel)ViewBag.Pagination;
+            @if (pModel.TotalPages > 0)
+            {
+                <div class="pagination-container border-top">
+                    <div class="pagination-info">
+                        Showing @(((pModel.CurrentPage - 1) * pModel.PageSize) + 1) to @(Math.Min(pModel.CurrentPage * pModel.PageSize, pModel.TotalItems)) of @pModel.TotalItems entries
+                    </div>
+                    <div class="pagination-controls">
+                        <div class="page-size-selector">
+                            <select class="page-size-select" onchange="updatePageSize(this.value)">
+                                <option value="12" selected="@(pModel.PageSize == 12)">12</option>
+                                <option value="24" selected="@(pModel.PageSize == 24)">24</option>
+                                <option value="48" selected="@(pModel.PageSize == 48)">48</option>
+                                <option value="96" selected="@(pModel.PageSize == 96)">96</option>
+                            </select>
+                        </div>
+                        <div class="custom-pagination">
+                            @if (pModel.HasPreviousPage) {
+                                var prevVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage - 1).ToString() };
+                                <a href="@Url.Action(pModel.Action, pModel.Controller, prevVals)" class="page-link-custom">Previous</a>
+                            } else { <span class="page-link-custom disabled">Previous</span> }
+                            @{
+                                int startPage = Math.Max(1, pModel.CurrentPage - 2);
+                                int endPage = Math.Min(pModel.TotalPages, startPage + 4);
+                                if (endPage - startPage < 4) startPage = Math.Max(1, endPage - 4);
+                            }
+                            @for (int i = startPage; i <= endPage; i++) {
+                                var pageVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = i.ToString() };
+                                <a href="@Url.Action(pModel.Action, pModel.Controller, pageVals)" class="page-link-custom @(i == pModel.CurrentPage ? "active" : "")">@i</a>
+                            }
+                            @if (pModel.HasNextPage) {
+                                var nextVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage + 1).ToString() };
+                                <a href="@Url.Action(pModel.Action, pModel.Controller, nextVals)" class="page-link-custom">Next</a>
+                            } else { <span class="page-link-custom disabled">Next</span> }
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    function updatePageSize(size) {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('pageSize', size);
+                        url.searchParams.set('page', '1');
+                        window.location.href = url.toString();
+                    }
+                </script>
+            }
+        }
+    </div>
+</div>
+
+<style>
+    .pass-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid #f1f5f9 !important; }
+    .pass-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12) !important; border-color: rgba(59, 130, 246, 0.2) !important; }
+    .qr-wrapper { transition: all 0.3s ease; }
+    .pass-card:hover .qr-wrapper { border-color: #0d6efd !important; transform: scale(1.02); }
+</style>
+
+@section Scripts {
+    <script>
+        function printPass(name, code, qrUrl) {
+            var w = window.open('', '_blank');
+            var highResQr = qrUrl.replace('size=180x180', 'size=400x400');
+            w.document.write('<html><head><title>Print Pass - ' + name + '<\/title>');
+            w.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">');
+            w.document.write('<style>');
+            w.document.write("body { font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f8fafc; }");
+            w.document.write(".pass-card { border: 2px solid #0d6efd; border-radius: 30px; padding: 40px; background: white; text-align: center; width: 350px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }");
+            w.document.write(".pass-header { color: #0d6efd; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; font-size: 24px; }");
+            w.document.write(".qr-img { border: 1px solid #e2e8f0; padding: 15px; border-radius: 20px; margin-bottom: 25px; }");
+            w.document.write(".visitor-name { font-size: 22px; font-weight: 700; color: #1e293b; margin: 0 0 10px 0; }");
+            w.document.write(".pass-code { font-family: 'Courier New', monospace; font-size: 28px; font-weight: 800; letter-spacing: 6px; background: #f1f5f9; padding: 15px; border-radius: 15px; color: #0d6efd; }");
+            w.document.write(".footer { margin-top: 25px; font-size: 12px; color: #94a3b8; font-weight: 600; }");
+            w.document.write("<\/style><\/head><body>");
+            w.document.write('<div class="pass-card">');
+            w.document.write('<div class="pass-header"><i class="fas fa-id-card me-2"><\/i> Visitor Pass<\/div>');
+            w.document.write('<img src="' + highResQr + '" width="220" height="220" class="qr-img" \/>');
+            w.document.write('<h3 class="visitor-name">' + name + '<\/h3>');
+            w.document.write('<div class="pass-code">' + code + '<\/div>');
+            w.document.write('<div class="footer text-uppercase">Scan at entry points • Valid for today only<\/div>');
+            w.document.write('<\/div><\/body><\/html>');
+            w.document.close();
+            setTimeout(function() { w.print(); w.close(); }, 800);
+        }
+
+        function sharePass(name, code, qrUrl) {
+            var shareText = 'Visitor Pass for ' + name + '\nPass Code: ' + code + '\nScan QR: ' + qrUrl.replace('size=180x180', 'size=400x400');
+            if (navigator.share) {
+                navigator.share({ title: 'Visitor Access Pass', text: shareText, url: window.location.href });
+            } else {
+                navigator.clipboard.writeText(shareText).then(function() { alert('Pass details copied to clipboard!'); });
+            }
+        }
+    </script>
+}

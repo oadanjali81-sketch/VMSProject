@@ -1,0 +1,384 @@
+@model IEnumerable<VMSProject.Models.DemoRequest>
+@{
+    Layout = "~/Views/Shared/_SuperAdminLayout.cshtml";
+    ViewData["Title"] = "Demo Requests";
+    var requests = (List<VMSProject.Models.DemoRequest>)ViewBag.Requests;
+    var totalCount = (int)ViewBag.TotalCount;
+    var search = (string?)ViewBag.Search ?? "";
+    var status = (string)ViewBag.Status;
+}
+
+@section Styles {
+    <style>
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; margin-top: 10px; }
+        .page-title { font-size: 2rem; font-weight: 700; color: #1e293b; margin: 0; }
+        .total-badge { background: #3B82F6; color: white; padding: 6px 14px; border-radius: 6px; font-weight: 700; font-size: 0.9rem; }
+
+        .filter-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+
+        .filter-row { display: flex; gap: 20px; align-items: flex-end; }
+        .filter-item { flex: 1; }
+        .filter-item label { display: block; font-size: 0.9rem; color: #475569; margin-bottom: 8px; font-weight: 500; }
+        .filter-item input, .filter-item select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: #334155;
+            background: #fff;
+            transition: all 0.2s;
+        }
+        .filter-item input:focus, .filter-item select:focus { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); outline: none; }
+
+        .btn-search { 
+            background: #fff; 
+            color: #3B82F6; 
+            border: 1px solid #3B82F6; 
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .btn-search:hover { background: #3B82F6; color: #fff; }
+
+        .btn-clear {
+            background: #fff;
+            border: 1px solid #64748b;
+            padding: 10px 18px;
+            border-radius: 12px;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-clear:hover {
+            background: #64748b;
+            color: #fff;
+        }
+
+        .demo-table-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px; 
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .demo-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .demo-table th {
+            padding: 15px 20px;
+            text-align: left;
+            font-weight: 700;
+            color: #0f172a;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.95rem;
+            background: #fdfdfd;
+        }
+
+        .demo-table tr { transition: all 0.2s; }
+        .demo-table tr:hover { background-color: #f1f5f9 !important; }
+
+        .demo-table td {
+            padding: 15px 20px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.9rem;
+            color: #334155;
+        }
+
+        .name-cell { font-weight: 700; color: #0f172a; }
+        .email-link { color: #3B82F6; text-decoration: underline; font-weight: 500; transition: color 0.2s; }
+        .email-link:hover { color: #2563eb; }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: white;
+            display: inline-block;
+        }
+        .bg-new { background: #F59E0B; }
+        .bg-contacted { background: #10B981; }
+        .bg-completed { background: #3B82F6; }
+
+        .action-btns { display: flex; gap: 8px; }
+        .act-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            background: #fff;
+            color: #64748b;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-view { border-color: #6366f1; color: #6366f1; }
+        .btn-view:hover { background: #6366f1; color: #fff; }
+        
+        .btn-call { border-color: #10B981; color: #10B981; }
+        .btn-call:hover { background: #10B981; color: #fff; }
+        
+        .btn-done { border-color: #065f46; color: #065f46; }
+        .btn-done:hover { background: #065f46; color: #fff; }
+
+        /* Modal Overlay from Image 2 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .modal-card {
+            background: white;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .modal-header {
+            padding: 15px 25px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+        }
+        .modal-body { padding: 25px; }
+        .msg-header { display: flex; gap: 15px; margin-bottom: 20px; align-items: center; color: #64748b; font-size: 0.9rem; }
+        .msg-content {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: #1e293b;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+        }
+        .modal-footer {
+            padding: 15px 25px;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            background: #fff;
+        }
+        .btn-modal {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-close-modal { background: #64748b; color: white; }
+        .btn-reply-modal { background: #3B82F6; color: white; }
+    </style>
+}
+
+<div class="container-fluid px-4">
+    <div class="page-header">
+        <h2 class="page-title">Demo Requests</h2>
+        <div class="total-badge">@totalCount total</div>
+    </div>
+
+    <form method="get" action="/SuperAdmin/DemoRequests" class="filter-card">
+        <div class="filter-row">
+            <div class="filter-item">
+                <label>Search Requests</label>
+                <input type="text" name="search" value="@search" placeholder="Search by name, email, company...">
+            </div>
+            <div class="filter-item">
+                <label>Status</label>
+                <select name="status">
+                    <option value="All" selected="@(status == "All")">All Status</option>
+                    <option value="New" selected="@(status == "New")">New</option>
+                    <option value="Contacted" selected="@(status == "Contacted")">Contacted</option>
+                    <option value="Completed" selected="@(status == "Completed")">Completed</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn-search"><i class="fas fa-filter"></i> Apply</button>
+                <a href="/SuperAdmin/DemoRequests" class="btn-clear">Clear Filters</a>
+            </div>
+        </div>
+    </form>
+
+    <div class="demo-table-card">
+        <table class="demo-table">
+            <thead>
+                <tr>
+                    <th>#ID</th>
+                    <th>Name & Company</th>
+                    <th>Contact Info</th>
+                    <th>Message Snippet</th>
+                    <th>Date Received</th>
+                    <th>Current Status</th>
+                    <th style="text-align: right;">Operations</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (requests != null && requests.Any())
+                {
+                    foreach (var r in requests)
+                    {
+                        <tr>
+                            <td>#@r.Id</td>
+                            <td>
+                                <div class="name-cell">@r.Name</div>
+                                <div style="font-size: 0.8rem; color: #64748b;">@r.Company</div>
+                            </td>
+                            <td>
+                                <div><a href="mailto:@r.Email" class="email-link">@r.Email</a></div>
+                                <div style="font-size: 0.8rem; color: #64748b;">@r.Phone</div>
+                            </td>
+                            <td><div style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="@r.Message">@(string.IsNullOrEmpty(r.Message) ? "-" : r.Message)</div></td>
+                            <td>@r.CreatedAt.ToString("MMM dd, yyyy")</td>
+                            <td>
+                                <span class="status-badge bg-@r.Status.ToLower()">@r.Status</span>
+                            </td>
+                            <td>
+                                <div class="action-btns justify-content-end">
+                                    <button class="act-btn btn-view" title="View Message" onclick="viewDemoDetails(@r.Id)"><i class="fas fa-eye"></i></button>
+                                    @if (r.Status == "New")
+                                    {
+                                        <button class="act-btn btn-call" title="Mark as Contacted" onclick="updateStatus(@r.Id, 'Contacted')"><i class="fas fa-phone"></i></button>
+                                    }
+                                    @if (r.Status != "Completed")
+                                    {
+                                        <button class="act-btn btn-done" title="Mark as Completed" onclick="updateStatus(@r.Id, 'Completed')"><i class="fas fa-check"></i></button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">No demo requests found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- View Modal Overlay (Image 2 style) -->
+<div class="modal-overlay" id="demoViewModal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h5 style="margin:0; font-weight:800; color:#1e293b;"><i class="fas fa-comment-dots text-primary me-2"></i>Message from <span id="viewName"></span></h5>
+            <button type="button" style="background:none; border:none; font-size:1.5rem; color:#94a3b8; cursor:pointer;" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="msg-header">
+                <span><i class="fas fa-envelope me-1"></i> <span id="viewEmail"></span></span>
+                <span>|</span>
+                <span><i class="fas fa-building me-1"></i> <span id="viewCompany"></span></span>
+            </div>
+            <div class="msg-content" id="viewMessage"></div>
+            <div style="color: #64748b; font-size: 0.8rem; font-weight: 600;">
+                <i class="fas fa-clock me-1"></i> Submitted on <span id="viewDate"></span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-modal btn-close-modal" onclick="closeModal()">Close</button>
+            <button class="btn-modal btn-reply-modal" id="btnReply"><i class="fas fa-reply"></i> Reply</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function viewDemoDetails(id) {
+            try {
+                const response = await fetch(`/SuperAdmin/GetDemoRequest?id=${id}`);
+                const data = await response.json();
+                
+                document.getElementById('viewName').innerText = data.name;
+                document.getElementById('viewEmail').innerText = data.email;
+                document.getElementById('viewCompany').innerText = data.company;
+                document.getElementById('viewMessage').innerText = data.message || "No message provided.";
+                
+                const date = new Date(data.createdAt);
+                document.getElementById('viewDate').innerText = date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                
+                document.getElementById('btnReply').onclick = () => window.location.href = `mailto:${data.email}?subject=Demo Request - Vision VMS`;
+                
+                document.getElementById('demoViewModal').style.display = 'flex';
+            } catch (error) {
+                alert("Error fetching details.");
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('demoViewModal').style.display = 'none';
+        }
+
+        async function updateStatus(id, status) {
+            if (!confirm(`Mark this request as ${status}?`)) return;
+            
+            try {
+                const response = await fetch('/SuperAdmin/UpdateDemoStatus', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `id=${id}&status=${status}`
+                });
+                const result = await response.json();
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert("Error updating status.");
+                }
+            } catch (error) {
+                alert("An error occurred.");
+            }
+        }
+
+        // Close on overlay click
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('demoViewModal')) {
+                closeModal();
+            }
+        }
+    </script>
+}

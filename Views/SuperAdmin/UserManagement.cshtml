@@ -1,0 +1,279 @@
+@model List<VMSProject.Models.CompanyModel>
+@{
+    Layout = "_SuperAdminLayout";
+    ViewData["Title"] = "User Management";
+}
+
+@section Styles {
+    <style>
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .filter-console {
+            background: white;
+            border-radius: var(--sa-radius-md);
+            padding: 24px;
+            box-shadow: var(--sa-shadow);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            align-items: flex-end;
+            margin-bottom: 30px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--sa-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-input {
+            background: #f8fafc;
+            border: 1px solid var(--sa-border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--sa-text-main);
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .filter-input:focus {
+            border-color: var(--sa-primary);
+            background: white;
+            box-shadow: 0 0 0 4px var(--sa-primary-soft);
+        }
+
+        .premium-btn {
+            background: var(--sa-primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+        }
+
+        .premium-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px var(--sa-primary-soft);
+            opacity: 0.95;
+        }
+
+        .premium-btn.secondary {
+            background: var(--sa-white);
+            color: var(--sa-text-main);
+            border: 1px solid var(--sa-border);
+        }
+
+        .premium-btn.secondary:hover {
+            background: #f8fafc;
+            box-shadow: var(--sa-shadow);
+        }
+
+        /* Status & Role Badges */
+        .badge-executive {
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .role-super { background: #EEF2FF; color: #6366f1; }
+        .role-staff { background: #F1F5F9; color: #64748b; }
+        .status-active { background: #ECFDF5; color: #10B981; }
+        .status-inactive { background: #FFF1F2; color: #F43F5E; }
+
+        .action-cell {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .tool-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--sa-border);
+            color: var(--sa-text-muted);
+            background: white;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .tool-btn:hover {
+            border-color: var(--sa-primary);
+            color: var(--sa-primary);
+            background: var(--sa-primary-soft);
+        }
+
+        .tool-btn.danger:hover {
+            border-color: var(--sa-rose);
+            color: var(--sa-rose);
+            background: rgba(244, 63, 94, 0.05);
+        }
+    </style>
+}
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <h2 style="margin: 0; font-size: 1.5rem; font-weight: 800;">Administrator Access</h2>
+    <a href="/Account/Register" class="premium-btn">
+        <i class="fas fa-plus-circle"></i> Provision New User
+    </a>
+</div>
+
+<!-- FILTERS -->
+<form method="get" action="/SuperAdmin/UserManagement">
+    <div class="filter-console">
+        <div class="filter-group">
+            <label class="filter-label">Identity Search</label>
+            <input type="text" name="search" value="@ViewBag.Search" placeholder="Name, Email, etc..." class="filter-input">
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">System Role</label>
+            <select name="role" class="filter-input">
+                <option value="">All Access Levels</option>
+                <option value="Superadmin" selected="@(ViewBag.SelectedRole == "Superadmin")">Super Admin</option>
+                <option value="Receptionist" selected="@(ViewBag.SelectedRole == "Receptionist")">Receptionist</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">Access State</label>
+            <select name="status" class="filter-input">
+                <option value="">All States</option>
+                <option value="Active" selected="@(ViewBag.SelectedStatus == "Active")">Permitted</option>
+                <option value="Inactive" selected="@(ViewBag.SelectedStatus == "Inactive")">Revoked</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <button type="submit" class="premium-btn secondary" style="width: 100%; justify-content: center;">
+                <i class="fas fa-sliders-h"></i> Apply Filters
+            </button>
+        </div>
+    </div>
+</form>
+
+<!-- TABLE -->
+<div class="activity-box">
+    <div class="activity-header">
+        <h3 class="chart-title"><i class="fas fa-user-shield" style="color: var(--sa-primary); margin-right: 10px;"></i> System User Directory</h3>
+    </div>
+    
+    <div style="overflow-x: auto;">
+        <table class="activity-table">
+            <thead>
+                <tr>
+                    <th style="padding-left: 30px;">Administrator Profile</th>
+                    <th>Email Control</th>
+                    <th>Access Level</th>
+                    <th>Terminal State</th>
+                    <th style="text-align: right; padding-right: 30px;">Operations</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Count > 0)
+                {
+                    foreach (var u in Model)
+                    {
+                        <tr>
+                            <td style="padding-left: 30px;">
+                                <div class="user-badge">
+                                    <div style="width: 42px; height: 42px; border-radius: 12px; background: #EEF2FF; color: #6366f1; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem;">@(string.IsNullOrEmpty(u?.AdminName) ? "U" : u.AdminName.Substring(0,1).ToUpper())</div>
+                                    <div class="user-meta">
+                                        <h4>@(u?.AdminName ?? "Anonymous User")</h4>
+                                        <p>UID: #SA-@u?.CompanyId</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="font-weight: 600; color: var(--sa-text-main);">@(u?.AdminEmail ?? "—")</td>
+                            <td>
+                                @{
+                                    var isSuper = string.Equals(u?.Role, "Superadmin", StringComparison.OrdinalIgnoreCase);
+                                    var roleClass = isSuper ? "role-super" : "role-staff";
+                                    var isMaster = string.Equals(u?.AdminEmail, "anjali@gmail.com", StringComparison.OrdinalIgnoreCase);
+                                }
+                                <span class="badge-executive @roleClass">@(isSuper ? "Super Admin" : "Receptionist")</span>
+                            </td>
+                            <td>
+                                <span class="badge-executive @(u?.IsActive == true ? "status-active" : "status-inactive")">
+                                    @(u?.IsActive == true ? "Permitted" : "Revoked")
+                                </span>
+                            </td>
+                            <td style="padding-right: 30px;">
+                                <div class="action-cell">
+                                    <button class="tool-btn" title="View" onclick='openUserViewModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(u)))'><i class="fas fa-eye"></i></button>
+                                    <button class="tool-btn" title="Edit" onclick='openUserEditModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(u)))'><i class="fas fa-pen"></i></button>
+                                    @if (!isMaster)
+                                    {
+                                        <button class="tool-btn danger" title="Delete" onclick="openUserDeleteModal(@(u?.CompanyId ?? 0), '@(u?.AdminName ?? "")')"><i class="fas fa-trash-alt"></i></button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- SYSTEMATIC PAGINATION -->
+    @if (ViewBag.Pagination != null)
+    {
+        var pg = (VMSProject.Models.PaginationViewModel)ViewBag.Pagination;
+        <div class="sa-table-footer">
+            <div class="sa-pg-info">
+                Displaying <b>@(((pg.CurrentPage - 1) * pg.PageSize) + 1)</b> - <b>@(Math.Min(pg.CurrentPage * pg.PageSize, pg.TotalItems))</b> of <b>@pg.TotalItems</b> users
+            </div>
+            <div class="sa-pg-controls">
+                <div class="sa-pg-jump">
+                    Jump to: <input type="number" class="sa-pg-input" value="@pg.CurrentPage" min="1" max="@pg.TotalPages" onkeydown="if(event.key==='Enter'){ window.location.search = '?search=@ViewBag.Search&role=@ViewBag.SelectedRole&status=@ViewBag.SelectedStatus&page='+this.value; }">
+                </div>
+                <div class="sa-pagination">
+                    @if (pg.HasPreviousPage)
+                    {
+                        <a href="?search=@ViewBag.Search&role=@ViewBag.SelectedRole&status=@ViewBag.SelectedStatus&page=@(pg.CurrentPage-1)" class="sa-pg-btn"><i class="fas fa-chevron-left"></i></a>
+                    }
+                    @for (int i = Math.Max(1, pg.CurrentPage - 2); i <= Math.Min(pg.TotalPages, pg.CurrentPage + 2); i++)
+                    {
+                        <a href="?search=@ViewBag.Search&role=@ViewBag.SelectedRole&status=@ViewBag.SelectedStatus&page=@i" class="sa-pg-btn @(i == pg.CurrentPage ? "active" : "")">@i</a>
+                    }
+                    @if (pg.HasNextPage)
+                    {
+                        <a href="?search=@ViewBag.Search&role=@ViewBag.SelectedRole&status=@ViewBag.SelectedStatus&page=@(pg.CurrentPage+1)" class="sa-pg-btn"><i class="fas fa-chevron-right"></i></a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- MODALS Handled in layout and JS -->
+
+@section Scripts {
+    <script src="~/js/SuperAdmin/UserManagement.js"></script>
+}

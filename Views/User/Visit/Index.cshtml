@@ -1,0 +1,81 @@
+@model List<VMSProject.Models.Visit>
+@{
+    Layout = "~/Views/User/Layout/_UserLayout.cshtml";
+    ViewData["Title"] = "Visit Logs";
+
+    var tableModel = new VMSProject.Models.UserTableViewModel
+    {
+        Title = "Visit Logs",
+        Icon = "fas fa-calendar-check",
+        Headers = new List<string> { "#", "Visitor", "Host Person", "Check In / Out", "Duration", "Status", "Actions" },
+        SearchPlaceholder = "Search by visitor name or mobile...",
+        Pagination = (VMSProject.Models.PaginationViewModel)ViewBag.Pagination
+    };
+}
+
+<div class="stat-card-row">
+    <div class="user-stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Total Logs</span>
+            <span class="stat-value">@ViewBag.TotalVisits</span>
+        </div>
+        <div class="stat-icon" style="background: #3B82F6;"><i class="fas fa-database"></i></div>
+    </div>
+    <div class="user-stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Active Now</span>
+            <span class="stat-value">@ViewBag.ActiveVisits</span>
+        </div>
+        <div class="stat-icon" style="background: #10B981;"><i class="fas fa-walking"></i></div>
+    </div>
+    <div class="user-stat-card">
+        <div class="stat-info">
+            <span class="stat-label">Expected Today</span>
+            <span class="stat-value">@ViewBag.PendingVisits</span>
+        </div>
+        <div class="stat-icon" style="background: #F59E0B;"><i class="fas fa-clock"></i></div>
+    </div>
+</div>
+
+<!-- Standardized Filter Section -->
+<form method="get" action="/Visit/Index" class="filter-section">
+    <div class="filter-grid">
+        <div class="filter-group">
+            <label>Search Identity</label>
+            <input type="text" name="search" value="@ViewBag.Search" class="filter-control" placeholder="Visitor name or phone...">
+        </div>
+        <div class="filter-group">
+            <label>Status</label>
+            <select name="status" class="filter-control">
+                <option value="">All Statuses</option>
+                <option value="Pending" selected="@(ViewBag.StatusFilter == "Pending")">Pending</option>
+                <option value="Active" selected="@(ViewBag.StatusFilter == "Active")">Checked In</option>
+                <option value="CheckedOut" selected="@(ViewBag.StatusFilter == "CheckedOut")">Completed</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>From Date</label>
+            <input type="date" name="dateFrom" value="@ViewBag.DateFrom" class="filter-control">
+        </div>
+        <div class="filter-group">
+            <label>To Date</label>
+            <input type="date" name="dateTo" value="@ViewBag.DateTo" class="filter-control">
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary fw-bold px-4 rounded-3 shadow-sm"><i class="fas fa-filter me-2"></i>Filter</button>
+            <a href="/Visit/Report" class="btn btn-outline-primary fw-bold px-4 rounded-3 shadow-sm"><i class="fas fa-chart-bar me-2"></i>Report</a>
+            <a href="/Visit/ExportCsv" class="btn btn-success fw-bold px-4 rounded-3 text-white shadow-sm"><i class="fas fa-file-csv me-2"></i>Export</a>
+        </div>
+    </div>
+</form>
+
+@{
+    var tableBody = await Html.PartialAsync("~/Views/User/Visit/_VisitTableBody.cshtml", Model);
+    tableModel.TableBody = tableBody;
+}
+
+@await Html.PartialAsync("~/Views/User/Components/_UserTable.cshtml", tableModel)
+
+@section Scripts {
+    <script src="~/js/Visit.js"></script>
+}

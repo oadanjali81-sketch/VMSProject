@@ -1,0 +1,240 @@
+@{
+    Layout = "UserLayout";
+    ViewData["Title"] = "QR Access Scanner";
+}
+
+<div class="row g-4">
+    <div class="col-xl-8">
+        <div class="table-section">
+            <div class="table-header-title d-flex align-items-center justify-content-between">
+                <span><i class="fas fa-camera me-2 text-primary"></i>Live Scanner Console</span>
+                <div class="d-flex gap-2">
+                    <button id="switchCameraBtn" class="btn btn-sm btn-light border" style="display:none;"><i class="fas fa-sync me-1"></i>Switch</button>
+                    <button id="manualEntryBtn" class="btn btn-sm btn-light border" onclick="toggleManualEntry()"><i class="fas fa-keyboard me-1"></i>Manual Entry</button>
+                </div>
+            </div>
+            <div class="p-4 bg-light bg-opacity-50">
+                <div class="scanner-video-wrap shadow-sm mx-auto" style="max-width: 100%; position: relative; background: #000; border-radius: 20px; overflow: hidden; min-height: 450px; display: flex; align-items: center; justify-content: center;">
+                    <video id="scannerVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+                    <canvas id="scannerCanvas" style="display:none;"></canvas>
+                    
+                    <div class="scanner-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                        <div class="scanner-frame" style="width: 280px; height: 280px; border: 2px solid rgba(255,255,255,0.3); border-radius: 24px; position: relative; transition: all 0.3s ease;">
+                            <div class="scanner-line" style="position: absolute; width: 100%; height: 2px; background: #3B82F6; box-shadow: 0 0 15px #3B82F6; top: 0; animation: scanline 2.5s linear infinite;"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="scannerStatus" style="position: absolute; bottom: 20px; background: rgba(0,0,0,0.75); color: #fff; padding: 8px 20px; border-radius: 30px; font-size: 0.8rem; backdrop-filter: blur(4px);">
+                        <i class="fas fa-circle-notch fa-spin me-2"></i>Initializing Scanner...
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button id="startScanBtn" class="btn btn-primary fw-800 px-5 py-3 rounded-pill shadow-lg" onclick="startScanner()">
+                        <i class="fas fa-play me-2"></i>START SCANNING
+                    </button>
+                    <button id="stopScanBtn" class="btn btn-danger fw-800 px-5 py-3 rounded-pill shadow-lg" onclick="stopScanner()" style="display:none;">
+                        <i class="fas fa-stop me-2"></i>STOP SCANNER
+                    </button>
+                </div>
+
+                <!-- Manual Entry Section -->
+                <div id="manualEntryCard" class="mt-4 animate__animated animate__fadeInUp" style="display:none;">
+                    <div class="input-group shadow-sm" style="max-width: 500px; margin: 0 auto;">
+                        <span class="input-group-text bg-white border-end-0 rounded-start-pill ps-4"><i class="fas fa-id-card text-muted"></i></span>
+                        <input type="text" id="manualPassInput" class="form-control border-start-0 py-3 ps-0" placeholder="Enter Pass ID manually...">
+                        <button onclick="processManualEntry()" class="btn btn-dark fw-800 px-4 rounded-end-pill">VALIDATE</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results and Activity -->
+    <div class="col-xl-4">
+        <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden" id="resultCard" style="display:none;">
+            <div class="card-header bg-primary text-white py-3 text-center border-0" id="resultHeader">
+                <h6 class="fw-800 mb-0" id="resultTitle">Scan Result</h6>
+            </div>
+            <div class="card-body p-4" id="resultContent">
+                <!-- Dynamic Content -->
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
+                <h6 class="fw-800 mb-0 text-dark"><i class="fas fa-history me-2 text-primary"></i>Recent Scans</h6>
+                <button class="btn btn-sm btn-link text-muted text-decoration-none fw-bold" onclick="clearActivity()">Clear</button>
+            </div>
+            <div class="card-body p-0">
+                <div id="activityList" class="activity-feed">
+                    <div class="text-center py-5 text-muted activity-empty">
+                        <i class="fas fa-inbox fa-2x mb-2 opacity-25"></i>
+                        <p class="small mb-0">No scans in this session</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @@keyframes scanline { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
+    
+    .activity-feed { max-height: 500px; overflow-y: auto; }
+    .activity-item { padding: 15px 20px; border-bottom: 1px solid #f1f5f9; transition: background 0.2s; }
+    .activity-item:hover { background: #f8fafc; }
+    .activity-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .activity-name { font-weight: 700; color: #1e293b; }
+    .activity-time { font-size: 0.75rem; color: #94a3b8; }
+    .activity-details { font-size: 0.8rem; color: #64748b; display: flex; flex-direction: column; gap: 2px; }
+    .activity-pass { font-family: monospace; font-weight: 700; color: #3b82f6; margin-top: 4px; }
+    
+    .result-info { display: flex; flex-direction: column; gap: 12px; }
+    .result-field { display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; }
+    .result-label { font-size: 0.75rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; }
+    .result-value { font-weight: 700; color: #1e293b; }
+</style>
+
+@section Scripts {
+    <script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js"></script>
+    <script>
+        let videoStream = null;
+        let scanningActive = false;
+        let scanInterval = null;
+        let lastScannedCode = null;
+        let lastScanTime = 0;
+        const SCAN_COOLDOWN = 2000;
+
+        function toggleManualEntry() {
+            const card = document.getElementById('manualEntryCard');
+            card.style.display = card.style.display === 'none' ? 'block' : 'none';
+            if (card.style.display === 'block') document.getElementById('manualPassInput').focus();
+        }
+
+        async function startScanner() {
+            const video = document.getElementById('scannerVideo');
+            const status = document.getElementById('scannerStatus');
+            const startBtn = document.getElementById('startScanBtn');
+            const stopBtn = document.getElementById('stopScanBtn');
+
+            try {
+                status.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Accessing Camera...';
+                videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                video.srcObject = videoStream;
+                await video.play();
+                
+                status.style.display = 'none';
+                scanningActive = true;
+                startBtn.style.display = 'none';
+                stopBtn.style.display = 'inline-block';
+                
+                scanInterval = setInterval(scanQRCode, 200);
+            } catch (err) {
+                console.error("Scanner Error:", err);
+                status.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Camera Access Denied';
+                alert("Please allow camera access to use the scanner.");
+            }
+        }
+
+        function stopScanner() {
+            scanningActive = false;
+            if (scanInterval) clearInterval(scanInterval);
+            if (videoStream) videoStream.getTracks().forEach(t => t.stop());
+            
+            document.getElementById('scannerVideo').srcObject = null;
+            document.getElementById('scannerStatus').style.display = 'block';
+            document.getElementById('scannerStatus').innerHTML = 'Scanner Ready';
+            document.getElementById('startScanBtn').style.display = 'inline-block';
+            document.getElementById('stopScanBtn').style.display = 'none';
+        }
+
+        function scanQRCode() {
+            if (!scanningActive) return;
+            const video = document.getElementById('scannerVideo');
+            const canvas = document.getElementById('scannerCanvas');
+            const ctx = canvas.getContext('2d');
+
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvas.height = video.videoHeight;
+                canvas.width = video.videoWidth;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
+
+                if (code) {
+                    const now = Date.now();
+                    if (code.data !== lastScannedCode || (now - lastScanTime) > SCAN_COOLDOWN) {
+                        lastScannedCode = code.data;
+                        lastScanTime = now;
+                        processPass(code.data);
+                    }
+                }
+            }
+        }
+
+        function processPass(passNumber) {
+            fetch('/User/ProcessQR', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'code=' + encodeURIComponent(passNumber)
+            })
+            .then(r => r.json())
+            .then(res => {
+                displayResult(res, passNumber);
+                if (res.success) addActivity(res.visitor, passNumber, res.message);
+            })
+            .catch(err => console.error("Process Error:", err));
+        }
+
+        function displayResult(res, pass) {
+            const card = document.getElementById('resultCard');
+            const header = document.getElementById('resultHeader');
+            const title = document.getElementById('resultTitle');
+            const content = document.getElementById('resultContent');
+
+            card.style.display = 'block';
+            header.className = res.success ? 'card-header bg-success text-white py-3 text-center border-0' : 'card-header bg-danger text-white py-3 text-center border-0';
+            title.innerHTML = res.success ? '<i class="fas fa-check-circle me-2"></i>SUCCESS' : '<i class="fas fa-times-circle me-2"></i>FAILED';
+
+            content.innerHTML = `
+                <div class="result-info">
+                    <div class="result-field"><span class="result-label">Pass ID</span><span class="result-value font-monospace">${pass}</span></div>
+                    <div class="result-field"><span class="result-label">Visitor</span><span class="result-value">${res.visitor || 'N/A'}</span></div>
+                    <div class="result-field"><span class="result-label">Message</span><span class="result-value">${res.message}</span></div>
+                </div>
+                <button class="btn btn-outline-secondary w-100 mt-4 rounded-pill fw-bold" onclick="document.getElementById('resultCard').style.display='none'">Dismiss</button>
+            `;
+        }
+
+        function addActivity(name, pass, msg) {
+            const list = document.getElementById('activityList');
+            const empty = list.querySelector('.activity-empty');
+            if (empty) empty.remove();
+
+            const item = document.createElement('div');
+            item.className = 'activity-item animate__animated animate__fadeIn';
+            item.innerHTML = `
+                <div class="activity-header">
+                    <span class="activity-name">${name || 'Unknown'}</span>
+                    <span class="activity-time">${new Date().toLocaleTimeString()}</span>
+                </div>
+                <div class="activity-details">
+                    <div>${msg}</div>
+                    <div class="activity-pass">${pass}</div>
+                </div>
+            `;
+            list.insertBefore(item, list.firstChild);
+        }
+
+        function clearActivity() {
+            document.getElementById('activityList').innerHTML = '<div class="text-center py-5 text-muted activity-empty"><i class="fas fa-inbox fa-2x mb-2 opacity-25"></i><p class="small mb-0">No scans in this session</p></div>';
+        }
+
+        function processManualEntry() {
+            const input = document.getElementById('manualPassInput');
+            if (input.value.trim()) processPass(input.value.trim());
+            input.value = '';
+        }
+    </script>
+}

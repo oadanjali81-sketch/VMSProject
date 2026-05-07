@@ -1,0 +1,240 @@
+@model List<VMSProject.Models.VisitorListViewModel>
+@{
+    Layout = "_SuperAdminLayout";
+    ViewData["Title"] = "Visitor Management";
+}
+
+@section Styles {
+    <style>
+        /* Admin Filter Styles - Systematic Unity */
+        .sa-filter-plexus {
+            background: var(--sa-white);
+            border: 1px solid var(--sa-border);
+            border-radius: 20px;
+            padding: 25px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 120px;
+            gap: 20px;
+            margin-bottom: 30px;
+            align-items: end;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .sa-filter-group { display: flex; flex-direction: column; gap: 8px; }
+        .sa-filter-label { font-size: 0.7rem; font-weight: 800; color: var(--sa-primary); text-transform: uppercase; letter-spacing: 1px; }
+        .sa-filter-input { 
+            background: #f8fafc; 
+            border: 1px solid var(--sa-border); 
+            border-radius: 12px; 
+            padding: 12px 15px; 
+            font-size: 0.85rem; 
+            outline: none;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        .sa-filter-input:focus { border-color: var(--sa-primary); background: white; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+
+        .sa-btn-plexus {
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            height: 46px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem;
+        }
+        .sa-btn-plexus:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(99, 102, 241, 0.25);
+            background: #4f46e5;
+        }
+
+        /* Unified Badges */
+        .sa-badge-nexus { font-size: 0.65rem; font-weight: 800; padding: 5px 12px; border-radius: 50px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .sa-badge-inside { background: rgba(16, 185, 129, 0.1); color: #10B981; }
+        .sa-badge-out { background: rgba(100, 116, 139, 0.1); color: #64748B; }
+        .sa-badge-pending { background: rgba(59, 130, 246, 0.1); color: #3B82F6; }
+
+        /* Icon Buttons */
+        .sa-action-flex { display: flex; gap: 8px; justify-content: flex-end; }
+        .sa-icon-btn { 
+            width: 34px; 
+            height: 34px; 
+            border-radius: 10px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border: 1px solid var(--sa-primary); 
+            background: white; 
+            color: var(--sa-primary); 
+            cursor: pointer; 
+            transition: all 0.25s; 
+            font-size: 0.85rem; 
+        }
+        .sa-icon-btn:hover { 
+            background: var(--sa-primary); 
+            color: #fff; 
+        }
+        
+        .sa-icon-btn.danger {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        .sa-icon-btn.danger:hover { 
+            background: #ef4444; 
+            color: #fff; 
+        }
+
+        /* Detail Modal Styles */
+        .sa-detail-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .sa-detail-table td { padding: 12px 0; border-bottom: 1px solid var(--sa-border); vertical-align: middle; }
+        .sa-detail-label { font-size: 0.7rem; font-weight: 800; color: var(--sa-text-muted); text-transform: uppercase; width: 35%; }
+        .sa-detail-val { font-size: 0.9rem; font-weight: 700; color: var(--sa-text-main); text-align: right; }
+
+        @@media (max-width: 1200px) {
+            .sa-filter-plexus { grid-template-columns: 1fr; }
+        }
+    </style>
+}
+
+<!-- FILTERS -->
+<form method="get" action="/SuperAdmin/VisitorManagement">
+    <div class="sa-filter-plexus">
+        <div class="sa-filter-group">
+            <label class="sa-filter-label">Search Repository</label>
+            <input type="text" name="search" value="@ViewBag.Search" placeholder="Identity, Mobile or Group..." class="sa-filter-input">
+        </div>
+        <div class="sa-filter-group">
+            <label class="sa-filter-label">Access Status</label>
+            <select name="status" class="sa-filter-input">
+                <option value="">All Streams</option>
+                <option value="Active" selected="@(ViewBag.Status == "Active")">Inside</option>
+                <option value="Checked Out" selected="@(ViewBag.Status == "Checked Out")">Checked-Out</option>
+                <option value="Registered" selected="@(ViewBag.Status == "Registered")">Pending Access</option>
+            </select>
+        </div>
+        <div class="sa-filter-group">
+            <label class="sa-filter-label">Timeline Date</label>
+            <input type="date" name="date" value="@ViewBag.Date" class="sa-filter-input">
+        </div>
+        <div class="sa-filter-group">
+            <button type="submit" class="sa-btn-plexus">
+                <i class="fas fa-search-plus"></i> Execute
+            </button>
+        </div>
+    </div>
+</form>
+
+<!-- TABLE -->
+<div class="sa-table-container">
+    <div class="sa-table-header" style="background: #1e293b; color: white; display: flex; justify-content: space-between; align-items: center; padding: 22px 30px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <i class="fas fa-users-viewfinder" style="font-size: 1.3rem; color: #60a5fa;"></i>
+            <span style="font-weight: 700; letter-spacing: 1px; font-size: 1rem;">MASTER VISITOR DIRECTORY</span>
+        </div>
+        <form method="post" action="/SuperAdmin/ExportVisitors" style="margin: 0;">
+            <button type="submit" class="sa-btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 0.75rem; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: 700;">
+                <i class="fas fa-file-csv" style="margin-right: 8px;"></i> Export Cloud
+            </button>
+        </form>
+    </div>
+    
+    <div style="overflow-x: auto;">
+        <table class="sa-table" id="saVisitorTable">
+            <thead>
+                <tr style="background: #f1f5f9;">
+                    <th style="padding-left: 30px; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; color: #475569; font-weight: 800;">Visitor Profile</th>
+                    <th style="text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; color: #475569; font-weight: 800;">Mobile</th>
+                    <th style="text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; color: #475569; font-weight: 800;">Assigned Host</th>
+                    <th style="text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; color: #475569; font-weight: 800;">Check-In</th>
+                    <th style="text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; color: #475569; font-weight: 800;">Check-Out</th>
+                    <th style="text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; color: #475569; font-weight: 800;">Status</th>
+                    <th style="text-align: right; padding-right: 30px; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; color: #475569; font-weight: 800;">Operations</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Count > 0)
+                {
+                    foreach (var v in Model)
+                    {
+                        <tr>
+                            <td style="padding-left: 30px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div class="sa-avatar" style="width: 34px; height: 34px; font-size: 0.8rem; font-weight: 800;">@(string.IsNullOrEmpty(v?.Name) ? "?" : v.Name.Substring(0,1).ToUpper())</div>
+                                    <div>
+                                        <div style="font-weight: 700; color: var(--sa-text-main);">@(v?.Name ?? "N/A")</div>
+                                        <div style="font-size: 0.75rem; color: var(--sa-text-muted);">@(v?.CompanyName ?? "Guest")</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="font-weight: 600; font-size: 0.85rem;">@(v?.Phone ?? "—")</td>
+                            <td>
+                                <div style="font-weight: 700; color: var(--sa-primary);">@(v?.HostName ?? "—")</div>
+                                <div style="font-size: 0.7rem; color: var(--sa-text-muted); text-transform: uppercase;">@(v?.Department ?? "N/A") • @(v?.HostCompany ?? "N/A")</div>
+                            </td>
+                            <td style="font-weight: 700; font-size: 0.8rem;">@(v?.CheckInTime?.ToString("hh:mm tt") ?? "---")</td>
+                            <td style="font-weight: 700; font-size: 0.8rem;">@(v?.CheckOutTime?.ToString("hh:mm tt") ?? "---")</td>
+                            <td>
+                                @{
+                                    var visitorStatus = v?.Status;
+                                    var statusVal = visitorStatus == "Active" ? "Inside" : (visitorStatus == "Registered" ? "Pending" : visitorStatus);
+                                    var badgeClass = statusVal switch {
+                                        "Inside" => "sa-badge-inside",
+                                        "Checked Out" => "sa-badge-out",
+                                        _ => "sa-badge-pending"
+                                    };
+                                }
+                                <span class="sa-badge-nexus @badgeClass">@statusVal</span>
+                            </td>
+                            <td style="padding-right: 30px;">
+                                <div class="sa-action-flex">
+                                    <button class="sa-icon-btn" title="View" onclick='openSAViewModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(v)))'><i class="fas fa-eye"></i></button>
+                                    <button class="sa-icon-btn" title="Edit" onclick='openSAEditModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(v)))'><i class="fas fa-pen"></i></button>
+                                    <button class="sa-icon-btn danger" title="Delete" onclick="openSADeleteConfirm(@(v?.VisitorId ?? 0), '@(v?.Name ?? "Visitor")')"><i class="fas fa-trash-alt"></i></button>
+                                    <button class="sa-icon-btn" title="QR" onclick="openSAQRModal(@(v?.VisitorId ?? 0), '@(v?.Name ?? "Visitor")', '@(v?.QRCode ?? "")')"><i class="fas fa-qrcode"></i></button>
+                                    <button class="sa-icon-btn" title="Logs" onclick="openSALogsModal(@(v?.VisitorId ?? 0), '@(v?.Name ?? "Visitor")')"><i class="fas fa-clock-rotate-left"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- SYSTEMATIC PAGINATION -->
+    @if (ViewBag.Pagination != null)
+    {
+        var pg = (VMSProject.Models.PaginationViewModel)ViewBag.Pagination;
+        <div class="sa-table-footer">
+            <div class="sa-pg-info">
+                Displaying <b>@(((pg.CurrentPage - 1) * pg.PageSize) + 1)</b> - <b>@(Math.Min(pg.CurrentPage * pg.PageSize, pg.TotalItems))</b> of <b>@pg.TotalItems</b> entries
+            </div>
+            <div class="sa-pg-controls">
+                <div class="sa-pg-jump">
+                    Jump to: <input type="number" class="sa-pg-input" value="@pg.CurrentPage" min="1" max="@pg.TotalPages" onkeydown="if(event.key==='Enter'){ window.location.search = '?search=@ViewBag.Search&status=@ViewBag.Status&date=@ViewBag.Date&page='+this.value; }">
+                </div>
+                <div class="sa-pagination">
+                    @if (pg.HasPreviousPage)
+                    {
+                        <a href="?search=@ViewBag.Search&status=@ViewBag.Status&date=@ViewBag.Date&page=@(pg.CurrentPage-1)" class="sa-pg-btn"><i class="fas fa-chevron-left"></i></a>
+                    }
+                    @for (int i = Math.Max(1, pg.CurrentPage - 2); i <= Math.Min(pg.TotalPages, pg.CurrentPage + 2); i++)
+                    {
+                        <a href="?search=@ViewBag.Search&status=@ViewBag.Status&date=@ViewBag.Date&page=@i" class="sa-pg-btn @(i == pg.CurrentPage ? "active" : "")">@i</a>
+                    }
+                    @if (pg.HasNextPage)
+                    {
+                        <a href="?search=@ViewBag.Search&status=@ViewBag.Status&date=@ViewBag.Date&page=@(pg.CurrentPage+1)" class="sa-pg-btn"><i class="fas fa-chevron-right"></i></a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/js/SuperAdmin/VisitorManagement.js"></script>
+}

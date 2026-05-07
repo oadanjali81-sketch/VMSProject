@@ -1,0 +1,226 @@
+@{
+    Layout = "_LandingLayout";
+    ViewData["Title"] = "Contact Us | VISION VMS";
+}
+
+@section Styles {
+    <style>
+        .contact-section {
+            padding: 180px 40px 100px;
+            min-height: 100vh;
+            background: #F8FAFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .contact-container {
+            max-width: 1200px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 60px;
+            background: white;
+            padding: 60px;
+            border-radius: 40px;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.05);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+        .contact-info h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #3730A3, #6366F1);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .contact-info p {
+            font-size: 1.1rem;
+            color: #64748B;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .contact-icon {
+            width: 50px;
+            height: 50px;
+            background: #EFF6FF;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--vision-primary);
+            font-size: 1.2rem;
+        }
+        .contact-details h4 {
+            font-size: 1rem;
+            color: #1E293B;
+            margin-bottom: 4px;
+        }
+        .contact-details p {
+            font-size: 0.95rem;
+            color: #475569;
+            margin: 0;
+        }
+        .contact-form {
+            display: grid;
+            gap: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .form-group label {
+            font-weight: 600;
+            color: var(--dark-blue);
+            font-size: 0.9rem;
+        }
+        .form-group input, .form-group textarea {
+            padding: 16px 20px;
+            border-radius: 16px;
+            border: 1px solid #E2E8F0;
+            background: #F8FAFF;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--vision-primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+        .btn-submit {
+            background: var(--vision-gradient);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        @@media (max-width: 968px) {
+            .contact-container {
+                grid-template-columns: 1fr;
+                padding: 40px;
+            }
+            .contact-section {
+                padding: 140px 20px 60px;
+            }
+        }
+    </style>
+}
+
+<section class="contact-section">
+    <div class="contact-container">
+        <div class="contact-info">
+            <h1>Get in Touch</h1>
+            <p>Have questions about VISION VMS? Our team is here to help you transform your visitor management experience.</p>
+            
+            <div class="contact-item">
+                <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                <div class="contact-details">
+                    <h4>Email Us</h4>
+                    <p>support@visionvms.com</p>
+                </div>
+            </div>
+            
+            <div class="contact-item">
+                <div class="contact-icon"><i class="fas fa-phone-alt"></i></div>
+                <div class="contact-details">
+                    <h4>Call Us</h4>
+                    <p>+91 98765 43210</p>
+                </div>
+            </div>
+            
+            <div class="contact-item">
+                <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <div class="contact-details">
+                    <h4>Visit Us</h4>
+                    <p>Tech Hub, Sector 62, Noida, UP, India</p>
+                </div>
+            </div>
+        </div>
+        
+        <form class="contact-form" id="contactForm">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="name" placeholder="John Doe" required>
+            </div>
+            <div class="form-group">
+                <label>Work Email</label>
+                <input type="email" name="email" placeholder="john@company.com" required>
+            </div>
+            <div class="form-group">
+                <label>Subject</label>
+                <input type="text" name="subject" placeholder="Inquiry about Enterprise Plan" required>
+            </div>
+            <div class="form-group">
+                <label>Message</label>
+                <textarea name="message" rows="5" placeholder="How can we help you?" required></textarea>
+            </div>
+            <button type="submit" class="btn-submit" id="submitBtn">Send Message</button>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script>
+        // Entrance Animation
+        document.addEventListener('DOMContentLoaded', () => {
+            gsap.from('.contact-info', { duration: 1, x: -50, opacity: 0, ease: 'power3.out' });
+            gsap.from('.contact-form', { duration: 1, x: 50, opacity: 0, ease: 'power3.out', delay: 0.2 });
+            gsap.from('.contact-item', { duration: 0.8, y: 20, opacity: 0, stagger: 0.2, delay: 0.5, ease: 'power2.out' });
+        });
+
+        // Form Submission
+        const contactForm = document.getElementById('contactForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (contactForm) {
+            contactForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Sending...';
+
+                const formData = new FormData(contactForm);
+                
+                try {
+                    const response = await fetch('/Home/SubmitContact', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        alert(result.message);
+                        contactForm.reset();
+                    } else {
+                        alert('Error: ' + result.message);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Something went wrong. Please try again later.');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'Send Message';
+                }
+            });
+        }
+    </script>
+}
+

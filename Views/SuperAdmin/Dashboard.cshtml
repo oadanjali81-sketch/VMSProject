@@ -1,0 +1,198 @@
+@{
+    Layout = "_SuperAdminLayout";
+    ViewData["Title"] = "Super Admin Dashboard";
+}
+
+<div id="spaStage"></div>
+
+@section Scripts {
+    <script>
+        // ========== REAL VMS DATA BINDING ==========
+        let dashboardData = {
+            totalCompanies: @(ViewBag.TotalCompanies ?? 0),
+            activeCompanies: @(ViewBag.ActiveCompanies ?? 0),
+            totalVisitors: @(ViewBag.TotalVisitors ?? 0),
+            visitsToday: @(ViewBag.VisitsToday ?? 0),
+            activeInside: @(ViewBag.ActiveInside ?? 0),
+            checkedOutToday: @(ViewBag.CheckedOutToday ?? 0),
+            totalEmployees: @(ViewBag.TotalEmployees ?? 0),
+            totalDepartments: @(ViewBag.TotalDepartments ?? 0),
+            recentCompanies: @Html.Raw(ViewBag.RecentCompaniesJson ?? "[]"),
+            recentActivity: @Html.Raw(ViewBag.RecentActivityJson ?? "[]"),
+            chartLabels: @Html.Raw(ViewBag.ChartLabels ?? "[]"),
+            checkInData: @Html.Raw(ViewBag.CheckInData ?? "[]"),
+            growthLabels: @Html.Raw(ViewBag.GrowthLabels ?? "[]"),
+            growthData: @Html.Raw(ViewBag.GrowthData ?? "[]"),
+            activePie: @(ViewBag.ActivePieCount ?? 0),
+            inactivePie: @(ViewBag.InactivePieCount ?? 0)
+        };
+
+        let companiesData = [
+            { id: 1, name: "Unified Mentor", email: "contact@unifiedmentor.com", phone: "+91 85749 91245", plan: "Enterprise", employees: 145, status: "Active", expiryDate: "2026-05-15" },
+            { id: 2, name: "Infotech Solutions", email: "admin@infotech.com", phone: "+91 78945 61230", plan: "Professional", employees: 89, status: "Active", expiryDate: "2026-04-30" }
+        ];
+
+        let pendingRequests = [
+            { id: 1, name: "Creative Agency", email: "info@creative.com", phone: "+91 87654 32109", requestDate: "2026-04-16", plan: "Professional" }
+        ];
+
+        let demoRequests = [
+            { id: 1, name: "Rahul Mehta", company: "Tech Corp", email: "rahul@techcorp.com", phone: "+91 98765 12345", date: "2026-04-16", status: "Pending" }
+        ];
+
+        let contactMessages = [
+            { id: 1, name: "Amit Sharma", email: "amit@example.com", message: "Interested in your VMS solution", date: "2026-04-15", status: "Unread" }
+        ];
+
+        let systemLogs = [
+            { time: "2026-04-21 09:23:12", user: "admin@vision.com", action: "Login", ip: "192.168.1.1", status: "Success" }
+        ];
+
+        let errorLogs = [
+            { time: "2026-04-21 07:30:15", error: "Database Connection Timeout", source: "API Gateway", severity: "High" }
+        ];
+
+        let systemUsageLogs = [
+            { date: "2026-04-21", totalVisitors: 342, activeVisits: 28, checkIns: 156, checkOuts: 148, devicesActive: 12 }
+        ];
+
+        // ========== RENDER FUNCTIONS (EXACT AS GIVEN) ==========
+        function renderDashboard() {
+            document.getElementById('spaStage').innerHTML = `
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3"><div class="stat-card"><div><p style="color: #3B82F6;">TOTAL COMPANIES</p><h3 class="fw-bold mb-0">${dashboardData.totalCompanies}</h3></div><div class="text-end"><i class="fas fa-building fa-2x" style="color: #3B82F6; opacity: 0.4;"></i></div></div></div>
+                    <div class="col-md-3"><div class="stat-card"><div><p style="color: #10B981;">ACTIVE COMPANIES</p><h3 class="fw-bold mb-0">${dashboardData.activeCompanies}</h3></div><div class="text-end"><i class="fas fa-check-circle fa-2x" style="color: #10B981; opacity: 0.4;"></i></div></div></div>
+                    <div class="col-md-3"><div class="stat-card"><div><p style="color: #F59E0B;">TOTAL VISITORS</p><h3 class="fw-bold mb-0">${dashboardData.totalVisitors}</h3></div><div class="text-end"><i class="fas fa-users fa-2x" style="color: #F59E0B; opacity: 0.4;"></i></div></div></div>
+                    <div class="col-md-3"><div class="stat-card"><div><p style="color: #EF4444;">VISITS TODAY</p><h3 class="fw-bold mb-0">${dashboardData.visitsToday}</h3></div><div class="text-end"><i class="fas fa-calendar-day fa-2x" style="color: #EF4444; opacity: 0.4;"></i></div></div></div>
+                </div>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3"><div class="stat-card"><div><p style="color: #06B6D4;">ACTIVE INSIDE</p><h3 class="fw-bold mb-0">${dashboardData.activeInside}</h3></div><div class="text-end"><i class="fas fa-door-open fa-2x" style="color: #06B6D4; opacity: 0.4;"></i></div></div></div>
+                    <div class="col-md-3"><div class="stat-card"><div><p style="color: #6366F1;">CHECKED OUT TODAY</p><h3 class="fw-bold mb-0">${dashboardData.checkedOutToday}</h3></div><div class="text-end"><i class="fas fa-sign-out-alt fa-2x" style="color: #6366F1; opacity: 0.4;"></i></div></div></div>
+                    <div class="col-md-3"><div class="stat-card"><div><p style="color: #10B981;">TOTAL EMPLOYEES</p><h3 class="fw-bold mb-0">${dashboardData.totalEmployees}</h3></div><div class="text-end"><i class="fas fa-user-tie fa-2x" style="color: #10B981; opacity: 0.4;"></i></div></div></div>
+                    <div class="col-md-3"><div class="stat-card"><div><p style="color: #8B5CF6;">TOTAL DEPARTMENTS</p><h3 class="fw-bold mb-0">${dashboardData.totalDepartments}</h3></div><div class="text-end"><i class="fas fa-sitemap fa-2x" style="color: #8B5CF6; opacity: 0.4;"></i></div></div></div>
+                </div>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4"><div class="section-card"><div class="d-flex justify-content-between mb-3"><h5 class="fw-bold mb-0" style="color: #3B82F6; font-size: 1rem;"><i class="fas fa-chart-area me-2"></i>Visitor Traffic (7 Days)</h5></div><canvas id="revenueChart" height="220"></canvas></div></div>
+                    <div class="col-md-4"><div class="section-card"><div class="d-flex justify-content-between mb-3"><h5 class="fw-bold mb-0" style="color: #10B981; font-size: 1rem;"><i class="fas fa-map-marker-alt me-2"></i>Companies by Region</h5></div><canvas id="growthChart" height="220"></canvas></div></div>
+                    <div class="col-md-4"><div class="section-card"><div class="d-flex justify-content-between mb-3"><h5 class="fw-bold mb-0" style="color: #8B5CF6; font-size: 1rem;"><i class="fas fa-chart-pie me-2"></i>Company Status</h5></div><div style="display: flex; justify-content: center; align-items: center; height: 220px;"><canvas id="statusPieChart"></canvas></div></div></div>
+                </div>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="section-card" style="height: 100%;">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-bold mb-0" style="color: #3B82F6; font-size: 1rem;"><i class="fas fa-building me-2"></i>Recent Companies</h5>
+                                <a href="/SuperAdmin/AllUsers" class="btn btn-sm btn-primary" style="font-size: 0.75rem; border-radius: 6px; padding: 5px 12px; color: white; text-decoration: none; display: inline-block;">View All</a>
+                            </div>
+                            <div class="table-responsive text-nowrap">
+                                <table class="table table-hover">
+                                    <thead style="background: #f8fafc;"><tr style="border-bottom: 2px solid #e2e8f0;"><th style="color: #475569; font-weight: 700;">Company</th><th style="color: #475569; font-weight: 700;">Plan</th><th style="color: #475569; font-weight: 700;">Employees</th><th style="color: #475569; font-weight: 700;">Status</th></tr></thead>
+                                    <tbody>${dashboardData.recentCompanies.map(c => `<tr><td><a href="/SuperAdmin/UserDetail/${c.id}" style="text-decoration: underline; color: #3B82F6; font-weight: 600;">${c.name}</a></td><td style="color: #475569; font-weight: 600;">${c.role}</td><td style="color: #475569; font-weight: 600;">--</td><td><span class="badge ${c.status === 'Active' ? 'badge-success' : 'badge-danger'}" style="padding: 6px 12px; border-radius: 6px;">${c.status}</span></td></tr>`).join('')}</tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="section-card" style="height: 100%;">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-bold mb-0" style="color: #F59E0B; font-size: 1rem;"><i class="fas fa-bell me-2"></i>Live System Activity</h5>
+                                <a href="/SuperAdmin/SystemUsage" class="btn btn-sm btn-warning text-white" style="font-size: 0.75rem; border-radius: 6px; padding: 5px 12px; background: #F59E0B; text-decoration: none; display: inline-block;">Live Stream</a>
+                            </div>
+                            <div class="d-flex flex-column gap-3">
+                                ${dashboardData.recentActivity.slice(0, 3).map(a => `
+                                    <div style="padding: 15px 20px; border: 1px solid #e2e8f0; border-radius: 12px; position: relative;">
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                            <div style="font-weight: 700; color: #1e293b; font-size: 0.9rem;">${a.user}</div>
+                                            <div style="font-size: 0.75rem; color: #94a3b8;">${a.date}</div>
+                                        </div>
+                                        <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 5px;"><i class="fas fa-tag me-2"></i>${a.ip}</div>
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <span style="background: ${a.status === 'Checked Out' ? '#6366F1' : '#10B981'}; color: white; font-size: 0.65rem; padding: 2px 8px; border-radius: 4px; font-weight: 800; text-transform: uppercase;">${a.status}</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            new Chart(document.getElementById('revenueChart'), { type: 'line', data: { labels: dashboardData.chartLabels, datasets: [{ label: 'Visits Check-ins', data: dashboardData.checkInData, borderColor: '#3B82F6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.1)' }] } });
+            new Chart(document.getElementById('growthChart'), { type: 'bar', data: { labels: dashboardData.growthLabels, datasets: [{ label: 'Total Companies', data: dashboardData.growthData, backgroundColor: '#10B981', borderRadius: 4 }] } });
+            new Chart(document.getElementById('statusPieChart'), { type: 'doughnut', data: { labels: ['Active Users', 'Inactive Users'], datasets: [{ data: [dashboardData.activePie, dashboardData.inactivePie], backgroundColor: ['#10B981', '#EF4444'], borderWidth: 0 }] }, options: { cutout: '70%', maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } } } } });
+        }
+
+        function renderCompanies() {
+            document.getElementById('spaStage').innerHTML = `<div class="section-card"><div class="d-flex justify-content-between align-items-center mb-4"><h4 class="fw-bold mb-0"><i class="fas fa-building me-2 text-primary"></i>All Companies</h4><button class="btn btn-primary btn-sm">+ Add Company</button></div><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Company</th><th>Email</th><th>Phone</th><th>Plan</th><th>Employees</th><th>Status</th></tr></thead><tbody>${companiesData.map(c => `<tr><td><b>${c.name}</b></td><td>${c.email}</td><td>${c.phone}</td><td>${c.plan}</td><td>${c.employees}</td><td><span class="badge ${c.status === 'Active' ? 'badge-success' : 'badge-warning'}">${c.status}</span></td></tr>`).join('')}</tbody></table></div></div>`;
+        }
+
+        function renderPending() {
+            document.getElementById('spaStage').innerHTML = `<div class="section-card"><h4 class="fw-bold mb-4"><i class="fas fa-clock me-2 text-primary"></i>Registration Requests</h4><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Company</th><th>Email</th><th>Phone</th><th>Date</th><th>Plan</th></tr></thead><tbody>${pendingRequests.map(r => `<tr><td><b>${r.name}</b></td><td>${r.email}</td><td>${r.phone}</td><td>${r.requestDate}</td><td>${r.plan}</td></tr>`).join('')}</tbody></table></div></div>`;
+        }
+
+        function renderReports() {
+            document.getElementById('spaStage').innerHTML = `<div class="section-card"><h4 class="fw-bold mb-4"><i class="fas fa-chart-bar me-2 text-primary"></i>System Reports</h4><canvas id="reportChart" height="150"></canvas></div>`;
+            new Chart(document.getElementById('reportChart'), { type: 'bar', data: { labels: ['Jan','Feb','Mar','Apr'], datasets: [{ label: 'Signups', data: [8,10,15,12], backgroundColor: '#3B82F6' }] } });
+        }
+
+        function renderUsage() {
+            document.getElementById('spaStage').innerHTML = `<div class="section-card"><h4 class="fw-bold mb-4"><i class="fas fa-chart-line me-2 text-primary"></i>System Usage</h4><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Date</th><th>Visitors</th><th>Check-Ins</th><th>Devices</th></tr></thead><tbody>${systemUsageLogs.map(l => `<tr><td>${l.date}</td><td>${l.totalVisitors}</td><td>${l.checkIns}</td><td>${l.devicesActive}</td></tr>`).join('')}</tbody></table></div></div>`;
+        }
+
+        function renderDemo() {
+            document.getElementById('spaStage').innerHTML = `<div class="section-card"><h4 class="fw-bold mb-4"><i class="fas fa-envelope-open-text me-2 text-primary"></i>Demo Requests</h4><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Name</th><th>Company</th><th>Email</th></tr></thead><tbody>${demoRequests.map(r => `<tr><td>${r.name}</td><td>${r.company}</td><td>${r.email}</td></tr>`).join('')}</tbody></table></div></div>`;
+        }
+
+        function renderMessages() {
+            document.getElementById('spaStage').innerHTML = `<div class="section-card"><h4 class="fw-bold mb-4"><i class="fas fa-comments me-2 text-primary"></i>Contact Messages</h4><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Name</th><th>Email</th><th>Message</th></tr></thead><tbody>${contactMessages.map(m => `<tr><td>${m.name}</td><td>${m.email}</td><td>${m.message}</td></tr>`).join('')}</tbody></table></div></div>`;
+        }
+
+        function renderLogs() {
+            document.getElementById('spaStage').innerHTML = `<div class="section-card"><h4 class="fw-bold mb-4"><i class="fas fa-file-alt me-2 text-primary"></i>System Activity Logs</h4><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Time</th><th>User</th><th>Action</th></tr></thead><tbody>${systemLogs.map(l => `<tr><td>${l.time}</td><td>${l.user}</td><td>${l.action}</td></tr>`).join('')}</tbody></table></div></div>`;
+        }
+
+        function renderErrors() {
+            document.getElementById('spaStage').innerHTML = `<div class="section-card"><h4 class="fw-bold mb-4"><i class="fas fa-exclamation-triangle me-2 text-primary"></i>System Errors</h4><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Time</th><th>Error</th><th>Severity</th></tr></thead><tbody>${errorLogs.map(e => `<tr><td>${e.time}</td><td>${e.error}</td><td><span class="badge badge-danger">${e.severity}</span></td></tr>`).join('')}</tbody></table></div></div>`;
+        }
+
+        // ========== NAVIGATION GIVEN IN SOURCE ==========
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            const activeNav = document.querySelector(`.nav-item[data-tab="${tab}"]`);
+            if (activeNav) activeNav.classList.add('active');
+            
+            const titles = { 
+                dashboard: { title: 'Dashboard', subtitle: 'Welcome back, Super Admin' },
+                pending: { title: 'Registration Requests', subtitle: 'Review and approve companies' },
+                companies: { title: 'All Companies', subtitle: 'Global registry' },
+                reports: { title: 'Reports & Analytics', subtitle: 'Performance metrics' },
+                usage: { title: 'System Usage', subtitle: 'Active stream monitoring' },
+                demo: { title: 'Demo Requests', subtitle: 'Sales leads' },
+                messages: { title: 'Contact Messages', subtitle: 'User inquiries' },
+                logs: { title: 'System Logs', subtitle: 'Audit trail' },
+                errors: { title: 'Error Logs', subtitle: 'Fault tracking' }
+            };
+            
+            document.getElementById('pageTitle').innerText = titles[tab]?.title || 'Dashboard';
+            document.getElementById('pageSubtitle').innerText = titles[tab]?.subtitle || 'Super Admin';
+            
+            if (tab === 'dashboard') renderDashboard();
+            else if (tab === 'companies') renderCompanies();
+            else if (tab === 'pending') renderPending();
+            else if (tab === 'reports') renderReports();
+            else if (tab === 'usage') renderUsage();
+            else if (tab === 'demo') renderDemo();
+            else if (tab === 'messages') renderMessages();
+            else if (tab === 'logs') renderLogs();
+            else if (tab === 'errors') renderErrors();
+        }
+
+        // Sidebar logic (Fixed for SPA behavior)
+        document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchTab(btn.getAttribute('data-tab'));
+            });
+        });
+
+        renderDashboard();
+    </script>
+}

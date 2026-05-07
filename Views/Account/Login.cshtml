@@ -1,0 +1,516 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "VISION VMS | Login — Secure Access";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>VISION VMS | Login — Secure Access</title>
+    <link rel="stylesheet" href="/css/Home/Landing.css">
+    <!-- Google Fonts + Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Swiper CSS for Carousel -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', 'Inter', sans-serif;
+            background: var(--vision-bg);
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            color: var(--vision-text);
+        }
+
+        /* Main Container */
+        .login-container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Left Side - Image Carousel Section */
+        .carousel-side {
+            flex: 1;
+            position: relative;
+            background: var(--vision-dark-gradient);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .carousel-side::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(30,58,138,0.7), rgba(59,130,246,0.5));
+            z-index: 1;
+        }
+        .swiper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 2;
+        }
+        .swiper-slide {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            padding: 40px;
+        }
+        .swiper-slide img {
+            width: 80%;
+            max-width: 400px;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            margin-bottom: 32px;
+            object-fit: cover;
+        }
+        .slide-content h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .slide-content p {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .swiper-pagination-bullet {
+            background: white;
+            opacity: 0.5;
+        }
+        .swiper-pagination-bullet-active {
+            background: white;
+            opacity: 1;
+        }
+        .swiper-button-next, .swiper-button-prev {
+            color: white;
+            background: rgba(255,255,255,0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            backdrop-filter: blur(4px);
+        }
+        .swiper-button-next:after, .swiper-button-prev:after {
+            font-size: 18px;
+        }
+
+        /* Right Side - Login Form */
+        .form-side {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--vision-bg);
+            padding: 20px;
+            height: 100vh;
+        }
+        .login-card {
+            max-width: 380px;
+            width: 100%;
+            padding: 30px;
+            background: var(--vision-card-bg);
+            border-radius: 32px;
+            box-shadow: var(--vision-shadow);
+            border: 1px solid var(--vision-border);
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .logo i {
+            font-size: 1.8rem;
+            background: var(--vision-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .logo span {
+            font-size: 1.35rem;
+            font-weight: 800;
+            background: var(--vision-dark-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .welcome-text h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--vision-text);
+        }
+        .welcome-text p {
+            color: var(--vision-text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+        .input-wrapper {
+            position: relative;
+        }
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94A3B8;
+            font-size: 1rem;
+        }
+        .input-field {
+            width: 100%;
+            padding: 14px 46px 14px 46px; /* Right padding for the eye icon */
+            border: 2px solid #E2E8F0;
+            border-radius: 28px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.2s;
+            outline: none;
+        }
+        .input-field:focus {
+            border-color: var(--vision-primary);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+        .options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+        }
+        .checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .checkbox input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .forgot-link {
+            color: var(--vision-primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+        .input-wrapper .toggle-password {
+            position: absolute;
+            right: 20px;
+            left: auto !important;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94A3B8;
+            cursor: pointer;
+            transition: color 0.3s, transform 0.2s;
+            z-index: 10;
+            font-size: 0.95rem;
+        }
+        .toggle-password:hover { color: var(--vision-primary); transform: translateY(-50%) scale(1.1); }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--vision-gradient);
+            border: none;
+            border-radius: 40px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 14px rgba(59,130,246,0.3);
+        }
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59,130,246,0.4);
+        }
+        .divider {
+            text-align: center;
+            margin: 15px 0;
+            position: relative;
+        }
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #E2E8F0;
+        }
+        .divider span {
+            background: white;
+            padding: 0 16px;
+            position: relative;
+            color: #94A3B8;
+            font-size: 0.85rem;
+        }
+        .social-login {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+        .social-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 1px solid #E2E8F0;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #475569;
+        }
+        .social-btn:hover {
+            border-color: var(--vision-primary);
+            color: var(--vision-primary);
+            transform: translateY(-2px);
+        }
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #64748B;
+        }
+        .register-link a {
+            color: var(--vision-primary);
+            text-decoration: none;
+            font-weight: 700;
+        }
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @@media (max-width: 968px) {
+            .login-container {
+                flex-direction: column;
+            }
+            .carousel-side {
+                min-height: 400px;
+            }
+            .swiper-slide img {
+                width: 60%;
+            }
+            .slide-content h2 {
+                font-size: 1.5rem;
+            }
+            .login-card {
+                padding: 32px 24px;
+            }
+        }
+        @@media (max-width: 480px) {
+            .options {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+
+
+
+<div class="login-container">
+    <!-- Left Side: Image Carousel -->
+    <div class="carousel-side">
+        <div class="swiper loginSwiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                    <img src="/images/login_illustration.png" alt="Welcome">
+                    <div class="slide-content">
+                        <h2>Welcome back</h2>
+                        <p>Modern visitor management solutions for your workspace.</p>
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <img src="/images/qr_illustration.png" alt="QR Access">
+                    <div class="slide-content">
+                        <h2>Contactless Check-in</h2>
+                        <p>Secure QR code based entry system</p>
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <img src="/images/analytics_illustration.png" alt="Analytics">
+                    <div class="slide-content">
+                        <h2>AI-Powered Analytics</h2>
+                        <p>Real-time visitor insights</p>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-pagination"></div>
+
+        </div>
+    </div>
+
+    <!-- Right Side: Login Form -->
+    <div class="form-side">
+        <div class="login-card">
+            <div class="logo">
+                <i class="fas fa-crown"></i>
+                <span>VISION VMS</span>
+            </div>
+            <div class="welcome-text">
+                <h1>Welcome back</h1>
+                <p>Login to access your dashboard</p>
+            </div>
+
+            @if (ViewBag.Error != null)
+            {
+                <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; padding: 12px 15px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-circle-exclamation"></i>
+                    @ViewBag.Error
+                </div>
+            }
+            
+            <form asp-action="Login" asp-controller="Account" method="post">
+                @Html.AntiForgeryToken()
+                
+                <div class="input-group">
+                    <label class="input-label">Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" name="AdminEmail" class="input-field" placeholder="admin@visionvms.com" required autofocus>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" name="Password" id="password" class="input-field" placeholder="••••••••" required>
+                        <i class="fas fa-eye-slash toggle-password" id="togglePassword"></i>
+                    </div>
+                </div>
+                
+                <div class="options">
+                    <label class="checkbox">
+                        <input type="checkbox" name="RememberMe"> Remember me
+                    </label>
+                    <a href="#" class="forgot-link">Forgot password?</a>
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-arrow-right-to-bracket"></i> Sign In
+                </button>
+            </form>
+            
+            <div class="divider">
+                <span>Or continue with</span>
+            </div>
+            
+            <div class="social-login">
+                <button class="social-btn"><i class="fab fa-google"></i></button>
+                <button class="social-btn"><i class="fab fa-microsoft"></i></button>
+                <button class="social-btn"><i class="fab fa-github"></i></button>
+            </div>
+            
+            <div class="register-link">
+                Don't have an account? <a href="/Account/Register">Create an account</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    // Initialize Swiper Carousel on Login Page
+    const loginSwiper = new Swiper('.loginSwiper', {
+        slidesPerView: 1,
+        spaceBetween: 0,
+        loop: true,
+        autoplay: {
+            delay: 5000,
+            disableOnInteraction: false,
+        },
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+
+        effect: 'fade',
+        fadeEffect: {
+            crossFade: true
+        },
+        speed: 1000,
+    });
+
+
+
+    const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#password');
+    if (togglePassword && password) {
+        togglePassword.addEventListener('click', function () {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+    }
+
+    // Fade animation to sides
+    const carouselSide = document.querySelector('.carousel-side');
+    if (carouselSide) {
+        carouselSide.style.animation = 'fadeIn 0.8s ease';
+    }
+    
+    const formSide = document.querySelector('.form-side');
+    if (formSide) {
+        formSide.style.animation = 'slideInUp 0.6s ease';
+    }
+    
+    const fadeStyle = document.createElement('style');
+    fadeStyle.textContent = `
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @@keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    `;
+    document.head.appendChild(fadeStyle);
+</script>
+</body>
+</html>

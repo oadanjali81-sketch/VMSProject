@@ -1,0 +1,370 @@
+@{
+    Layout = "_LandingLayout";
+    ViewData["Title"] = "Privacy Policy | VISION VMS";
+}
+
+@section Styles {
+    <style>
+        /* ── Legal Page Layout ── */
+        .legal-page-header {
+            padding: 160px 80px 80px;
+            background: linear-gradient(135deg, #EEF2FF 0%, #F8FAFF 60%);
+            border-bottom: 1px solid #E2E8F0;
+            text-align: center;
+        }
+        .legal-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366F1;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+        .legal-page-header h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: #1E293B;
+            margin-bottom: 16px;
+            letter-spacing: -1.5px;
+        }
+        .legal-page-header p {
+            font-size: 1.1rem;
+            color: #64748B;
+            max-width: 560px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* ── Main Two-Column Layout ── */
+        .legal-body {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 80px 100px;
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        /* ── Sidebar TOC ── */
+        .legal-sidebar {
+            position: sticky;
+            top: 100px;
+        }
+        .toc-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #94A3B8;
+            margin-bottom: 16px;
+        }
+        .toc-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .toc-link {
+            display: block;
+            padding: 10px 14px;
+            color: #64748B;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-left: 2px solid transparent;
+        }
+        .toc-link:hover {
+            background: #EEF2FF;
+            color: #6366F1;
+            border-left-color: #6366F1;
+        }
+        .toc-link.active {
+            background: #EEF2FF;
+            color: #6366F1;
+            border-left-color: #6366F1;
+            font-weight: 600;
+        }
+        .toc-date {
+            margin-top: 24px;
+            padding: 12px 14px;
+            background: #F8FAFF;
+            border-radius: 10px;
+            border: 1px solid #E2E8F0;
+            font-size: 0.82rem;
+            color: #64748B;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toc-date i { color: #6366F1; }
+
+        /* ── Article Content ── */
+        .legal-article section {
+            margin-bottom: 48px;
+            padding-bottom: 48px;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        .legal-article section:last-child {
+            border-bottom: none;
+        }
+        .legal-article h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #1E293B;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .section-marker {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366F1;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+        .legal-article p {
+            line-height: 1.85;
+            color: #475569;
+            margin-bottom: 1.25rem;
+            font-size: 1rem;
+        }
+        .legal-article ul {
+            margin: 16px 0 20px 0;
+            padding-left: 0;
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .legal-article ul li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            color: #475569;
+            line-height: 1.7;
+            font-size: 0.97rem;
+        }
+        .legal-article ul li::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #6366F1;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 8px;
+        }
+
+        /* ── Info Card (highlight box) ── */
+        .info-card {
+            background: #F8FAFF;
+            border: 1px solid #E0E7FF;
+            border-left: 4px solid #6366F1;
+            border-radius: 16px;
+            padding: 24px 28px;
+            margin: 24px 0;
+        }
+        .info-card ul {
+            margin: 0;
+        }
+        .info-card ul li {
+            padding: 8px 0;
+            border-bottom: 1px solid #EEF2FF;
+        }
+        .info-card ul li:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .info-card ul li strong {
+            color: #1E293B;
+        }
+        /* override bullet for info card */
+        .info-card ul li::before {
+            background: #10B981;
+            margin-top: 9px;
+        }
+
+        /* ── CTA Buttons ── */
+        .legal-cta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 28px;
+        }
+        .btn-legal-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--vision-gradient);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
+        }
+        .btn-legal-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(99, 102, 241, 0.35);
+        }
+        .btn-legal-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            color: #6366F1;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-decoration: none;
+            border: 2px solid #6366F1;
+            transition: all 0.3s;
+        }
+        .btn-legal-outline:hover {
+            background: #EEF2FF;
+            transform: translateY(-2px);
+        }
+
+        /* ── Responsive ── */
+        @@media (max-width: 1024px) {
+            .legal-body {
+                grid-template-columns: 1fr;
+                padding: 40px 40px 80px;
+            }
+            .legal-sidebar {
+                position: static;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 16px;
+            }
+            .toc-label { margin: 0; }
+            .toc-nav { flex-direction: row; flex-wrap: wrap; }
+            .toc-date { margin-top: 0; }
+        }
+        @@media (max-width: 640px) {
+            .legal-page-header {
+                padding: 140px 24px 60px;
+            }
+            .legal-page-header h1 { font-size: 2.2rem; }
+            .legal-body { padding: 32px 24px 60px; }
+        }
+    </style>
+}
+
+<!-- Page Header -->
+<header class="legal-page-header">
+    <div class="legal-badge">
+        <i class="fas fa-shield-alt"></i> Legal Document
+    </div>
+    <h1>Privacy Policy</h1>
+    <p>How we collect, use, and protect your information at VISION VMS</p>
+</header>
+
+<!-- Main Content -->
+<div class="legal-body">
+
+    <!-- Sidebar TOC -->
+    <aside class="legal-sidebar">
+        <div class="toc-label">On this page</div>
+        <nav class="toc-nav">
+            <a href="#data-collection" class="toc-link">1. Data Collection</a>
+            <a href="#data-usage" class="toc-link">2. Data Usage</a>
+            <a href="#data-security" class="toc-link">3. Data Security</a>
+            <a href="#cookies" class="toc-link">4. Cookies</a>
+            <a href="#contact" class="toc-link">5. Contact Us</a>
+        </nav>
+        <div class="toc-date">
+            <i class="far fa-calendar-alt"></i>
+            Last updated: April 16, 2026
+        </div>
+    </aside>
+
+    <!-- Article -->
+    <article class="legal-article">
+
+        <section id="data-collection">
+            <h2><span class="section-marker">1</span> Data Collection</h2>
+            <p>We collect essential visitor data to maintain site security and provide services to our clients. This data is handled with the highest level of care and in compliance with data protection regulations.</p>
+            <div class="info-card">
+                <ul>
+                    <li><strong>Contact Information:</strong> Full name, email address, and phone number.</li>
+                    <li><strong>Visit Details:</strong> Check-in/out timestamps, host name, and visit purpose.</li>
+                    <li><strong>Verification Data:</strong> Photos or IDs, but only if specifically required by the host organization.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="data-usage">
+            <h2><span class="section-marker">2</span> Data Usage</h2>
+            <p>Your data is used strictly for security and operational purposes. We never sell your personal information to third parties. Our primary goals are security and efficiency.</p>
+            <p>Key uses include:</p>
+            <ul>
+                <li>Processing secure and seamless check-ins and check-outs.</li>
+                <li>Generating temporary digital access badges and QR codes.</li>
+                <li>Real-time notifications to hosts upon guest arrival.</li>
+                <li>Maintaining security logs for the host organization.</li>
+            </ul>
+        </section>
+
+        <section id="data-security">
+            <h2><span class="section-marker">3</span> Data Security</h2>
+            <p>We implement bank-grade security measures to protect your information. This includes AES-256 encryption at rest and TLS 1.3 for all data in transit. Our infrastructure is regularly audited to ensure compliance with global security standards.</p>
+        </section>
+
+        <section id="cookies">
+            <h2><span class="section-marker">4</span> Cookies</h2>
+            <p>We use only essential session cookies required for the platform's functionality. These cookies help keep you securely logged in during your session. We do not use any tracking or advertising cookies on this platform.</p>
+        </section>
+
+        <section id="contact">
+            <h2><span class="section-marker">5</span> Contact Us</h2>
+            <p>If you have any questions or concerns regarding your privacy or our data practices, please don't hesitate to reach out to our dedicated privacy team.</p>
+            <div class="legal-cta">
+                <a href="mailto:privacy@visionvms.com" class="btn-legal-primary">
+                    <i class="fas fa-envelope"></i> Email Privacy Team
+                </a>
+                <a href="/Home/Contact" class="btn-legal-outline">
+                    <i class="fas fa-arrow-right"></i> Visit Contact Page
+                </a>
+            </div>
+        </section>
+
+    </article>
+
+</div>
+
+@section Scripts {
+    <script>
+        // Highlight active TOC link on scroll
+        const sections = document.querySelectorAll('.legal-article section');
+        const tocLinks = document.querySelectorAll('.toc-link');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    tocLinks.forEach(link => link.classList.remove('active'));
+                    const active = document.querySelector(`.toc-link[href="#${entry.target.id}"]`);
+                    if (active) active.classList.add('active');
+                }
+            });
+        }, { rootMargin: '-20% 0px -70% 0px' });
+
+        sections.forEach(s => observer.observe(s));
+    </script>
+}

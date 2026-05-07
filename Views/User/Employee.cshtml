@@ -1,0 +1,383 @@
+@{
+    Layout = "UserLayout";
+    ViewData["Title"] = "Employee Directory";
+    var departments = (List<VMSProject.Models.Department>)ViewBag.Departments;
+}
+
+<div class="table-section">
+    <div class="table-header-title d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-user-tie me-2 text-primary"></i>
+            <span class="fw-800 text-dark" style="font-size: 1.1rem; letter-spacing: -0.5px;">Employee List</span>
+        </div>
+        
+        <div class="d-flex align-items-center gap-2 flex-wrap ms-auto">
+            <div class="input-group input-group-sm" style="width: 280px;">
+                <span class="input-group-text bg-light border-end-0 border-light"><i class="fas fa-search text-muted"></i></span>
+                <input type="text" class="form-control border-start-0 ps-0 shadow-none bg-light border-light" id="tableSearchInput" placeholder="Search by name or email..." onkeyup="filterTable()">
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" data-bs-toggle="modal" data-bs-target="#addEmployeeModal" class="btn btn-primary btn-sm fw-bold px-3 rounded-pill shadow-sm">
+                    <i class="fas fa-plus me-1"></i>Add Employee
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table class="user-table" id="standardTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Employee</th>
+                    <th>Contact Info</th>
+                    <th>Department</th>
+                    <th>Job Title</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Count > 0)
+                {
+                    int i = 1;
+                    foreach (var e in Model)
+                    {
+                        <tr onclick="if(!event.target.closest('.acts-group')) { openViewEmployeeModal(@e.EmployeeId); }" style="cursor: pointer;" class="hover-row">
+                            <td><span class="badge bg-light text-secondary border rounded-pill">@i</span></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold me-3 shadow-sm overflow-hidden" style="width: 38px; height: 38px; border: 1px solid rgba(59, 130, 246, 0.2);">
+                                        @if (!string.IsNullOrEmpty(e.PhotoPath))
+                                        {
+                                            <img src="@e.PhotoPath" alt="@e.Name" class="w-100 h-100" style="object-fit: cover;" />
+                                        }
+                                        else
+                                        {
+                                            <span>@(e.Name != null ? e.Name.Substring(0,1).ToUpper() : "?")</span>
+                                        }
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">@e.Name</div>
+                                        <small class="text-muted">ID: 100@(e.EmployeeId)</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-semibold text-dark small">@e.Email</span>
+                                    <small class="text-muted">@e.Phone</small>
+                                </div>
+                            </td>
+                            <td><span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill shadow-sm" style="font-size: 0.7rem;">@(e.Department?.DepartmentName ?? "—")</span></td>
+                            <td><span class="fw-bold text-secondary small">@e.Designation</span></td>
+                            <td>
+                                <div class="acts-group">
+                                    <button type="button" class="act-btn act-edit" title="Edit" onclick="openEditEmployeeModal(@e.EmployeeId)">
+                                        <i class="fas fa-pen-to-square"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        i++;
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">No employee records found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (ViewBag.Pagination != null)
+    {
+        var pModel = (VMSProject.Models.PaginationViewModel)ViewBag.Pagination;
+        @if (pModel.TotalPages > 0)
+        {
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    Showing @(((pModel.CurrentPage - 1) * pModel.PageSize) + 1) to @(Math.Min(pModel.CurrentPage * pModel.PageSize, pModel.TotalItems)) of @pModel.TotalItems entries
+                </div>
+                <div class="pagination-controls">
+                    <div class="page-size-selector">
+                        <select class="page-size-select" onchange="updatePageSize(this.value)">
+                            <option value="10" selected="@(pModel.PageSize == 10)">10</option>
+                            <option value="20" selected="@(pModel.PageSize == 20)">20</option>
+                            <option value="50" selected="@(pModel.PageSize == 50)">50</option>
+                            <option value="100" selected="@(pModel.PageSize == 100)">100</option>
+                        </select>
+                    </div>
+                    <div class="custom-pagination">
+                        @if (pModel.HasPreviousPage) {
+                            var prevVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage - 1).ToString() };
+                            <a href="@Url.Action(pModel.Action, pModel.Controller, prevVals)" class="page-link-custom">Previous</a>
+                        } else { <span class="page-link-custom disabled">Previous</span> }
+                        @{
+                            int startPage = Math.Max(1, pModel.CurrentPage - 2);
+                            int endPage = Math.Min(pModel.TotalPages, startPage + 4);
+                            if (endPage - startPage < 4) startPage = Math.Max(1, endPage - 4);
+                        }
+                        @for (int i = startPage; i <= endPage; i++) {
+                            var pageVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = i.ToString() };
+                            <a href="@Url.Action(pModel.Action, pModel.Controller, pageVals)" class="page-link-custom @(i == pModel.CurrentPage ? "active" : "")">@i</a>
+                        }
+                        @if (pModel.HasNextPage) {
+                            var nextVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage + 1).ToString() };
+                            <a href="@Url.Action(pModel.Action, pModel.Controller, nextVals)" class="page-link-custom">Next</a>
+                        } else { <span class="page-link-custom disabled">Next</span> }
+                    </div>
+                </div>
+            </div>
+            <script>
+                function updatePageSize(size) {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('pageSize', size);
+                    url.searchParams.set('page', '1');
+                    window.location.href = url.toString();
+                }
+            </script>
+        }
+    }
+</div>
+
+<!-- MODALS -->
+<!-- ADD EMPLOYEE MODAL -->
+<div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-bottom-0 pt-4 px-4">
+                <h5 class="fw-800 text-dark mb-0"><i class="fas fa-user-plus text-primary me-2"></i> Add New Employee</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="/User/AddEmployee" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-700 small text-muted uppercase letter-spacing-1">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" name="Name" class="form-control rounded-3 border-light bg-light" placeholder="e.g. John Doe" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-700 small text-muted uppercase letter-spacing-1">Phone Number</label>
+                            <input type="text" name="Phone" class="form-control rounded-3 border-light bg-light" placeholder="+1..." />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-700 small text-muted uppercase letter-spacing-1">Email Address</label>
+                            <input type="email" name="Email" class="form-control rounded-3 border-light bg-light" placeholder="john@company.com" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-700 small text-muted uppercase letter-spacing-1">Job Title</label>
+                            <input type="text" name="Designation" class="form-control rounded-3 border-light bg-light" placeholder="Software Engineer" />
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-700 small text-muted uppercase letter-spacing-1">Department <span class="text-danger">*</span></label>
+                            <select name="DepartmentId" class="form-select rounded-3 border-light bg-light" required>
+                                <option value="">— Select Department —</option>
+                                @foreach (var d in departments)
+                                {
+                                    <option value="@d.DepartmentId">@d.DepartmentName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-700 small text-muted uppercase letter-spacing-1">Profile Photo</label>
+                            <input type="file" name="Photo" class="form-control rounded-3 border-light bg-light" accept="image/*" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 p-4 pt-0 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-800 small text-muted letter-spacing-1" data-bs-dismiss="modal">CANCEL</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-800 small letter-spacing-1 shadow-sm">ADD EMPLOYEE</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT EMPLOYEE MODAL -->
+<div class="modal fade" id="editEmployeeModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-bottom-0 pt-4 px-4">
+                <h5 class="fw-800 text-dark mb-0"><i class="fas fa-user-edit text-primary me-2"></i> Edit Employee Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editEmployeeForm" method="post" action="/User/EditEmployee" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="edit_EmployeeId" name="EmployeeId" />
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-700 small text-muted uppercase letter-spacing-1">Full Name</label>
+                            <input type="text" id="edit_Name" name="Name" class="form-control rounded-3 border-light bg-light" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-700 small text-muted uppercase letter-spacing-1">Phone Number</label>
+                            <input type="text" id="edit_Phone" name="Phone" class="form-control rounded-3 border-light bg-light" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-700 small text-muted uppercase letter-spacing-1">Email Address</label>
+                            <input type="email" id="edit_Email" name="Email" class="form-control rounded-3 border-light bg-light" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-700 small text-muted uppercase letter-spacing-1">Job Title</label>
+                            <input type="text" id="edit_Designation" name="Designation" class="form-control rounded-3 border-light bg-light" />
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-700 small text-muted uppercase letter-spacing-1">Department</label>
+                            <select id="edit_DepartmentId" name="DepartmentId" class="form-select rounded-3 border-light bg-light" required>
+                                <option value="">Select Department</option>
+                                @foreach (var d in departments)
+                                {
+                                    <option value="@d.DepartmentId">@d.DepartmentName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-700 small text-muted uppercase letter-spacing-1">Update Photo</label>
+                            <div class="d-flex align-items-center gap-3">
+                                <div id="edit_photo_preview_container" class="rounded-circle overflow-hidden border border-primary border-opacity-25 shadow-sm" style="width: 45px; height: 45px; display: none;">
+                                    <img id="edit_photo_preview" src="" class="w-100 h-100 object-fit-cover" />
+                                </div>
+                                <input type="file" name="Photo" class="form-control rounded-3 border-light bg-light" accept="image/*" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 p-4 pt-0 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-800 small text-muted letter-spacing-1" data-bs-dismiss="modal">CANCEL</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-800 small letter-spacing-1 shadow-sm">SAVE CHANGES</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- VIEW EMPLOYEE MODAL -->
+<div class="modal fade" id="viewEmployeeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-body p-0">
+                <div style="height: 180px; background: linear-gradient(135deg, #4f46e5, #3b82f6); position: relative;">
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-4" data-bs-dismiss="modal" aria-label="Close" style="font-size: 0.8rem;"></button>
+                </div>
+                <div class="px-4 pb-4">
+                    <div class="d-flex align-items-center gap-4" style="margin-top: -70px; margin-bottom: 35px; position: relative; z-index: 5;">
+                        <div class="rounded-4 border border-5 border-white shadow-sm overflow-hidden bg-white d-flex align-items-center justify-content-center shadow-lg" style="width: 140px; height: 140px; min-width: 140px; transition: transform 0.3s ease;">
+                            <img id="view_photo" src="" class="w-100 h-100 object-fit-cover d-none" />
+                            <span id="view_initial" class="fw-800 text-primary fs-1">?</span>
+                        </div>
+                        <div class="pt-5 mt-2">
+                            <h2 id="view_name" class="fw-800 text-dark mb-0" style="letter-spacing: -0.5px; font-size: 2rem;">Employee Name</h2>
+                            <p id="view_designation" class="text-primary small fw-800 uppercase letter-spacing-2 mb-0">DESIGNATION TITLE</p>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-4 bg-light rounded-4 border border-light h-100 shadow-sm" style="background: rgba(248, 250, 252, 0.8) !important;">
+                                <label class="text-muted small fw-800 uppercase letter-spacing-2 d-block mb-2" style="font-size: 0.6rem; opacity: 0.6;">DEPARTMENT</label>
+                                <div id="view_department" class="fw-800 text-primary d-flex align-items-center fs-5">
+                                    <i class="fas fa-building-user me-3 opacity-75"></i>
+                                    <span>—</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-4 bg-light rounded-4 border border-light h-100 shadow-sm" style="background: rgba(248, 250, 252, 0.8) !important;">
+                                <label class="text-muted small fw-800 uppercase letter-spacing-2 d-block mb-2" style="font-size: 0.6rem; opacity: 0.6;">EMPLOYEE ID</label>
+                                <div id="view_id" class="fw-800 text-dark d-flex align-items-center fs-5">
+                                    <i class="fas fa-fingerprint me-3 opacity-50"></i>
+                                    <span>#—</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-4 bg-light rounded-4 border border-light h-100 shadow-sm" style="background: rgba(248, 250, 252, 0.8) !important;">
+                                <label class="text-muted small fw-800 uppercase letter-spacing-2 d-block mb-2" style="font-size: 0.6rem; opacity: 0.6;">EMAIL ADDRESS</label>
+                                <div id="view_email" class="fw-700 text-dark d-flex align-items-center small text-truncate">
+                                    <i class="fas fa-envelope-open me-3 opacity-50"></i>
+                                    <span>—</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-4 bg-light rounded-4 border border-light h-100 shadow-sm" style="background: rgba(248, 250, 252, 0.8) !important;">
+                                <label class="text-muted small fw-800 uppercase letter-spacing-2 d-block mb-2" style="font-size: 0.6rem; opacity: 0.6;">PHONE NUMBER</label>
+                                <div id="view_phone" class="fw-700 text-dark d-flex align-items-center fs-6">
+                                    <i class="fas fa-phone-volume me-3 opacity-50"></i>
+                                    <span>—</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-4 pt-0 d-flex justify-content-center gap-3 bg-white">
+                <button type="button" class="btn btn-light rounded-pill px-5 py-3 fw-800 small letter-spacing-1 shadow-sm text-muted" data-bs-dismiss="modal" style="border: 1px solid #e2e8f0; min-width: 200px;">CLOSE PROFILE</button>
+                <button type="button" id="view_edit_btn" class="btn btn-primary rounded-pill px-5 py-3 fw-800 small letter-spacing-1 shadow" style="background: #4f46e5; border: none; min-width: 200px;">
+                    <i class="fas fa-user-pen me-2"></i> EDIT PROFILE
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function openEditEmployeeModal(id) {
+            try {
+                const response = await fetch(`/User/GetEmployee/${id}`);
+                if (!response.ok) throw new Error('Failed to fetch employee data');
+                const data = await response.json();
+                document.getElementById('edit_EmployeeId').value = data.id;
+                document.getElementById('edit_Name').value = data.name;
+                document.getElementById('edit_Phone').value = data.phone || '';
+                document.getElementById('edit_Email').value = data.email || '';
+                document.getElementById('edit_Designation').value = data.designation || '';
+                document.getElementById('edit_DepartmentId').value = data.departmentId;
+                const previewWrap = document.getElementById('edit_photo_preview_container');
+                const previewImg = document.getElementById('edit_photo_preview');
+                if (data.photoPath) { previewImg.src = data.photoPath; previewWrap.style.display = 'block'; }
+                else { previewWrap.style.display = 'none'; }
+                openModal('editEmployeeModal');
+            } catch (error) { console.error(error); }
+        }
+
+        async function openViewEmployeeModal(id) {
+            try {
+                const response = await fetch(`/User/GetEmployee/${id}`);
+                if (!response.ok) throw new Error('Failed to fetch employee data');
+                const data = await response.json();
+                const name = data.name || data.Name || 'Unknown';
+                document.getElementById('view_name').textContent = name;
+                document.getElementById('view_designation').textContent = data.designation || data.Designation || 'Personnel';
+                document.getElementById('view_id').querySelector('span').textContent = `#${id}`;
+                document.getElementById('view_email').querySelector('span').textContent = data.email || data.Email || '—';
+                document.getElementById('view_phone').querySelector('span').textContent = data.phone || data.Phone || '—';
+                document.getElementById('view_department').querySelector('span').textContent = data.departmentName || data.DepartmentName || 'Corporate';
+                const photo = document.getElementById('view_photo');
+                const initial = document.getElementById('view_initial');
+                if (data.photoPath) { photo.src = data.photoPath; photo.classList.remove('d-none'); initial.classList.add('d-none'); }
+                else { photo.classList.add('d-none'); initial.classList.remove('d-none'); initial.textContent = name.charAt(0).toUpperCase(); }
+                document.getElementById('view_edit_btn').onclick = () => { closeModal('viewEmployeeModal'); openEditEmployeeModal(id); };
+                openModal('viewEmployeeModal');
+            } catch (error) { console.error(error); }
+        }
+
+        function filterTable() {
+            var input = document.getElementById("tableSearchInput");
+            var filter = input.value.toUpperCase();
+            var tr = document.getElementById("standardTable").getElementsByTagName("tr");
+            for (var i = 1; i < tr.length; i++) {
+                var found = false;
+                var td = tr[i].getElementsByTagName("td");
+                for (var j = 0; j < td.length; j++) {
+                    if (td[j] && td[j].textContent.toUpperCase().indexOf(filter) > -1) { found = true; break; }
+                }
+                tr[i].style.display = found ? "" : "none";
+            }
+        }
+    </script>
+}

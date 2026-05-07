@@ -1,0 +1,104 @@
+@{
+    Layout = "UserLayout";
+    ViewData["Title"] = "Visitor History";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h4 class="fw-bold text-dark mb-0">@(Model.Visitor?.Name ?? "Visitor")'s History</h4>
+    </div>
+    <a href="/User/Visit" class="btn btn-outline-secondary px-4 rounded-pill fw-bold shadow-sm">
+        <i class="fas fa-arrow-left me-2"></i>Back to List
+    </a>
+</div>
+
+<!-- Visitor History Table -->
+@if (ViewBag.VisitorHistory != null)
+{
+    var history = (List<VMSProject.Models.Visit>)ViewBag.VisitorHistory;
+    if (history.Count > 0)
+    {
+        <div class="card border-0 shadow-sm rounded-4 mt-2 mb-4">
+            <div class="card-header bg-white py-3 border-bottom border-light d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold text-primary text-uppercase letter-spacing-1">
+                    <i class="fas fa-list me-2"></i>Complete Visit Records
+                </h6>
+                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">@history.Count Total Visits</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light bg-opacity-50">
+                            <tr>
+                                <th class="text-uppercase small fw-bold text-muted px-4 py-3 border-0">Visit Date</th>
+                                <th class="text-uppercase small fw-bold text-muted py-3 border-0">Host Person</th>
+                                <th class="text-uppercase small fw-bold text-muted py-3 border-0">Purpose</th>
+                                <th class="text-uppercase small fw-bold text-muted py-3 border-0">Check In / Out</th>
+                                <th class="text-uppercase small fw-bold text-muted py-3 border-0">Duration</th>
+                                <th class="text-uppercase small fw-bold text-muted py-3 border-0">Status</th>
+                                <th class="text-uppercase small fw-bold text-muted text-end px-4 py-3 border-0">Pass ID</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var h in history)
+                            {
+                                var hDur = "—";
+                                if (h.CheckOutTime.HasValue)
+                                {
+                                    int mins = (int)(h.CheckOutTime.Value - h.CheckInTime).TotalMinutes;
+                                    hDur = mins >= 60 ? $"{mins / 60}h {mins % 60}m" : $"{mins}m";
+                                }
+                                var hStatusClass = h.Status == "Active" ? "bg-success" : (h.Status == "Pending" ? "bg-warning text-dark" : "bg-secondary");
+                                var hStatusText = h.Status == "Active" ? "Inside" : (h.Status == "CheckedOut" ? "Completed" : h.Status);
+
+                                <tr>
+                                    <td class="px-4 py-3">
+                                        <div class="fw-bold text-dark">@h.VisitDate.ToString("dd MMM yyyy")</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="fw-bold text-primary">@(h.Employee?.Name ?? h.Visitor?.WhomeToMeet ?? "—")</div>
+                                        <div class="small text-muted">@(h.Employee?.Department?.DepartmentName ?? "General")</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="text-dark fw-medium">@(h.Purpose ?? "—")</div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex flex-column gap-1">
+                                            @if (h.Status != "Pending")
+                                            {
+                                                <span class="text-success small fw-bold"><i class="fas fa-sign-in-alt me-1"></i> @h.CheckInTime.ToString("hh:mm tt")</span>
+                                                if (h.CheckOutTime.HasValue)
+                                                {
+                                                    <span class="text-danger small fw-bold"><i class="fas fa-sign-out-alt me-1"></i> @h.CheckOutTime.Value.ToString("hh:mm tt")</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted fst-italic small">Pending</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="fw-bold font-monospace">@hDur</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge @hStatusClass px-3 py-2 rounded-pill shadow-sm" style="font-size: 0.7rem;">@hStatusText</span>
+                                    </td>
+                                    <td class="text-end px-4 py-3">
+                                        <div class="fw-bold font-monospace text-muted">@h.PassNumber</div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="text-center py-5">
+        <p class="text-muted">No history found for this visitor.</p>
+    </div>
+}

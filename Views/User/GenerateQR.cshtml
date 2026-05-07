@@ -1,0 +1,88 @@
+@model VMSProject.Models.Visitor
+@{
+    Layout = "UserLayout";
+    ViewData["Title"] = "Generate Access Pass";
+    var hasQR = !string.IsNullOrEmpty(Model.QRCode);
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-6 col-lg-8">
+        <div class="table-section p-0 border-0 shadow-lg rounded-5 overflow-hidden bg-white">
+            <div class="p-5 text-center bg-primary text-white position-relative overflow-hidden">
+                <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10" style="background-image: radial-gradient(#fff 2px, transparent 2px); background-size: 20px 20px;"></div>
+                
+                <h3 class="fw-800 mb-1" style="letter-spacing: -0.5px;">Security Access Pass</h3>
+                <p class="opacity-75 small uppercase letter-spacing-1 fw-bold">Visitor Identification Protocol</p>
+                
+                <div class="mt-4 position-relative d-inline-block">
+                    <div class="rounded-circle border border-4 border-white border-opacity-25 p-1 shadow-lg mx-auto">
+                        <div class="rounded-circle overflow-hidden bg-white d-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                            @if (!string.IsNullOrEmpty(Model.CapturePhoto)) {
+                                <img src="@Model.CapturePhoto" class="w-100 h-100 object-fit-cover" />
+                            } else {
+                                <span class="fw-800 text-primary fs-1">@(Model.Name?[0].ToString().ToUpper() ?? "?")</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+                
+                <h4 class="mt-3 fw-800 mb-0">@Model.Name</h4>
+                <p class="small opacity-75">@(Model.CompanyName ?? "GUEST VISITOR")</p>
+            </div>
+
+            <div class="p-5 text-center">
+                @if (hasQR)
+                {
+                    <div class="qr-container p-4 border border-light bg-light bg-opacity-50 rounded-5 d-inline-block shadow-sm mb-4">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&color=000000&bgcolor=ffffff&qzone=1&data=@Uri.EscapeDataString(Model.QRCode!)" 
+                             width="200" height="200" class="rounded-3 shadow-sm border border-white" alt="Access QR" />
+                    </div>
+                    
+                    <div class="mb-5">
+                        <label class="d-block small fw-800 text-muted uppercase letter-spacing-1 mb-2">Unique Pass Code</label>
+                        <div class="bg-primary bg-opacity-10 text-primary border border-primary border-opacity-10 px-4 py-3 rounded-pill d-inline-block fw-800 font-monospace fs-5">
+                            @Model.QRCode
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-3">
+                        <button onclick="window.print()" class="btn btn-primary py-3 rounded-pill fw-800 shadow-sm fs-5">
+                            <i class="fas fa-print me-2"></i> PRINT PASS
+                        </button>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary py-3 rounded-pill fw-800 flex-grow-1 shadow-sm">
+                                <i class="fas fa-share-nodes me-2"></i> SHARE
+                            </button>
+                            <a href="/User/Visitor" class="btn btn-light py-3 rounded-pill fw-bold px-4 border">
+                                DONE
+                            </a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="py-5">
+                        <div class="bg-light rounded-5 p-5 border-dashed border-2 border-primary border-opacity-25 mb-4">
+                            <i class="fas fa-qrcode fa-4x text-primary opacity-25 mb-3"></i>
+                            <h5 class="fw-800 text-dark">No Active Pass</h5>
+                            <p class="text-muted small">This visitor does not have an active security pass assigned.</p>
+                        </div>
+                        
+                        <form action="/User/GenerateVisitorQR" method="post">
+                            <input type="hidden" name="id" value="@Model.VisitorId" />
+                            <button type="submit" class="btn btn-primary py-3 px-5 rounded-pill fw-800 shadow-lg fs-5">
+                                GENERATE NEW PASS <i class="fas fa-bolt ms-2"></i>
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+            
+            <div class="bg-light p-3 text-center border-top border-light border-opacity-50">
+                <p class="mb-0 text-muted fw-bold" style="font-size: 0.65rem; letter-spacing: 2px;">
+                    VALID FOR TODAY ONLY • SECURE SYSTEM • VISION VMS
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

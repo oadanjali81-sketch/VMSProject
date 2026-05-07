@@ -1,0 +1,297 @@
+@using Microsoft.AspNetCore.Http
+@{
+    var adminName = (ViewBag.AdminName as object)?.ToString();
+    if (string.IsNullOrEmpty(adminName)) { adminName = User.Identity?.Name ?? "Admin"; }
+    var adminInitial = !string.IsNullOrEmpty(adminName) ? adminName.Substring(0, 1).ToUpper() : "A";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VMS | @ViewData["Title"]</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Global Styles & Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- User Design System -->
+    <link rel="stylesheet" href="/css/UserDesignSystem.css">
+    
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body style="background-color: #f8fafc; font-family: 'Inter', sans-serif;">
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
+    @{
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+        var currentAction     = ViewContext.RouteData.Values["action"]?.ToString()     ?? "";
+    }
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="tmb-sidebar-logo">
+                <i class="fas fa-crown tmb-logo-icon"></i>
+                <span class="nav-text">VISION<span class="tmb-logo-accent">|VMS</span></span>
+            </div>
+        </div>
+
+        <div class="sidebar-nav">
+            <div class="nav-section">
+                <div class="section-title"><span>MAIN</span></div>
+                <a href="/User/Dashboard" class="nav-item @(currentAction == "Dashboard" ? "active" : "")" data-title="Dashboard">
+                    <i class="fas fa-chart-pie"></i>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="section-title"><span>VISITOR MANAGEMENT</span></div>
+                <a href="/User/VisitorManagement" class="nav-item @(currentAction == "VisitorManagement" ? "active" : "")" data-title="Visitors">
+                    <i class="fas fa-users"></i>
+                    <span class="nav-text">Visitors</span>
+                </a>
+                <a href="/User/Visit" class="nav-item @(currentAction == "Visit" ? "active" : "")" data-title="Visits">
+                    <i class="fas fa-history"></i>
+                    <span class="nav-text">Visit Logs</span>
+                </a>
+                <a href="/User/ScanQR" class="nav-item @(currentAction == "ScanQR" ? "active" : "")" data-title="QR Scanner">
+                    <i class="fas fa-qrcode"></i>
+                    <span class="nav-text">QR Scanner</span>
+                </a>
+                <a href="/User/AllQRCodes" class="nav-item @(currentAction == "AllQRCodes" ? "active" : "")" data-title="Visitor Passes">
+                    <i class="fas fa-id-badge"></i>
+                    <span class="nav-text">Visitor Passes</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="section-title"><span>EMPLOYEES</span></div>
+                <a href="/User/Employee" class="nav-item @(currentAction == "Employee" ? "active" : "")" data-title="Employees">
+                    <i class="fas fa-user-tie"></i>
+                    <span class="nav-text">Employees</span>
+                </a>
+                <a href="/User/Department" class="nav-item @(currentAction == "Department" ? "active" : "")" data-title="Departments">
+                    <i class="fas fa-building-user"></i>
+                    <span class="nav-text">Departments</span>
+                </a>
+            </div>
+
+            @if (string.Equals(Context.Session.GetString("UserRole"), "Superadmin", System.StringComparison.OrdinalIgnoreCase))
+            {
+                <div class="nav-section">
+                    <div class="section-title"><span>ADMIN</span></div>
+                    <a href="/SuperAdmin/Dashboard" class="nav-item text-danger" data-title="Super Admin">
+                        <i class="fas fa-shield-alt text-danger"></i>
+                        <span class="nav-text">Super Admin</span>
+                    </a>
+                </div>
+            }
+        </div>
+
+        <div class="sidebar-footer">
+            <a href="/Account/Logout" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <style>
+        /* ========== SIDEBAR STYLES (MATCHED TO SUPER ADMIN) ========== */
+        .sidebar { 
+            position: fixed; top: 0; left: 0; height: 100vh; width: 250px; 
+            background: #1e1e2d; 
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.1); 
+            transition: all 0.3s ease; z-index: 1030; 
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .sidebar.collapsed { width: 85px; }
+        
+        .sidebar-header { padding: 30px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
+        .tmb-sidebar-logo { display: flex; align-items: center; gap: 12px; font-size: 1.4rem; font-weight: 800; color: #FFFFFF; letter-spacing: -0.5px; }
+        .tmb-logo-icon { color: #F59E0B; font-size: 1.5rem; text-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
+        .tmb-logo-accent { color: #6366f1; margin-left: 2px; }
+
+        .sidebar-nav { flex: 1; padding: 10px 0; overflow-y: auto; }
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        
+        .sidebar-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
+        
+        .nav-section { margin-bottom: 20px; }
+        .section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #494b74; padding: 0 20px 8px; font-weight: 600; }
+        
+        .nav-item { 
+            display: flex; align-items: center; gap: 14px; padding: 12px 20px; 
+            color: #A2A3B7; text-decoration: none; transition: all 0.2s; cursor: pointer; 
+            border-left: 3px solid transparent; white-space: nowrap; font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .nav-item i { width: 22px; font-size: 1.1rem; color: #6366f1; text-align: center; }
+        .nav-item:hover { background: rgba(255, 255, 255, 0.05); color: #FFFFFF; }
+        .nav-item.active { background: rgba(99, 102, 241, 0.1); color: #FFFFFF; border-left-color: #6366f1; }
+        .nav-item.active i { color: #FFFFFF; }
+        
+        .logout-btn { 
+            display: flex; align-items: center; justify-content: center; gap: 12px; 
+            padding: 12px 16px; background: rgba(239, 68, 68, 0.1); border-radius: 12px; 
+            color: #EF4444; text-decoration: none; transition: 0.2s; font-weight: 700; 
+        }
+        .logout-btn:hover { background: #EF4444; color: #FFFFFF; }
+
+        /* Collapsed State */
+        .sidebar.collapsed .nav-text, .sidebar.collapsed .section-title { display: none; }
+        .sidebar.collapsed .nav-item { padding: 12px 0; justify-content: center; border-left: none; }
+        .sidebar.collapsed .sidebar-header { padding: 20px 10px; text-align: center; }
+        .sidebar.collapsed .tmb-sidebar-logo { justify-content: center; }
+        .sidebar.collapsed .logout-btn span { display: none; }
+        .sidebar.collapsed .logout-btn { padding: 12px 0; width: 44px; margin: 0 auto; }
+
+        @@media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); position: fixed; z-index: 1050; }
+            .sidebar.mobile-open { transform: translateX(0); }
+        }
+    </style>
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper" class="main-content">
+        <!-- Top Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom py-3 px-4 shadow-sm sticky-top">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-light border-0 me-3" id="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h5 class="mb-0 fw-bold text-dark d-none d-md-block" id="pageTitle">@ViewData["Title"]</h5>
+            </div>
+
+            <div class="ms-auto d-flex align-items-center">
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="text-end me-3 d-none d-md-block">
+                            <div class="fw-bold mb-0 lh-1">@adminName</div>
+                            <small class="text-muted">Company Administrator</small>
+                        </div>
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 40px; height: 40px; border: 2px solid #fff;">
+                            @adminInitial
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item py-2" href="/Account/Logout"><i class="fas fa-sign-out-alt text-danger me-2"></i> Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Container -->
+        <div class="container-fluid px-4 py-4" style="min-height: calc(100vh - 160px);">
+            @RenderBody()
+        </div>
+
+        <!-- Standardized Footer -->
+        <footer class="py-4 px-4 border-top mt-auto bg-white text-center">
+            <p class="mb-0 text-muted small">&copy; @DateTime.Now.Year Visitor Management System. All Rights Reserved.</p>
+        </footer>
+    </div>
+
+    <style>
+        .main-content { margin-left: 250px; transition: all 0.3s ease; min-height: 100vh; display: flex; flex-direction: column; }
+        .main-content.expanded { margin-left: 85px; }
+        
+        .sidebar-overlay { 
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+            background: rgba(0,0,0,0.5); z-index: 1040; display: none; 
+        }
+        .sidebar-overlay.show { display: block; }
+
+        @@media (max-width: 768px) {
+            .main-content { margin-left: 0; }
+            .main-content.expanded { margin-left: 0; }
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // ── MODAL UTILITIES ──
+        function openModal(modalId) {
+            const modalEl = document.getElementById(modalId);
+            if (modalEl) {
+                let modal = bootstrap.Modal.getInstance(modalEl);
+                if (!modal) modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            }
+        }
+
+        function closeModal(modalId) {
+            const modalEl = document.getElementById(modalId);
+            if (modalEl) {
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+            }
+        }
+
+        // Sidebar Toggle Logic
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('page-content-wrapper');
+        const toggleBtn = document.getElementById('menu-toggle');
+        const overlay = document.getElementById('sidebarOverlay');
+        
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                if (window.innerWidth <= 768) { 
+                    sidebar.classList.toggle('mobile-open'); 
+                    overlay.classList.toggle('show'); 
+                } else { 
+                    sidebar.classList.toggle('collapsed'); 
+                    mainContent.classList.toggle('expanded'); 
+                }
+            });
+        }
+        
+        if (overlay) {
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('mobile-open');
+                overlay.classList.remove('show');
+            });
+        }
+    </script>
+    
+    <!-- Universal Structured Delete Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-bottom px-4 py-3">
+                    <h5 class="modal-title fw-800 text-dark" id="deleteModalTitle">Delete Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeDeleteModal()"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="flex-shrink-0 bg-danger bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <i class="fas fa-trash-can text-danger fs-3"></i>
+                        </div>
+                        <div>
+                            <p class="mb-1 fw-700 text-dark">Are you sure you want to delete this?</p>
+                            <p class="text-muted mb-0 small">You are about to permanently remove <strong id="deleteItemName" class="text-primary">this item</strong>. This action cannot be reversed.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top px-4 py-3 bg-light bg-opacity-50">
+                    <button type="button" onclick="closeDeleteModal()" class="btn btn-secondary fw-700 rounded-3 px-4" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i> Cancel
+                    </button>
+                    <button type="button" id="deleteConfirmBtn" onclick="confirmDelete()" class="btn btn-danger fw-700 rounded-3 px-4 shadow-sm">
+                        <i class="fas fa-trash-can me-2"></i> Delete Now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
