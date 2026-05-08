@@ -73,6 +73,27 @@ body {
     flex-shrink: 0;
 }
 
+.tmb-sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    letter-spacing: -0.5px;
+}
+
+.tmb-logo-icon {
+    color: #F59E0B;
+    font-size: 1.5rem;
+    text-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+.tmb-logo-accent {
+    color: var(--nexus-primary);
+    margin-left: 2px;
+}
+
 .sidebar-nav {
     flex: 1;
     padding: 10px 0;
@@ -144,6 +165,16 @@ body {
 
 .sidebar.collapsed .nav-text, .sidebar.collapsed .section-title span {
     display: none;
+}
+
+.sidebar.collapsed .sidebar-header {
+    padding: 30px 0;
+    display: flex;
+    justify-content: center;
+}
+
+.sidebar.collapsed .tmb-sidebar-logo {
+    gap: 0;
 }
 
 .sidebar.collapsed .nav-item {
@@ -296,14 +327,20 @@ h6 {
     padding: 24px;
     border: none;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    transition: none;
+    transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
     position: relative;
     /* Default flex layout: text-left, icon-right pattern used by all stat cards */
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
+    cursor: default;
 }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+    }
 
 .section-card {
     background: #FFFFFF;
@@ -311,10 +348,15 @@ h6 {
     padding: 24px;
     border: none;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    transition: none;
+    transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
     position: relative;
     overflow: hidden;
 }
+
+    .section-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+    }
 
 /* Premium Buttons */
 .premium-btn {
@@ -335,10 +377,11 @@ h6 {
 }
 
     .premium-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 15px rgba(99, 102, 241, 0.25);
         background: #4f46e5;
-        color: white;
+        color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(99, 102, 241, 0.3);
+        filter: brightness(1.1);
     }
 
     .premium-btn.secondary {

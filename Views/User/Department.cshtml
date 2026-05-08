@@ -175,31 +175,5 @@
 </div>
 
 @section Scripts {
-    <script>
-
-        async function openEditDepartmentModal(id) {
-            try {
-                const response = await fetch(`/User/GetDepartment/${id}`);
-                const data = await response.json();
-                document.getElementById('edit_DeptId').value = data.id || data.DepartmentId || data.Id;
-                document.getElementById('edit_DeptName').value = data.name || data.DepartmentName || data.Name;
-                openModal('editDepartmentModal');
-            } catch (err) { console.error(err); }
-        }
-
-        async function openViewDepartmentModal(id) {
-            try {
-                const response = await fetch(`/User/GetDepartment/${id}`);
-                const data = await response.json();
-                document.getElementById('view_DeptName').textContent = data.name || data.DepartmentName || data.Name;
-                document.getElementById('view_DeptCount').textContent = data.employeeCount || data.EmployeeCount || 0;
-                document.getElementById('view_DeptEditBtn').onclick = () => {
-                    closeModal('viewDepartmentModal');
-                    openEditDepartmentModal(id);
-                };
-                openModal('viewDepartmentModal');
-            } catch (err) { console.error(err); }
-        }
-
-    </script>
+    <script src="/js/User/DepartmentManagement.js"></script>
 }

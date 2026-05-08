@@ -127,7 +127,7 @@
         </nav>
 
         <!-- Main Body Area -->
-        <div class="container-fluid p-4 animate-fade-up" style="min-height: calc(100vh - 160px);">
+        <div class="container-fluid p-4" style="min-height: calc(100vh - 160px);">
             @RenderBody()
         </div>
 
@@ -145,57 +145,30 @@
 
     <script>
         /**
-        * ── GLOBAL UTILITIES ──
-        * These provide standardized behavior for all modules.
+        * ── SIDEBAR CONTROL ──
         */
-        
-        // Modal Instance Management
-        const getModal = (id) => {
-        const el = document.getElementById(id);
-        if (!el) return null;
-        return bootstrap.Modal.getOrCreateInstance(el);
-        };
-
-        const openModal = (id) => getModal(id)?.show();
-        const closeModal = (id) => getModal(id)?.hide();
-
-        // Sidebar Control Logic
         const sidebar = document.getElementById('sidebar');
         const mainContent = document.getElementById('mainContent');
         const overlay = document.getElementById('sidebarOverlay');
         const toggleBtn = document.getElementById('toggleSidebar');
 
         if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-        if (window.innerWidth <= 768) {
-        sidebar.classList.toggle('mobile-open');
-        overlay.classList.toggle('show');
-        } else {
-        sidebar.classList.toggle('collapsed');
-        mainContent.classList.toggle('expanded');
-        }
-        });
+            toggleBtn.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.toggle('mobile-open');
+                    overlay.classList.toggle('show');
+                } else {
+                    sidebar.classList.toggle('collapsed');
+                    mainContent.classList.toggle('expanded');
+                }
+            });
         }
 
         if (overlay) {
-        overlay.addEventListener('click', () => {
-        sidebar.classList.remove('mobile-open');
-        overlay.classList.remove('show');
-        });
-        }
-
-        // Global Table Quick Filter
-        function filterTable(inputId = "tableSearchInput", tableId = "standardTable") {
-        const val = document.getElementById(inputId).value.toUpperCase();
-        const rows = document.getElementById(tableId).getElementsByTagName("tr");
-        for (let i = 1; i < rows.length; i++) {
-        let found = false;
-        const cells = rows[i].getElementsByTagName("td");
-        for (let j = 0; j < cells.length; j++) {
-        if (cells[j] && cells[j].textContent.toUpperCase().indexOf(val) > -1) { found = true; break; }
-        }
-        rows[i].style.display = found ? "" : "none";
-        }
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('mobile-open');
+                overlay.classList.remove('show');
+            });
         }
     </script>
     

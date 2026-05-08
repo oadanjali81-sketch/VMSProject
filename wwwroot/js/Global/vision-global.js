@@ -1,7 +1,41 @@
 /**
- * VISION GLOBAL SCRIPTS
- * Centralized utility functions for Premium VMS UI
+ * VISION GLOBAL UTILITIES
  */
+
+var getModal = function(id) {
+    var el = document.getElementById(id);
+    if (!el) return null;
+    return bootstrap.Modal.getOrCreateInstance(el);
+};
+
+window.openModal = function(id) { 
+    var m = getModal(id);
+    if (m) m.show();
+    else console.warn("Modal not found: " + id);
+};
+
+window.closeModal = function(id) { 
+    var m = getModal(id);
+    if (m) m.hide();
+};
+
+/**
+ * Global Table Quick Filter
+ */
+function filterTable(inputId = "tableSearchInput", tableId = "standardTable") {
+    const val = document.getElementById(inputId).value.toUpperCase();
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    const rows = table.getElementsByTagName("tr");
+    for (let i = 1; i < rows.length; i++) {
+        let found = false;
+        const cells = rows[i].getElementsByTagName("td");
+        for (let j = 0; j < cells.length; j++) {
+            if (cells[j] && cells[j].textContent.toUpperCase().indexOf(val) > -1) { found = true; break; }
+        }
+        rows[i].style.display = found ? "" : "none";
+    }
+}
 
 let pendingDeleteAction = null;
 

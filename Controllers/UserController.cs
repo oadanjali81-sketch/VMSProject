@@ -10,16 +10,10 @@ using System.Text;
 
 namespace VMSProject.Controllers
 {
-    public class UserController : Controller
+    public class UserController(ApplicationDbContext context, IWebHostEnvironment env) : Controller
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IWebHostEnvironment _env;
-
-        public UserController(ApplicationDbContext context, IWebHostEnvironment env)
-        {
-            _context = context;
-            _env = env;
-        }
+        private readonly ApplicationDbContext _context = context;
+        private readonly IWebHostEnvironment _env = env;
 
         private bool IsLoggedIn() =>
             !string.IsNullOrEmpty(HttpContext.Session.GetString("AdminName"));
@@ -41,19 +35,19 @@ namespace VMSProject.Controllers
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
             ViewBag.AdminName = HttpContext.Session.GetString("AdminName");
-            ViewBag.TotalVisitors  = _context.Visitors.Count();
+            ViewBag.TotalVisitors = _context.Visitors.Count();
             ViewBag.TotalEmployees = _context.Employees.Count();
             ViewBag.TotalDepartments = _context.Departments.Count();
-            ViewBag.TodayVisits    = _context.Visits.Count(v => v.VisitDate.Date == DateTime.Today);
-            ViewBag.ActiveVisits   = _context.Visits.Count(v => v.Status == "Active");
+            ViewBag.TodayVisits = _context.Visits.Count(v => v.VisitDate.Date == DateTime.Today);
+            ViewBag.ActiveVisits = _context.Visits.Count(v => v.Status == "Active");
             ViewBag.CheckedOutToday = _context.Visits.Count(v => v.Status == "CheckedOut" && v.VisitDate.Date == DateTime.Today);
             ViewBag.PendingVisits = _context.Visits.Count(v => v.Status == "Pending");
             ViewBag.TotalPasses = _context.Visitors.Count(v => !string.IsNullOrEmpty(v.QRCode));
-            
+
             // Chart Data Generation (Last 7 Days)
             var last7Days = Enumerable.Range(0, 7).Select(i => DateTime.Today.AddDays(-6 + i)).ToList();
             ViewBag.ChartLabels = System.Text.Json.JsonSerializer.Serialize(last7Days.Select(d => d.ToString("ddd")));
-            
+
             var checkIns = new List<int>();
             var checkOuts = new List<int>();
             foreach (var day in last7Days)
@@ -64,15 +58,15 @@ namespace VMSProject.Controllers
             ViewBag.CheckInData = System.Text.Json.JsonSerializer.Serialize(checkIns);
             ViewBag.CheckOutData = System.Text.Json.JsonSerializer.Serialize(checkOuts);
 
-            ViewBag.RecentVisits   = _context.Visits
+            ViewBag.RecentVisits = _context.Visits
                 .OrderByDescending(v => v.VisitDate)
                 .Take(5)
-                .Select(v => new { 
-                    v.VisitId, 
-                    VisitorName = v.Visitor != null ? v.Visitor.Name : "Unknown", 
-                    EmployeeName = v.Employee != null ? v.Employee.Name : "General", 
-                    v.VisitDate, 
-                    v.Status 
+                .Select(v => new {
+                    v.VisitId,
+                    VisitorName = v.Visitor != null ? v.Visitor.Name : "Unknown",
+                    EmployeeName = v.Employee != null ? v.Employee.Name : "General",
+                    v.VisitDate,
+                    v.Status
                 }).ToList();
 
             return View();
@@ -113,7 +107,8 @@ namespace VMSProject.Controllers
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
             var existing = _context.Departments.Find(d.DepartmentId);
-            if (existing != null) {
+            if (existing != null)
+            {
                 existing.DepartmentName = d.DepartmentName;
                 _context.SaveChanges();
                 TempData["Success"] = "Department updated successfully!";
@@ -165,7 +160,8 @@ namespace VMSProject.Controllers
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
             var existing = _context.Employees.Find(e.EmployeeId);
-            if (existing != null) {
+            if (existing != null)
+            {
                 existing.Name = e.Name;
                 existing.Email = e.Email;
                 existing.Phone = e.Phone;
@@ -183,15 +179,16 @@ namespace VMSProject.Controllers
         {
             var e = _context.Employees.Include(d => d.Department).FirstOrDefault(x => x.EmployeeId == id);
             if (e == null) return NotFound();
-            return Json(new { 
-                id = e.EmployeeId, 
-                name = e.Name, 
-                email = e.Email, 
-                phone = e.Phone, 
-                designation = e.Designation, 
+            return Json(new
+            {
+                id = e.EmployeeId,
+                name = e.Name,
+                email = e.Email,
+                phone = e.Phone,
+                designation = e.Designation,
                 departmentId = e.DepartmentId,
                 departmentName = e.Department?.DepartmentName,
-                photoPath = e.PhotoPath 
+                photoPath = e.PhotoPath
             });
         }
 
@@ -219,14 +216,16 @@ namespace VMSProject.Controllers
             ViewBag.StatusFilter = status;
             ViewBag.DateFrom = dateFrom?.ToString("yyyy-MM-dd");
             ViewBag.DateTo = dateTo?.ToString("yyyy-MM-dd");
-            
-            ViewBag.Pagination = new PaginationViewModel { 
-                CurrentPage = page, 
-                TotalItems = total, 
-                PageSize = pageSize, 
-                Action = "Visit", 
+
+            ViewBag.Pagination = new PaginationViewModel
+            {
+                CurrentPage = page,
+                TotalItems = total,
+                PageSize = pageSize,
+                Action = "Visit",
                 Controller = "User",
-                RouteValues = new Dictionary<string, string> {
+                RouteValues = new Dictionary<string, string>
+                {
                     ["search"] = search ?? "",
                     ["status"] = status ?? "",
                     ["dateFrom"] = dateFrom?.ToString("yyyy-MM-dd") ?? "",
@@ -259,10 +258,10 @@ namespace VMSProject.Controllers
             ViewBag.TotalInRange = visits.Count;
             ViewBag.CheckedIn = visits.Count(v => v.Status != "Pending");
             ViewBag.CheckedOut = visits.Count(v => v.Status == "CheckedOut");
-            
+
             var completed = visits.Where(v => v.CheckOutTime.HasValue).ToList();
-            ViewBag.AvgDurationMins = completed.Any() ? completed.Average(v => (v.CheckOutTime.Value - v.CheckInTime).TotalMinutes) : 0;
-            
+            ViewBag.AvgDurationMins = completed.Count > 0 ? completed.Average(v => (v.CheckOutTime!.Value - v.CheckInTime).TotalMinutes) : 0;
+
             ViewBag.GroupedVisits = visits.GroupBy(v => v.VisitDate.Date).OrderByDescending(g => g.Key).ToList();
             ViewBag.DateFrom = from.ToString("yyyy-MM-dd");
             ViewBag.DateTo = to.ToString("yyyy-MM-dd");
@@ -283,24 +282,27 @@ namespace VMSProject.Controllers
             int pageSize = 10;
             var total = query.Count();
             var items = query.OrderByDescending(v => v.VisitorId).Skip((page - 1) * pageSize).Take(pageSize)
-                .Select(v => new VisitorListViewModel {
-                    VisitorId = v.VisitorId, Name = v.Name, Phone = v.Phone, Email = v.Email, CompanyName = v.CompanyName, 
-                    WhomeToMeet = v.WhomeToMeet, Department = v.Department, QRCode = v.QRCode, CapturePhoto = v.CapturePhoto
+                .Select(v => new VisitorListViewModel
+                {
+                    VisitorId = v.VisitorId,
+                    Name = v.Name,
+                    Phone = v.Phone,
+                    Email = v.Email,
+                    CompanyName = v.CompanyName,
+                    WhomeToMeet = v.WhomeToMeet,
+                    Department = v.Department,
+                    Purpose = v.PurposeOfVisit,
+                    VehicleNumber = v.VehicleNumber,
+                    QRCode = v.QRCode,
+                    CapturePhoto = v.CapturePhoto
                 }).ToList();
 
             ViewBag.TotalVisitors = total;
             ViewBag.Pagination = new PaginationViewModel { CurrentPage = page, TotalItems = total, PageSize = pageSize, Action = "VisitorManagement", Controller = "User" };
-
-            return View("VisitorManagement", items);
-        }
-
-        public IActionResult AddVisitor()
-        {
-            if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
-            ViewBag.AdminName = HttpContext.Session.GetString("AdminName");
             ViewBag.Employees = _context.Employees.OrderBy(e => e.Name).ToList();
             ViewBag.Departments = _context.Departments.OrderBy(d => d.DepartmentName).ToList();
-            return View(new Visitor());
+
+            return View("VisitorManagement", items);
         }
 
         [HttpPost]
@@ -319,7 +321,8 @@ namespace VMSProject.Controllers
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
             var existing = _context.Visitors.Find(v.VisitorId);
-            if (existing != null) {
+            if (existing != null)
+            {
                 existing.Name = v.Name;
                 existing.Email = v.Email;
                 existing.Phone = v.Phone;
@@ -340,7 +343,8 @@ namespace VMSProject.Controllers
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
             var visitor = _context.Visitors.Find(id);
-            if (visitor != null) {
+            if (visitor != null)
+            {
                 _context.Visitors.Remove(visitor);
                 _context.SaveChanges();
                 TempData["Success"] = "Visitor record deleted!";
@@ -362,7 +366,8 @@ namespace VMSProject.Controllers
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
             var visitor = _context.Visitors.Find(id);
-            if (visitor != null && string.IsNullOrEmpty(visitor.QRCode)) {
+            if (visitor != null && string.IsNullOrEmpty(visitor.QRCode))
+            {
                 visitor.QRCode = "VIS-" + Guid.NewGuid().ToString("N")[..10].ToUpper();
                 _context.SaveChanges();
                 TempData["Success"] = "New security pass generated!";
@@ -376,7 +381,8 @@ namespace VMSProject.Controllers
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
             var d = _context.Departments.Find(id);
-            if (d != null) {
+            if (d != null)
+            {
                 _context.Departments.Remove(d);
                 _context.SaveChanges();
                 TempData["Success"] = "Department deleted!";
@@ -389,7 +395,8 @@ namespace VMSProject.Controllers
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
             var e = _context.Employees.Find(id);
-            if (e != null) {
+            if (e != null)
+            {
                 _context.Employees.Remove(e);
                 _context.SaveChanges();
                 TempData["Success"] = "Employee record removed!";
@@ -402,7 +409,8 @@ namespace VMSProject.Controllers
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
             var v = _context.Visits.Find(id);
-            if (v != null) {
+            if (v != null)
+            {
                 _context.Visits.Remove(v);
                 _context.SaveChanges();
                 TempData["Success"] = "Visit record deleted!";
@@ -414,7 +422,7 @@ namespace VMSProject.Controllers
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
             ViewBag.AdminName = HttpContext.Session.GetString("AdminName");
-            
+
             var query = _context.Visitors.AsQueryable();
             if (!string.IsNullOrEmpty(search)) query = query.Where(v => v.Name.Contains(search) || v.QRCode.Contains(search));
 
@@ -456,19 +464,21 @@ namespace VMSProject.Controllers
             // 1. Check for an Active visit (to check out)
             var activeVisit = _context.Visits.Include(v => v.Visitor)
                 .FirstOrDefault(v => v.PassNumber == code && v.Status == "Active");
-            
-            if (activeVisit != null) {
+
+            if (activeVisit != null)
+            {
                 activeVisit.CheckOutTime = DateTime.Now;
                 activeVisit.Status = "CheckedOut";
                 _context.SaveChanges();
                 return Json(new { success = true, message = "Checked Out Successfully", visitor = activeVisit.Visitor?.Name });
             }
-            
+
             // 2. Check for a Pending visit (to check in)
             var pendingVisit = _context.Visits.Include(v => v.Visitor)
                 .FirstOrDefault(v => v.PassNumber == code && v.Status == "Pending");
-            
-            if (pendingVisit != null) {
+
+            if (pendingVisit != null)
+            {
                 pendingVisit.CheckInTime = DateTime.Now;
                 pendingVisit.Status = "Active";
                 _context.SaveChanges();
@@ -477,10 +487,12 @@ namespace VMSProject.Controllers
 
             // 3. Check if this is a Visitor's permanent QR code (create new visit)
             var visitor = _context.Visitors.FirstOrDefault(v => v.QRCode == code);
-            if (visitor != null) {
+            if (visitor != null)
+            {
                 // Auto-create an active visit for this permanent pass holder
                 var employee = _context.Employees.FirstOrDefault(e => e.Name == visitor.WhomeToMeet);
-                var newVisit = new Visit {
+                var newVisit = new Visit
+                {
                     VisitorId = visitor.VisitorId,
                     EmployeeId = employee?.EmployeeId,
                     Purpose = visitor.PurposeOfVisit,
