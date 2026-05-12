@@ -50,51 +50,52 @@
             <div class="col-12 col-md-6 col-lg-4 col-xl-3">
                 <div class="section-card h-100 p-0 overflow-hidden pass-card-nexus @(hasPass ? "" : "opacity-75")">
                     <div class="p-4 text-center">
-                        <div class="rounded-circle p-1 border border-primary border-opacity-10 d-inline-block mb-3 shadow-sm mx-auto">
+                        <div class="pass-header-accent"></div>
+                        <div class="rounded-circle p-1 border border-primary border-opacity-10 d-inline-block mb-3 shadow-sm mx-auto bg-white">
                             <div class="rounded-circle overflow-hidden d-flex align-items-center justify-content-center bg-light" style="width: 70px; height: 70px;">
-                                @if (!string.IsNullOrEmpty(v.CapturePhoto)) { 
-                                    <img src="@v.CapturePhoto" alt="@v.Name" class="w-100 h-100" style="object-fit: cover;" /> 
+                                @if (!string.IsNullOrEmpty(v?.CapturePhoto)) { 
+                                    <img src="@v.CapturePhoto" alt="@v?.Name" class="w-100 h-100" style="object-fit: cover;" /> 
                                 } else { 
-                                    <span class="fw-800 text-primary fs-3">@(v.Name?[0].ToString().ToUpper() ?? "?")</span> 
+                                    <span class="fw-800 text-primary fs-3">@(v?.Name?[0].ToString().ToUpper() ?? "?")</span> 
                                 }
                             </div>
                         </div>
 
-                        <h6 class="fw-800 text-dark mb-1" style="font-size: 1.1rem;">@v.Name</h6>
-                        <p class="small text-muted mb-4 uppercase fw-800 letter-spacing-1" style="font-size: 0.65rem;">@(v.CompanyName ?? "INDIVIDUAL")</p>
+                        <h6 class="fw-800 text-dark mb-1" style="font-size: 1.1rem; letter-spacing: -0.3px;">@v?.Name</h6>
+                        <p class="small text-muted mb-4 fw-700 uppercase" style="font-size: 0.65rem; letter-spacing: 1px;">@(v?.CompanyName?.ToUpper() ?? "INDIVIDUAL")</p>
 
                         @if (hasPass)
                         {
-                            <div class="qr-container mb-3 p-3 bg-white border border-light rounded-4 shadow-sm d-inline-block">
-                                <img src="@qrUrl" width="140" height="140" class="rounded-3" alt="QR" />
+                            <div class="qr-container mb-4 p-3 rounded-4 d-inline-block">
+                                <img src="@qrUrl" width="140" height="140" class="rounded-3 shadow-sm" alt="QR" style="mix-blend-mode: multiply;" />
                             </div>
-                            <div class="mb-4">
-                                <span class="nexus-badge nexus-badge-info font-monospace py-2 px-3" style="font-size: 0.85rem; border: 1px dashed rgba(99, 102, 241, 0.3);">
-                                    @item.LatestPassNumber
+                            <div class="mb-2">
+                                <span class="nexus-badge nexus-badge-info font-monospace py-2 px-3" style="font-size: 0.85rem; border: 1px dashed rgba(99, 102, 241, 0.3); background: rgba(99, 102, 241, 0.05);">
+                                    <i class="fas fa-shield-halved me-2"></i>@item.LatestPassNumber
                                 </span>
                             </div>
                         }
                         else
                         {
-                            <div class="py-5 mb-3 bg-light rounded-4 border border-dashed border-2 opacity-50">
-                                <i class="fas fa-qrcode fa-3x text-muted mb-2"></i>
-                                <p class="small fw-800 text-muted mb-0 uppercase letter-spacing-1">No Pass Active</p>
+                            <div class="py-5 mb-4 bg-light rounded-4 border border-dashed border-2 opacity-50 mx-3">
+                                <i class="fas fa-qrcode fa-3x text-muted mb-3"></i>
+                                <p class="small fw-800 text-muted mb-0 uppercase tracking-widest">No Active Pass</p>
                             </div>
                         }
                     </div>
                     
-                    <div class="p-4 bg-light bg-opacity-50 border-top mt-auto">
+                    <div class="p-4 bg-light bg-opacity-30 border-top mt-auto">
                         <div class="d-flex gap-2">
                             @if (hasPass) {
-                                <button class="premium-btn w-100 py-2" style="font-size: 0.8rem;" onclick="printPass('@v.Name', '@item.LatestPassNumber', '@qrUrl')">
+                                <button class="premium-btn w-100 py-2" style="font-size: 0.75rem; border-radius: 12px;" onclick="printPass('@v?.Name', '@item.LatestPassNumber', '@qrUrl')">
                                     <i class="fas fa-print me-2"></i>PRINT
                                 </button>
-                                <button class="premium-btn secondary px-3 py-2" onclick="sharePass('@v.Name', '@item.LatestPassNumber', '@qrUrl')" title="Share">
+                                <button class="premium-btn secondary px-3 py-2" style="border-radius: 12px;" onclick="sharePass('@v?.Name', '@item.LatestPassNumber', '@qrUrl')" title="Share">
                                     <i class="fas fa-share-nodes"></i>
                                 </button>
                             } else {
-                                <a href="/User/GenerateQR/@v.VisitorId" class="premium-btn w-100 py-2" style="font-size: 0.8rem;">
-                                    <i class="fas fa-plus-circle me-2"></i>CREATE PASS
+                                <a href="/User/GenerateQR/@v?.VisitorId" class="premium-btn w-100 py-2" style="font-size: 0.75rem; border-radius: 12px;">
+                                    <i class="fas fa-plus-circle me-2"></i>GENERATE
                                 </a>
                             }
                         </div>
@@ -107,8 +108,9 @@
     {
         <div class="col-12">
             <div class="section-card text-center py-5">
-                <div class="opacity-25 mb-3"><i class="fas fa-search fa-3x text-muted"></i></div>
-                <p class="text-muted fw-800">No visitor passes found matching your search criteria.</p>
+                <div class="opacity-10 mb-3"><i class="fas fa-search fa-5x text-muted"></i></div>
+                <h5 class="fw-800 text-muted mb-1">No Results Found</h5>
+                <p class="text-muted small">Try adjusting your search filters to find what you're looking for.</p>
             </div>
         </div>
     }
@@ -161,10 +163,35 @@
 }
 
 <style>
-    .pass-card-nexus { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid #e2e8f0 !important; }
-    .pass-card-nexus:hover { transform: translateY(-8px); border-color: var(--nexus-primary) !important; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important; }
-    .qr-container { transition: all 0.3s ease; }
-    .pass-card-nexus:hover .qr-container { border-color: var(--nexus-primary) !important; transform: scale(1.02); }
+    .pass-card-nexus { 
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+        border: 1px solid #e2e8f0 !important; 
+        background: #ffffff;
+        border-radius: 24px !important;
+    }
+    .pass-card-nexus:hover { 
+        transform: translateY(-8px); 
+        border-color: #6366f1 !important; 
+        box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.15) !important; 
+    }
+    .qr-container { 
+        transition: all 0.3s ease; 
+        background: #f8fafc;
+        border: 1px solid #f1f5f9;
+    }
+    .pass-card-nexus:hover .qr-container { 
+        border-color: #6366f1 !important; 
+        background: #ffffff;
+        transform: scale(1.02) rotate(1deg); 
+    }
+    .pass-header-accent {
+        height: 6px;
+        width: 40px;
+        background: #6366f1;
+        border-radius: 3px;
+        margin: 0 auto 20px;
+        opacity: 0.3;
+    }
 </style>
 
 @section Scripts {

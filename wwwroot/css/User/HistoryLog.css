@@ -43,7 +43,7 @@
     color: #fff; border: none; padding: 12px 24px; border-radius: 30px; 
     font-weight: 800; cursor: pointer; transition: 0.3s;
 }
-.hl-filter-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px var(--vision-primary-glow); }
+.hl-filter-btn:hover { box-shadow: 0 8px 20px var(--vision-primary-glow); }
 
 /* LOG TABLE CONTENT */
 .vision-log-card { 

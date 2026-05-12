@@ -21,7 +21,7 @@
     transition: 0.3s;
     text-decoration: none;
 }
-.btn-vision-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px var(--vision-primary-glow); }
+.btn-vision-primary:hover { box-shadow: 0 8px 25px var(--vision-primary-glow); }
 
 /* BENTO STATS */
 .stats-fleet { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 32px; }
@@ -57,7 +57,7 @@
     overflow: hidden; 
     transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.dept-card:hover { transform: translateY(-10px); border-color: var(--vision-primary); box-shadow: var(--vision-shadow); }
+.dept-card:hover { border-color: var(--vision-primary); box-shadow: var(--vision-shadow); }
 
 .dept-card-top { 
     height: 120px; 

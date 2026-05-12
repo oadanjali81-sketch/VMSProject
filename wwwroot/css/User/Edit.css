@@ -210,7 +210,6 @@ button {
 }
 
     .next:hover {
-        transform: translateY(-2px);
     }
 
 .prev {
@@ -219,7 +218,6 @@ button {
 
     .prev:hover {
         background: #d1d5db;
-        transform: translateY(-2px);
     }
 
 @media(max-width:900px) {
@@ -363,5 +361,4 @@ button {
 }
 
     .confirm-btn:hover {
-        transform: translateY(-2px);
     }

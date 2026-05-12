@@ -32,7 +32,7 @@
                 <span class="input-group-text bg-light border-end-0" style="border-radius: 10px 0 0 10px; border-color: #e2e8f0;"><i class="fas fa-search text-muted"></i></span>
                 <input type="text" class="form-control bg-light border-start-0" id="tableSearchInput" placeholder="Quick search..." onkeyup="filterTable()" style="border-radius: 0 10px 10px 0; border-color: #e2e8f0; font-size: 0.9rem;">
             </div>
-            <button type="button" data-bs-toggle="modal" data-bs-target="#addEmployeeModal" class="premium-btn">
+            <button type="button" onclick="openModal('addEmployeeModal')" class="premium-btn">
                 <i class="fas fa-plus"></i> Add Employee
             </button>
         </div>
@@ -110,7 +110,7 @@
 <!-- MODALS -->
 <!-- ADD EMPLOYEE -->
 <div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content nexus-modal-content">
             <div class="nexus-modal-header">
                 <h5 class="fw-800 text-dark mb-0"><i class="fas fa-user-plus text-primary me-2"></i> Register New Employee</h5>
@@ -175,7 +175,7 @@
 
 <!-- EDIT EMPLOYEE -->
 <div class="modal fade" id="editEmployeeModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content nexus-modal-content">
             <div class="nexus-modal-header">
                 <h5 class="fw-800 text-dark mb-0"><i class="fas fa-user-edit text-primary me-2"></i> Edit Employee Details</h5>
@@ -245,68 +245,47 @@
 </div>
 
 <!-- VIEW EMPLOYEE -->
-<div class="modal fade" id="viewEmployeeModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content nexus-modal-content overflow-hidden">
-            <div class="modal-body p-0">
-                <div style="height: 180px; background: linear-gradient(135deg, #6366f1, #4f46e5); position: relative;">
-                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-4" data-bs-dismiss="modal"></button>
+<div class="modal fade" id="viewEmployeeModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="true">
+    <div class="modal-dialog modal-dialog-centered modal-view-lg">
+        <div class="modal-content nexus-view-modal-content border-0">
+            <div class="modal-body view-modal-body">
+                <div class="view-modal-header">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="position: absolute; top: 18px; right: 20px; z-index: 10;"></button>
                 </div>
-                <div class="px-5 pb-5">
-                    <div class="d-flex align-items-center gap-4" style="margin-top: -70px; margin-bottom: 35px;">
-                        <div class="rounded-4 border border-5 border-white shadow-lg overflow-hidden bg-white d-flex align-items-center justify-content-center" style="width: 140px; height: 140px; min-width: 140px;">
-                            <img id="view_photo" src="" class="w-100 h-100 object-fit-cover d-none" />
-                            <span id="view_initial" class="fw-800 text-primary fs-1">?</span>
-                        </div>
-                        <div class="pt-5 mt-3">
-                            <h2 id="view_name" class="fw-800 text-dark mb-1" style="letter-spacing: -1px; font-size: 2rem;">Employee Name</h2>
-                            <p id="view_designation" class="text-primary fw-800 uppercase letter-spacing-2 mb-0" style="font-size: 0.9rem;">DESIGNATION TITLE</p>
-                        </div>
+
+                <div class="view-profile-overlap">
+                    <div class="view-avatar-box">
+                        <img id="view_photo" src="" class="w-100 h-100 object-fit-cover d-none" />
+                        <span id="view_initial" class="fw-800 text-primary fs-2">?</span>
                     </div>
-                    
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="p-4 bg-light rounded-4 border border-white h-100">
-                                <label class="text-muted small fw-800 uppercase letter-spacing-1 d-block mb-2" style="font-size: 0.65rem;">DEPARTMENT</label>
-                                <div id="view_department" class="fw-800 text-dark d-flex align-items-center fs-5">
-                                    <i class="fas fa-building-user me-3 text-primary opacity-75"></i>
-                                    <span>—</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-4 bg-light rounded-4 border border-white h-100">
-                                <label class="text-muted small fw-800 uppercase letter-spacing-1 d-block mb-2" style="font-size: 0.65rem;">EMPLOYEE ID</label>
-                                <div id="view_id" class="fw-800 text-dark d-flex align-items-center fs-5">
-                                    <i class="fas fa-id-card-clip me-3 opacity-50"></i>
-                                    <span>#—</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-4 bg-light rounded-4 border border-white h-100">
-                                <label class="text-muted small fw-800 uppercase letter-spacing-1 d-block mb-2" style="font-size: 0.65rem;">EMAIL ADDRESS</label>
-                                <div id="view_email" class="fw-700 text-dark d-flex align-items-center small">
-                                    <i class="fas fa-envelope me-3 opacity-50"></i>
-                                    <span>—</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-4 bg-light rounded-4 border border-white h-100">
-                                <label class="text-muted small fw-800 uppercase letter-spacing-1 d-block mb-2" style="font-size: 0.65rem;">PHONE NUMBER</label>
-                                <div id="view_phone" class="fw-700 text-dark d-flex align-items-center">
-                                    <i class="fas fa-phone me-3 opacity-50"></i>
-                                    <span>—</span>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="pb-2">
+                        <h2 id="view_name" class="fw-800 text-dark mb-1" style="letter-spacing: -0.75px; font-size: 1.75rem;">Employee Name</h2>
+                        <p id="view_designation" class="text-primary fw-800 uppercase letter-spacing-2 mb-0" style="font-size: 0.78rem;">DESIGNATION TITLE</p>
+                    </div>
+                </div>
+
+                <div class="view-detail-grid">
+                    <div class="view-info-card">
+                        <label class="view-info-label">Department</label>
+                        <div id="view_department" class="view-info-value"><i class="fas fa-building-user"></i><span>—</span></div>
+                    </div>
+                    <div class="view-info-card">
+                        <label class="view-info-label">Employee ID</label>
+                        <div id="view_id" class="view-info-value"><i class="fas fa-id-card-clip"></i><span>#—</span></div>
+                    </div>
+                    <div class="view-info-card">
+                        <label class="view-info-label">Email Address</label>
+                        <div id="view_email" class="view-info-value"><i class="fas fa-envelope"></i><span>—</span></div>
+                    </div>
+                    <div class="view-info-card">
+                        <label class="view-info-label">Phone Number</label>
+                        <div id="view_phone" class="view-info-value"><i class="fas fa-phone"></i><span>—</span></div>
                     </div>
                 </div>
             </div>
-            <div class="nexus-modal-footer d-flex justify-content-center gap-3 bg-light bg-opacity-50">
-                <button type="button" class="premium-btn secondary" data-bs-dismiss="modal" style="min-width: 180px;">Close Profile</button>
-                <button type="button" id="view_edit_btn" class="premium-btn" style="min-width: 180px;">
+            <div class="nexus-modal-footer">
+                <button type="button" class="premium-btn secondary" data-bs-dismiss="modal" style="min-width: 160px;">Close Profile</button>
+                <button type="button" id="view_edit_btn" class="premium-btn" style="min-width: 160px;">
                     <i class="fas fa-user-edit me-2"></i> Edit Profile
                 </button>
             </div>

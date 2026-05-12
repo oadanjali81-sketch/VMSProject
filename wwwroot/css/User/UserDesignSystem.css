@@ -338,7 +338,6 @@ h6 {
 }
 
     .stat-card:hover {
-        transform: translateY(-5px);
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
     }
 
@@ -354,7 +353,6 @@ h6 {
 }
 
     .section-card:hover {
-        transform: translateY(-3px);
         box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
     }
 
@@ -379,7 +377,6 @@ h6 {
     .premium-btn:hover {
         background: #4f46e5;
         color: #ffffff;
-        transform: translateY(-2px);
         box-shadow: 0 8px 15px rgba(99, 102, 241, 0.3);
         filter: brightness(1.1);
     }
@@ -416,7 +413,6 @@ h6 {
         border-color: #6366f1;
         color: white;
         background: #6366f1;
-        transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
     }
 
@@ -571,28 +567,325 @@ h6 {
         background: white;
     }
 
-/* Modals */
+/* ══════════════════════════════════════════
+   MODALS & OVERLAYS — NEXUS DESIGN SYSTEM
+   ══════════════════════════════════════════ */
+
+/* Backdrop: blurred, dark overlay */
+.modal-backdrop {
+    background-color: rgba(15, 23, 42, 0.5) !important;
+    backdrop-filter: blur(6px) saturate(160%);
+    -webkit-backdrop-filter: blur(6px) saturate(160%);
+    z-index: 1050 !important;
+}
+
+/* Modal z-index above backdrop */
+.modal {
+    z-index: 1060 !important;
+    padding-right: 0 !important;
+}
+
+/* Fade + scale entrance animation */
+.modal.fade .modal-dialog {
+    transform: scale(0.92) translateY(16px);
+    transition: transform 0.35s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.3s ease;
+    opacity: 0;
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+/* Base modal card — used for Add/Edit modals */
 .nexus-modal-content {
-    border-radius: 20px;
-    border: none;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border-radius: 24px;
+    box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.04);
     overflow: hidden;
+    background: #ffffff;
+    border: none;
+}
+
+/* View modal card — needs overflow visible so avatar can bleed out of gradient header */
+.nexus-view-modal-content {
+    border-radius: 24px;
+    box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.04);
+    overflow: visible !important;
+    background: #ffffff;
+    border: none;
+    /* clip the rounded corners cleanly without hiding the overlap */
+    position: relative;
 }
 
 .nexus-modal-header {
-    padding: 24px 32px;
+    padding: 28px 32px;
     border-bottom: 1px solid #f1f5f9;
-    background: #fff;
+    background: #ffffff;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    position: relative;
 }
+
+    .nexus-modal-header .btn-close {
+        background-color: #f1f5f9;
+        padding: 10px;
+        border-radius: 14px;
+        transition: all 0.3s ease;
+        opacity: 0.8;
+        margin: 0;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+        .nexus-modal-header .btn-close:hover {
+            background-color: #e2e8f0;
+            opacity: 1;
+            transform: rotate(90deg);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
 
 .nexus-modal-footer {
     padding: 24px 32px;
     border-top: 1px solid #f1f5f9;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+}
+
+/* ══════════════════════════════════════════
+   VIEW MODAL CARD COMPONENTS
+   ══════════════════════════════════════════ */
+
+/* Gradient header — balanced height for clean look */
+.view-modal-header {
+    height: 120px;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 60%, #4338ca 100%);
+    position: relative;
+    border-radius: 24px 24px 0 0;
+    flex-shrink: 0;
+}
+
+/* Profile section: avatar bleeds up over the header */
+.view-profile-overlap {
+    margin-top: -55px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    padding: 0 28px;
+    position: relative;
+    z-index: 2;
+}
+
+/* Avatar box: clean white card with rounded corners */
+.view-avatar-box {
+    width: 110px;
+    height: 110px;
+    min-width: 110px;
+    border-radius: 20px;
+    border: 5px solid #ffffff;
+    background: #f1f5f9;
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15), 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Info card grid: 2 columns */
+.view-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    padding: 0 28px 28px;
+}
+
+/* Individual info card */
+.view-info-card {
     background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 16px;
+    padding: 16px 18px;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+    .view-info-card:hover {
+        background: #ffffff;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+        border-color: #e2e8f0;
+    }
+
+.view-info-label {
+    font-size: 0.63rem;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.view-info-value {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+    .view-info-value i {
+        color: #6366f1;
+        opacity: 0.75;
+        width: 18px;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+
+/* ══════════════════════════════════════════
+   MODAL BODY — SCROLLING & SIZING
+   ══════════════════════════════════════════ */
+
+/* Default modal body: used for Add/Edit modals with form fields */
+.modal-body {
+    max-height: calc(100vh - 260px);
+    overflow-y: auto;
+    padding: 28px 32px;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+    .modal-body::-webkit-scrollbar { width: 5px; }
+    .modal-body::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+
+/* View modal body override: no scroll, no max-height — content is always short */
+.view-modal-body {
+    padding: 0 !important;
+    overflow: visible !important;
+    max-height: none !important;
+}
+
+/* Vertical Center Fix */
+.modal-dialog-centered {
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - var(--bs-modal-margin) * 2);
+}
+
+/* Lock background scroll when modal is open */
+body.modal-open {
+    overflow: hidden !important;
+    padding-right: 0 !important;
+}
+
+/* Width control */
+@media (min-width: 992px) {
+    .modal-lg {
+        max-width: 860px;
+    }
+    .modal-view-lg {
+        max-width: 780px;
+    }
+}
+
+/* ── View Modal Polish ─────────────────────────────── */
+
+/*
+ * Because nexus-view-modal-content uses overflow:visible (so the avatar
+ * can bleed above the gradient header), child backgrounds are NOT
+ * auto-clipped by the parent's border-radius. We manually give the
+ * footer rounded bottom corners to complete the card shape.
+ */
+.nexus-view-modal-content .nexus-modal-footer {
+    border-radius: 0 0 24px 24px;
+}
+
+/* Ensure the close × button inside the gradient header is always clickable */
+.view-modal-header .btn-close {
+    position: absolute;
+    top: 18px;
+    right: 20px;
+    z-index: 10;
+    filter: brightness(0) invert(1);   /* white icon on gradient */
+    opacity: 0.85;
+    transition: opacity 0.2s, transform 0.25s;
+}
+.view-modal-header .btn-close:hover {
+    opacity: 1;
+    transform: rotate(90deg) scale(1.1);
+}
+
+/* ── Camera modal body — never show a scrollbar ──── */
+#cameraModal .modal-body {
+    max-height: 500px;
+    overflow: hidden;
+}
+
+/* ── General footer button alignment ─────────────── */
+.nexus-modal-footer .premium-btn {
+    min-width: 140px;
+}
+
+/* Form Layout Consistency in Modals */
+.nexus-modal-content .nexus-form-group {
+    margin-bottom: 20px;
+}
+
+.nexus-modal-content .nexus-label {
+    margin-bottom: 8px;
+    font-size: 0.7rem;
+    color: #64748b;
+}
+
+/* Responsive: small screens */
+@media (max-width: 576px) {
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+
+    .nexus-modal-header,
+    .nexus-modal-footer {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    .modal-body {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    .nexus-modal-content,
+    .nexus-view-modal-content {
+        border-radius: 18px;
+    }
+
+    .view-modal-header {
+        border-radius: 18px 18px 0 0;
+    }
+
+    .view-detail-grid {
+        grid-template-columns: 1fr;
+        padding: 0 18px 22px;
+    }
+
+    .view-profile-overlap {
+        padding: 0 18px;
+        gap: 14px;
+    }
+
+    .view-avatar-box {
+        width: 90px;
+        height: 90px;
+        min-width: 90px;
+    }
+
+    .nexus-modal-footer {
+        flex-wrap: wrap;
+    }
 }
 
 /* Animations */

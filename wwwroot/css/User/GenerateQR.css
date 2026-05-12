@@ -280,7 +280,7 @@
     font-family: 'Inter', sans-serif;
     transition: all .2s;
 }
-.gqr-btn-checkin:hover { transform: translateY(-2px); }
+.gqr-btn-checkin:hover { }
 
 .gqr-btn-checkout {
     background: linear-gradient(135deg, #dc2626, #b91c1c);
@@ -297,7 +297,7 @@
     font-family: 'Inter', sans-serif;
     transition: all .2s;
 }
-.gqr-btn-checkout:hover { transform: translateY(-2px); }
+.gqr-btn-checkout:hover { }
 
 .gqr-status-msg { margin-top: 10px; font-size: 0.78rem; min-height: 20px; }
 .gqr-status-ok   { color: #16a34a; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }

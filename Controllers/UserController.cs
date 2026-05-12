@@ -117,6 +117,43 @@ namespace VMSProject.Controllers
         }
 
         [HttpGet]
+        [Route("User/Department/Add")]
+        public IActionResult DepartmentAdd()
+        {
+            if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
+            ViewBag.AdminName = HttpContext.Session.GetString("AdminName");
+            ViewBag.Mode = "Add";
+            return View("Department", new List<Department>());
+        }
+
+        [HttpGet]
+        [Route("User/Department/Edit/{id}")]
+        public IActionResult DepartmentEditPage(int id)
+        {
+            if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
+            ViewBag.AdminName = HttpContext.Session.GetString("AdminName");
+            var d = _context.Departments.Find(id);
+            if (d == null) return NotFound();
+            ViewBag.Mode = "Edit";
+            ViewBag.DepartmentData = d;
+            return View("Department", new List<Department>());
+        }
+
+        [HttpGet]
+        [Route("User/Department/Details/{id}")]
+        public IActionResult DepartmentDetails(int id)
+        {
+            if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
+            ViewBag.AdminName = HttpContext.Session.GetString("AdminName");
+            var d = _context.Departments.Find(id);
+            if (d == null) return NotFound();
+            ViewBag.Mode = "Details";
+            ViewBag.DepartmentData = d;
+            ViewBag.EmployeeCount = _context.Employees.Count(e => e.DepartmentId == id);
+            return View("Department", new List<Department>());
+        }
+
+        [HttpGet]
         public IActionResult GetDepartment(int id)
         {
             var d = _context.Departments.Find(id);
@@ -132,7 +169,7 @@ namespace VMSProject.Controllers
             ViewBag.AdminName = HttpContext.Session.GetString("AdminName");
 
             var query = _context.Employees.Include(e => e.Department).AsQueryable();
-            if (!string.IsNullOrEmpty(search)) query = query.Where(e => e.Name.Contains(search) || e.Email.Contains(search));
+            if (!string.IsNullOrEmpty(search)) query = query.Where(e => (e.Name != null && e.Name.Contains(search)) || (e.Email != null && e.Email.Contains(search)));
 
             int pageSize = 10;
             var total = query.Count();
@@ -200,7 +237,7 @@ namespace VMSProject.Controllers
 
             var query = _context.Visits.Include(v => v.Visitor).Include(v => v.Employee).ThenInclude(e => e.Department).AsQueryable();
 
-            if (!string.IsNullOrEmpty(search)) query = query.Where(v => v.Visitor.Name.Contains(search) || v.Visitor.Phone.Contains(search));
+            if (!string.IsNullOrEmpty(search)) query = query.Where(v => v.Visitor != null && ((v.Visitor.Name != null && v.Visitor.Name.Contains(search)) || (v.Visitor.Phone != null && v.Visitor.Phone.Contains(search))));
             if (!string.IsNullOrEmpty(status)) query = query.Where(v => v.Status == status);
             if (dateFrom.HasValue) query = query.Where(v => v.VisitDate.Date >= dateFrom.Value.Date);
             if (dateTo.HasValue) query = query.Where(v => v.VisitDate.Date <= dateTo.Value.Date);
@@ -252,19 +289,28 @@ namespace VMSProject.Controllers
             var from = dateFrom ?? DateTime.Today;
             var to = dateTo ?? DateTime.Today;
 
-            var visits = _context.Visits.Include(v => v.Visitor).Include(v => v.Employee).ThenInclude(e => e.Department)
-                        .Where(v => v.VisitDate.Date >= from.Date && v.VisitDate.Date <= to.Date).ToList();
+            var visits = _context.Visits
+                .Include(v => v.Visitor)
+                .Include(v => v.Employee).ThenInclude(e => e!.Department)
+                .Where(v => v.VisitDate.Date >= from.Date && v.VisitDate.Date <= to.Date)
+                .ToList();
 
             ViewBag.TotalInRange = visits.Count;
             ViewBag.CheckedIn = visits.Count(v => v.Status != "Pending");
             ViewBag.CheckedOut = visits.Count(v => v.Status == "CheckedOut");
 
             var completed = visits.Where(v => v.CheckOutTime.HasValue).ToList();
-            ViewBag.AvgDurationMins = completed.Count > 0 ? completed.Average(v => (v.CheckOutTime!.Value - v.CheckInTime).TotalMinutes) : 0;
+            ViewBag.AvgDurationMins = completed.Count > 0
+                ? completed.Average(v => (v.CheckOutTime!.Value - v.CheckInTime).TotalMinutes)
+                : 0;
 
-            ViewBag.GroupedVisits = visits.GroupBy(v => v.VisitDate.Date).OrderByDescending(g => g.Key).ToList();
+            // Raw values for the date inputs (yyyy-MM-dd for HTML date input)
             ViewBag.DateFrom = from.ToString("yyyy-MM-dd");
             ViewBag.DateTo = to.ToString("yyyy-MM-dd");
+
+            // Display text for the trigger label (e.g. "05/01/2026 thru 05/12/2026")
+            ViewBag.DateRangeLabel = $"{from:MM/dd/yyyy} thru {to:MM/dd/yyyy}";
+
             ViewBag.AdminName = HttpContext.Session.GetString("AdminName");
 
             return View(visits);
@@ -277,7 +323,7 @@ namespace VMSProject.Controllers
             ViewBag.AdminName = HttpContext.Session.GetString("AdminName");
 
             var query = _context.Visitors.AsQueryable();
-            if (!string.IsNullOrEmpty(search)) query = query.Where(v => v.Name.Contains(search) || v.Phone.Contains(search) || v.CompanyName.Contains(search));
+            if (!string.IsNullOrEmpty(search)) query = query.Where(v => (v.Name != null && v.Name.Contains(search)) || (v.Phone != null && v.Phone.Contains(search)) || (v.CompanyName != null && v.CompanyName.Contains(search)));
 
             int pageSize = 10;
             var total = query.Count();
@@ -305,11 +351,52 @@ namespace VMSProject.Controllers
             return View("VisitorManagement", items);
         }
 
+        // --- Page-Based Visitor CRUD via ViewBag.Mode ---
+        [HttpGet("User/AddVisitorPage")]
+        public IActionResult AddVisitorPage()
+        {
+            if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
+            ViewBag.AdminName = HttpContext.Session.GetString("AdminName");
+            ViewBag.Mode = "Add";
+            ViewBag.Employees = _context.Employees.OrderBy(e => e.Name).ToList();
+            ViewBag.Departments = _context.Departments.OrderBy(d => d.DepartmentName).ToList();
+            return View("VisitorManagement");
+        }
+
+        [HttpGet("User/ViewVisitor/{id}")]
+        public IActionResult ViewVisitor(int id)
+        {
+            if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
+            var visitor = _context.Visitors.Include(v => v.Company).FirstOrDefault(v => v.VisitorId == id);
+            if (visitor == null) return RedirectToAction("VisitorManagement");
+            ViewBag.AdminName = HttpContext.Session.GetString("AdminName");
+            ViewBag.Mode = "View";
+            ViewBag.Visitor = visitor;
+            ViewBag.VisitCount = _context.Visits.Count(v => v.VisitorId == id);
+            ViewBag.LastVisit = _context.Visits.Where(v => v.VisitorId == id).OrderByDescending(v => v.VisitDate).FirstOrDefault();
+            return View("VisitorManagement");
+        }
+
+        [HttpGet("User/EditVisitorPage/{id}")]
+        public IActionResult EditVisitorPage(int id)
+        {
+            if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
+            var visitor = _context.Visitors.Find(id);
+            if (visitor == null) return RedirectToAction("VisitorManagement");
+            ViewBag.AdminName = HttpContext.Session.GetString("AdminName");
+            ViewBag.Mode = "Edit";
+            ViewBag.Visitor = visitor;
+            ViewBag.Employees = _context.Employees.OrderBy(e => e.Name).ToList();
+            ViewBag.Departments = _context.Departments.OrderBy(d => d.DepartmentName).ToList();
+            return View("VisitorManagement");
+        }
+
         [HttpPost]
-        public IActionResult AddVisitor(Visitor v, IFormFile? PhotoFile)
+        public IActionResult AddVisitor(Visitor v, IFormFile? PhotoFile, IFormFile? IdFile)
         {
             if (!IsLoggedIn()) return RedirectToAction("Login", "Account");
             v.CapturePhoto = SaveFile(PhotoFile, "visitors");
+            v.UploadId = SaveFile(IdFile, "visitor-ids");
             _context.Visitors.Add(v);
             _context.SaveChanges();
             TempData["Success"] = "Visitor registered successfully!";
@@ -424,7 +511,7 @@ namespace VMSProject.Controllers
             ViewBag.AdminName = HttpContext.Session.GetString("AdminName");
 
             var query = _context.Visitors.AsQueryable();
-            if (!string.IsNullOrEmpty(search)) query = query.Where(v => v.Name.Contains(search) || v.QRCode.Contains(search));
+            if (!string.IsNullOrEmpty(search)) query = query.Where(v => (v.Name != null && v.Name.Contains(search)) || (v.QRCode != null && v.QRCode.Contains(search)));
 
             var result = query.OrderByDescending(v => v.VisitorId).Skip((page - 1) * pageSize).Take(pageSize)
                 .Select(v => new VisitorPassViewModel { Visitor = v, LatestPassNumber = v.QRCode }).ToList();

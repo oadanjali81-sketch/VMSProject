@@ -243,5 +243,13 @@
 
 @section Scripts {
     <script>
+        function filterTable() {
+            const input = document.getElementById('tableSearchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#standardTable tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(input) ? '' : 'none';
+            });
+        }
     </script>
 }

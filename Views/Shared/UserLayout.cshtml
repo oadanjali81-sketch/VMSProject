@@ -52,7 +52,13 @@
 
             <div class="nav-section">
                 <div class="section-title"><span>VISITOR MANAGEMENT</span></div>
-                <a href="/User/VisitorManagement" class="nav-item @(currentAction == "VisitorManagement" ? "active" : "")" data-title="Visitors">
+                @{
+                    var isVisitorActive = currentAction == "VisitorManagement" || 
+                                         currentAction == "AddVisitorPage" || 
+                                         currentAction == "ViewVisitor" || 
+                                         currentAction == "EditVisitorPage";
+                }
+                <a href="/User/VisitorManagement" class="nav-item @(isVisitorActive ? "active" : "")" data-title="Visitors">
                     <i class="fas fa-users"></i>
                     <span class="nav-text">Visitors</span>
                 </a>

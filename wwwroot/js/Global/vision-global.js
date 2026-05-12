@@ -1,22 +1,76 @@
 /**
  * VISION GLOBAL UTILITIES
+ * Single-instance modal management with full backdrop cleanup.
  */
 
-var getModal = function(id) {
+/** Internal: purge all stale .modal-backdrop elements from DOM */
+function _purgeBackdrops() {
+    document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+}
+
+/** Internal: get or create a Bootstrap Modal instance (never duplicate) */
+var getModal = function (id) {
     var el = document.getElementById(id);
     if (!el) return null;
-    return bootstrap.Modal.getOrCreateInstance(el);
+    var existing = bootstrap.Modal.getInstance(el);
+    if (existing) return existing;
+    return new bootstrap.Modal(el, { backdrop: true, keyboard: true });
 };
 
-window.openModal = function(id) { 
+/**
+ * Open a modal by ID. Ensures:
+ * - All currently-open modals are hidden first
+ * - All stale backdrops are purged
+ * - body.modal-open is cleaned up before re-opening
+ */
+window.openModal = function (id) {
+    // 1. Hide any currently visible modals
+    document.querySelectorAll('.modal.show').forEach(m => {
+        const inst = bootstrap.Modal.getInstance(m);
+        if (inst) {
+            inst.hide();
+            m.classList.remove('show');
+            m.style.display = 'none';
+            m.setAttribute('aria-hidden', 'true');
+            m.removeAttribute('aria-modal');
+        }
+    });
+
+    // 2. Remove ALL lingering backdrops and body classes
+    _purgeBackdrops();
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+
+    // 3. Open the requested modal
     var m = getModal(id);
-    if (m) m.show();
-    else console.warn("Modal not found: " + id);
+    if (m) {
+        m.show();
+    } else {
+        console.warn('[VMS] Modal element not found: #' + id);
+    }
 };
 
-window.closeModal = function(id) { 
-    var m = getModal(id);
-    if (m) m.hide();
+/**
+ * Close a modal by ID and fully clean up the DOM.
+ */
+window.closeModal = function (id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var m = bootstrap.Modal.getInstance(el);
+    if (m) {
+        m.hide();
+    } else {
+        // Force-hide if no instance exists
+        el.classList.remove('show');
+        el.style.display = 'none';
+        el.setAttribute('aria-hidden', 'true');
+        el.removeAttribute('aria-modal');
+        _purgeBackdrops();
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    }
 };
 
 /**
@@ -48,17 +102,17 @@ let pendingDeleteAction = null;
  */
 function openDeleteModal(action, itemName, title = "Delete Item", subtitle = "Action Confirmation Required") {
     pendingDeleteAction = action;
-    
+
     // Update content
     const nameEl = document.getElementById('deleteItemName');
     if (nameEl) nameEl.textContent = itemName;
-    
+
     const titleEl = document.getElementById('deleteModalTitle');
     if (titleEl) titleEl.textContent = title;
-    
+
     const subEl = document.getElementById('deleteModalSubtitle');
     if (subEl) subEl.textContent = subtitle;
-    
+
     // Reset button state
     const btn = document.getElementById('deleteConfirmBtn');
     if (btn) {
@@ -66,10 +120,7 @@ function openDeleteModal(action, itemName, title = "Delete Item", subtitle = "Ac
         btn.innerHTML = '<i class="fas fa-trash"></i> Delete Now';
     }
 
-    const modalEl = document.getElementById('deleteModal');
-    if (modalEl) {
-        new bootstrap.Modal(modalEl).show();
-    }
+    if (typeof openModal === 'function') openModal('deleteModal');
 }
 
 /**
@@ -106,4 +157,12 @@ function confirmDelete() {
     }
 }
 
-// Global Event Listeners (Removed as Bootstrap handles Escape and Backdrop click natively)
+// Global: purge ALL backdrops + restore scroll whenever any modal hides
+document.addEventListener('hidden.bs.modal', function () {
+    if (document.querySelectorAll('.modal.show').length === 0) {
+        _purgeBackdrops();
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    }
+});

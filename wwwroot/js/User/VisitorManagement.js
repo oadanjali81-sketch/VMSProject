@@ -3,22 +3,22 @@
  * Handles View, Edit, and Registration interactions.
  */
 
-(function() {
+(function () {
     // ── HELPERS FOR ID TRIGGERS ──
-    window.openViewModalFromId = function(id) {
+    window.openViewModalFromId = function (id) {
         if (typeof visitorsData === 'undefined' || !visitorsData) return;
         var v = visitorsData.find(x => x.VisitorId == id);
         if (v) openViewModal(v);
     };
 
-    window.openEditModalFromId = function(id) {
+    window.openEditModalFromId = function (id) {
         if (typeof visitorsData === 'undefined' || !visitorsData) return;
         var v = visitorsData.find(x => x.VisitorId == id);
         if (v) openEditModal(v);
     };
 
     // ── ADD VISITOR ──
-    window.openAddModal = function() {
+    window.openAddModal = function () {
         if (typeof openModal === 'function') openModal('modalAdd');
         else console.error("openModal function not found");
     };
@@ -27,17 +27,17 @@
     function openViewModal(v) {
         document.getElementById('v_name_top').textContent = v.Name || 'Anonymous';
         document.getElementById('v_company_top').textContent = (v.CompanyName || 'INDIVIDUAL').toUpperCase();
-        
+
         const setVal = (id, val) => {
             const el = document.getElementById(id);
             if (el && el.querySelector('span')) el.querySelector('span').textContent = val;
         };
-        
+
         setVal('v_email', v.Email || '—');
         setVal('v_phone', v.Phone || '—');
         setVal('v_host', v.WhomeToMeet || '—');
         setVal('v_purpose', v.Purpose || '—');
-        
+
         const photo = document.getElementById('v_photo');
         const initial = document.getElementById('v_initial');
         if (v.CapturePhoto) {
@@ -49,12 +49,12 @@
             initial.classList.remove('d-none');
             initial.textContent = (v.Name || '?').charAt(0).toUpperCase();
         }
-        
+
         document.getElementById('v_edit_btn').onclick = () => {
             if (typeof closeModal === 'function') closeModal('modalView');
             openEditModal(v);
         };
-        
+
         if (typeof openModal === 'function') openModal('modalView');
     }
 
@@ -72,10 +72,8 @@
 
     // ── CAMERA LOGIC ──
     let camStream = null;
-    window.openCameraModal = function() {
-        if (typeof bootstrap === 'undefined') return;
-        const modal = new bootstrap.Modal(document.getElementById('cameraModal'));
-        modal.show();
+    window.openCameraModal = function () {
+        if (typeof openModal === 'function') openModal('cameraModal');
         const video = document.getElementById('cameraVideo');
         const status = document.getElementById('cameraStatus');
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
@@ -89,7 +87,7 @@
             });
     }
 
-    window.closeCameraModal = function() {
+    window.closeCameraModal = function () {
         if (camStream) { camStream.getTracks().forEach(track => track.stop()); camStream = null; }
         const modalEl = document.getElementById('cameraModal');
         if (typeof bootstrap === 'undefined') return;
@@ -97,7 +95,7 @@
         if (modal) modal.hide();
     }
 
-    window.capturePhoto = function() {
+    window.capturePhoto = function () {
         const video = document.getElementById('cameraVideo');
         const canvas = document.getElementById('cameraCanvas');
         const preview = document.getElementById('add_photo_preview');
@@ -119,7 +117,7 @@
         window.closeCameraModal();
     }
 
-    window.handlePhotoUpload = function(input) {
+    window.handlePhotoUpload = function (input) {
         const preview = document.getElementById('add_photo_preview');
         if (input.files && input.files[0]) {
             const reader = new FileReader();
@@ -132,7 +130,7 @@
 
     // ── QR PASS ──
     let _currentQRData = { name: '', code: '', company: '' };
-    window.openQRPassModal = function(id, name, qrCode, photo, company) {
+    window.openQRPassModal = function (id, name, qrCode, photo, company) {
         _currentQRData = { name, code: qrCode, company: company || 'INDIVIDUAL' };
         document.getElementById('qrp_name').textContent = name;
         document.getElementById('qrp_company').textContent = (company || 'INDIVIDUAL').toUpperCase();
@@ -154,7 +152,7 @@
         if (typeof openModal === 'function') openModal('modalQRPass');
     }
 
-    window.printCurrentQR = function() {
+    window.printCurrentQR = function () {
         if (!_currentQRData.code) return;
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(_currentQRData.code)}`;
         const w = window.open('', '_blank');
@@ -170,7 +168,7 @@
         w.document.close();
     }
 
-    window.shareQRDirect = function() {
+    window.shareQRDirect = function () {
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(_currentQRData.code)}`;
         if (navigator.share) navigator.share({ title: 'Visitor Pass', url: qrUrl });
         else window.open(qrUrl, '_blank');
