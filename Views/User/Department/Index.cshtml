@@ -1,0 +1,165 @@
+@model IEnumerable<VMSProject.Models.Department>
+@{
+    Layout = "UserLayout";
+    ViewData["Title"] = "Department Directory";
+    var empCounts = ViewBag.EmpCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
+}
+
+<!-- Summary Header -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div>
+                <p class="text-muted small mb-1">TOTAL DEPARTMENTS</p>
+                <h3>@Model?.Count()</h3>
+            </div>
+            <div style="width: 48px; height: 48px; background: rgba(99, 102, 241, 0.1); color: #6366f1; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                <i class="fas fa-sitemap"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section-card animate-fade-up">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+        <div>
+            <h5 class="fw-800 text-dark mb-1" style="letter-spacing: -0.5px;">Department List</h5>
+            <p class="text-muted small mb-0">Manage organizational units and resource distribution.</p>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div class="input-group" style="width: 280px;">
+                <span class="input-group-text bg-light border-end-0" style="border-radius: 10px 0 0 10px; border-color: #e2e8f0;"><i class="fas fa-search text-muted"></i></span>
+                <input type="text" class="form-control bg-light border-start-0" id="tableSearchInput" placeholder="Quick search..." onkeyup="filterTable()" style="border-radius: 0 10px 10px 0; border-color: #e2e8f0; font-size: 0.9rem;">
+            </div>
+            <a href="/User/Department/Add" class="premium-btn text-decoration-none">
+                <i class="fas fa-plus"></i> Add Department
+            </a>
+        </div>
+    </div>
+
+    <div class="nexus-table-wrapper">
+        <div class="table-responsive">
+            <table class="nexus-table" id="standardTable">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">#</th>
+                        <th>Department Details</th>
+                        <th>Total Workforce</th>
+                        <th>Strategic Category</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        int i = 1;
+                        foreach (var d in Model)
+                        {
+                            var empCount = empCounts.ContainsKey(d.DepartmentId) ? empCounts[d.DepartmentId] : 0;
+                            <tr class="hover-row" style="cursor: pointer;" onclick="if(!event.target.closest('.tool-btn')) { window.location.href='/User/Department/Details/@d.DepartmentId'; }">
+                                <td><span class="nexus-badge nexus-badge-info">@i</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-800 shadow-sm" style="width: 42px; height: 42px; font-size: 14px; border: 1px solid rgba(99, 102, 241, 0.1);">
+                                            @d.DepartmentName.Substring(0, 1).ToUpper()
+                                        </div>
+                                        <div>
+                                            <div class="fw-800 text-dark fs-7 lh-1 mb-1">@d.DepartmentName</div>
+                                            <small class="text-muted" style="font-size: 0.75rem;">ID: DEPT-@(d.DepartmentId.ToString("D3"))</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress flex-grow-1" style="height: 6px; max-width: 100px; border-radius: 10px; background: #f1f5f9;">
+                                            <div class="progress-bar bg-primary rounded-pill" role="progressbar" style="width: @(Math.Min(empCount * 10, 100))%;"></div>
+                                        </div>
+                                        <span class="fw-800 text-dark fs-7">@empCount</span>
+                                    </div>
+                                </td>
+                                <td><span class="nexus-badge nexus-badge-success">Operational Unit</span></td>
+                                <td class="text-end">
+                                    <a href="/User/Department/Edit/@d.DepartmentId" class="tool-btn warning d-inline-flex align-items-center justify-content-center text-decoration-none" title="Edit">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="opacity-25 mb-3"><i class="fas fa-sitemap fa-3x"></i></div>
+                                <p class="text-muted fw-600">No departments found in the directory.</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if (ViewBag.Pagination != null)
+    {
+        var pModel = (VMSProject.Models.PaginationViewModel)ViewBag.Pagination;
+        @if (pModel.TotalPages > 0)
+        {
+            <div class="nexus-pagination-wrapper">
+                <div class="nexus-page-info">
+                    Showing @(((pModel.CurrentPage - 1) * pModel.PageSize) + 1) to @(Math.Min(pModel.CurrentPage * pModel.PageSize, pModel.TotalItems)) of @pModel.TotalItems entries
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <select class="nexus-page-size-select" onchange="updatePageSize(this.value)">
+                        <option value="10" selected="@(pModel.PageSize == 10)">10 per page</option>
+                        <option value="20" selected="@(pModel.PageSize == 20)">20 per page</option>
+                        <option value="50" selected="@(pModel.PageSize == 50)">50 per page</option>
+                        <option value="100" selected="@(pModel.PageSize == 100)">100 per page</option>
+                    </select>
+                    <nav>
+                        <ul class="nexus-pagination">
+                            @if (pModel.HasPreviousPage)
+                            {
+                                var prevVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage - 1).ToString() };
+                                <li class="page-item"><a href="@Url.Action(pModel.Action, pModel.Controller, prevVals)" class="page-link"><i class="fas fa-chevron-left"></i></a></li>
+                            }
+                            @for (int i = Math.Max(1, pModel.CurrentPage - 2); i <= Math.Min(pModel.TotalPages, pModel.CurrentPage + 2); i++)
+                            {
+                                var pageVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = i.ToString() };
+                                <li class="page-item @(i == pModel.CurrentPage ? "active" : "")"><a href="@Url.Action(pModel.Action, pModel.Controller, pageVals)" class="page-link">@i</a></li>
+                            }
+                            @if (pModel.HasNextPage)
+                            {
+                                var nextVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage + 1).ToString() };
+                                <li class="page-item"><a href="@Url.Action(pModel.Action, pModel.Controller, nextVals)" class="page-link"><i class="fas fa-chevron-right"></i></a></li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            <script>
+                function updatePageSize(size) {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('pageSize', size);
+                    url.searchParams.set('page', '1');
+                    window.location.href = url.toString();
+                }
+            </script>
+        }
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function filterTable() {
+            const input = document.getElementById('tableSearchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#standardTable tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(input) ? '' : 'none';
+            });
+        }
+    </script>
+}

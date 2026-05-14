@@ -81,6 +81,13 @@ body {
     font-weight: 800;
     color: #FFFFFF;
     letter-spacing: -0.5px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.tmb-sidebar-logo:hover {
+    transform: scale(1.02);
+    opacity: 0.9;
+    color: #FFFFFF;
 }
 
 .tmb-logo-icon {
@@ -393,6 +400,31 @@ h6 {
             color: #1e293b;
         }
 
+/* Interactive Hover Utilities */
+.hover-lift {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.hover-lift:hover {
+    transform: translateY(-4px);
+    filter: brightness(1.1);
+}
+
+.hover-primary:hover {
+    background: var(--nexus-primary) !important;
+    color: white !important;
+    border-color: var(--nexus-primary) !important;
+    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3) !important;
+    transform: translateY(-4px);
+}
+
+.hover-info:hover {
+    background: #3b82f6 !important;
+    color: white !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3) !important;
+    transform: translateY(-4px);
+}
+
 .tool-btn {
     width: 36px;
     height: 36px;
@@ -441,13 +473,27 @@ h6 {
         border-color: rgba(239, 68, 68, 0.3);
     }
 
+    /* Orange / Warning variant: used for Edit actions */
+    .tool-btn.warning {
+        color: var(--nexus-warning);
+        border-color: #e2e8f0;
+    }
+
+        .tool-btn.warning:hover {
+            border-color: var(--nexus-warning);
+            color: white;
+            background: var(--nexus-warning);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+        }
+
 /* Nexus Table Styles */
 .nexus-table-wrapper {
     background: #FFFFFF;
     border-radius: 12px;
     box-shadow: var(--nexus-card-shadow);
-    overflow-x: auto;
+    overflow: auto;
     border: 1px solid #f1f5f9;
+    max-height: 680px; /* Fixed height for large datasets */
 }
 
 .nexus-table {
@@ -458,7 +504,10 @@ h6 {
 }
 
     .nexus-table th {
-        background: #f8fafc;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: #f8fafc !important;
         padding: 18px 24px;
         font-weight: 800;
         font-size: 0.7rem;
@@ -466,6 +515,7 @@ h6 {
         letter-spacing: 1px;
         color: #64748b;
         border-bottom: 2px solid #f1f5f9;
+        box-shadow: inset 0 -1px 0 #f1f5f9;
         white-space: nowrap;
     }
 
@@ -905,6 +955,15 @@ body.modal-open {
     animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.animate-bounce {
+    animation: bounce 1s infinite;
+}
+
 /* Layout Helpers */
 .page-header {
     margin-bottom: 2rem;
@@ -959,3 +1018,90 @@ body.modal-open {
     .search-input-group .nexus-input {
         padding-left: 45px;
     }
+
+/* ══ Pagination — Nexus Design System ══ */
+.nexus-pagination-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    padding: 0.5rem 0.25rem;
+}
+
+.nexus-pagination {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nexus-pagination .page-link {
+    min-width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px !important;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #475569;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    padding: 0 8px;
+}
+
+.nexus-pagination .page-link:hover {
+    background: #f8fafc;
+    border-color: var(--nexus-primary);
+    color: var(--nexus-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.nexus-pagination .page-item.active .page-link {
+    background: var(--nexus-primary);
+    border-color: var(--nexus-primary);
+    color: #ffffff !important;
+    box-shadow: 0 8px 16px rgba(99, 102, 241, 0.25);
+}
+
+.nexus-pagination .page-item.disabled .page-link {
+    opacity: 0.4;
+    pointer-events: none;
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+}
+
+.nexus-page-info {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.nexus-page-size-select {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 8px 36px 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
+    background-color: #ffffff;
+    transition: all 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+}
+
+.nexus-page-size-select:focus {
+    border-color: var(--nexus-primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    outline: none;
+}

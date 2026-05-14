@@ -1,0 +1,604 @@
+@model IEnumerable<VMSProject.Models.Visit>
+@{
+    Layout = "UserLayout";
+    ViewData["Title"] = "Visit Logs & Report";
+    var pModel = (VMSProject.Models.PaginationViewModel)ViewBag.Pagination;
+}
+
+<script>
+    // Global handlers defined immediately
+    window.nexusToggleDatePicker = function(e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        const dropdown = document.getElementById('dateIntelligenceDropdown');
+        if (dropdown) {
+            dropdown.classList.toggle('nexus-active');
+        }
+    };
+
+    window.exportToExcel = function() {
+        const form = document.getElementById('filterForm');
+        if (form) {
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+            for (const [key, value] of formData.entries()) {
+                if (value) params.append(key, value);
+            }
+            window.location.href = '/User/ExportVisitLog?' + params.toString();
+        }
+    };
+</script>
+
+<div class="animate-fade-up">
+    <!-- Header & Breadcrumbs -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h3 class="fw-800 text-dark mb-0" style="letter-spacing: -0.5px;">Visit Intelligence Log</h3>
+        </div>
+    </div>
+
+    <!-- Premium Stats Cards (Trending Style) -->
+    <div class="row g-4 mb-5">
+        <div class="col-xl-3 col-md-6">
+            <div class="section-card border-0 shadow-sm overflow-hidden position-relative" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); h-100">
+                <div class="position-absolute top-0 end-0 p-3 opacity-10">
+                    <i class="fas fa-users-viewfinder fs-1 text-primary"></i>
+                </div>
+                <div class="text-muted small fw-800 uppercase letter-spacing-1 mb-1">Total Logs</div>
+                <div class="h2 fw-900 text-dark mb-0">@ViewBag.TotalVisits</div>
+                <div class="small text-primary fw-600 mt-2">
+                    <i class="fas fa-chart-line me-1"></i> Recorded visits
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="section-card border-0 shadow-sm overflow-hidden position-relative" style="background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); h-100">
+                <div class="position-absolute top-0 end-0 p-3 opacity-10">
+                    <i class="fas fa-door-open fs-1 text-success"></i>
+                </div>
+                <div class="text-muted small fw-800 uppercase letter-spacing-1 mb-1">Active Inside</div>
+                <div class="h2 fw-900 text-success mb-0">@ViewBag.ActiveVisits</div>
+                <div class="small text-success fw-600 mt-2">
+                    <i class="fas fa-circle-check me-1"></i> Currently on premises
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="section-card border-0 shadow-sm overflow-hidden position-relative" style="background: linear-gradient(135deg, #ffffff 0%, #ecfeff 100%); h-100">
+                <div class="position-absolute top-0 end-0 p-3 opacity-10">
+                    <i class="fas fa-clock-rotate-left fs-1 text-info"></i>
+                </div>
+                <div class="text-muted small fw-800 uppercase letter-spacing-1 mb-1">Checked Out</div>
+                <div class="h2 fw-900 text-info mb-0">@ViewBag.CheckedOutCount</div>
+                <div class="small text-info fw-600 mt-2">
+                    <i class="fas fa-sign-out-alt me-1"></i> Completed visits
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="section-card border-0 shadow-sm overflow-hidden position-relative" style="background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%); h-100">
+                <div class="position-absolute top-0 end-0 p-3 opacity-10">
+                    <i class="fas fa-hourglass-half fs-1 text-warning"></i>
+                </div>
+                <div class="text-muted small fw-800 uppercase letter-spacing-1 mb-1">Pending</div>
+                <div class="h2 fw-900 text-warning mb-0">@ViewBag.PendingVisits</div>
+                <div class="small text-warning fw-600 mt-2">
+                    <i class="fas fa-spinner me-1"></i> Awaiting check-in
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trending Toolbar (Single Row Filter Bar) -->
+    <div class="section-card mb-4 border-0 shadow-sm p-2" style="background: rgba(255,255,255,0.9); backdrop-filter: blur(15px); border-radius: 16px; overflow: visible !important; position: relative; z-index: 1100;">
+        <form method="get" action="/User/Visit" id="filterForm" class="d-flex align-items-center gap-2 flex-wrap flex-lg-nowrap" style="overflow: visible !important;">
+            <!-- Search: Flex Grow -->
+            <div class="flex-grow-1 position-relative">
+                <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted opacity-50"></i>
+                <input type="text" name="search" value="@ViewBag.Search" class="nexus-input ps-5 border-0 bg-light rounded-4 fs-7" placeholder="Search visitors..." style="height: 42px;" onchange="this.form.submit()" />
+            </div>
+
+            <!-- Status: Compact -->
+            <div style="min-width: 140px;">
+                <select name="status" class="nexus-input border-0 bg-light rounded-4 fs-7 cursor-pointer" style="height: 42px;" onchange="this.form.submit()">
+                    <option value="">All Activity</option>
+                    <option value="Active" selected="@(ViewBag.StatusFilter == "Active")">Inside</option>
+                    <option value="CheckedOut" selected="@(ViewBag.StatusFilter == "CheckedOut")">Completed</option>
+                    <option value="Pending" selected="@(ViewBag.StatusFilter == "Pending")">Awaiting</option>
+                </select>
+            </div>
+
+            <!-- Trending Date Intelligence Picker -->
+            <div class="position-relative" id="datePickerContainer" style="z-index: 1050; min-width: 260px;">
+                <button type="button" id="dateTriggerBtn" class="nexus-input bg-light border-0 rounded-4 fs-7 px-3 d-flex align-items-center gap-3 shadow-none cursor-pointer" style="height: 42px; width: 100%;" onclick="window.nexusToggleDatePicker(event)">
+                    <i class="fas fa-calendar-alt text-primary"></i>
+                    <span class="flex-grow-1 text-start fw-600 text-dark" id="dateDisplayLabel">
+                        @{
+                            string fromStr = ViewBag.DateFrom as string ?? "";
+                            string toStr = ViewBag.DateTo as string ?? "";
+                            DateTime fromD = DateTime.MinValue;
+                            DateTime toD = DateTime.MinValue;
+                            bool hasDates = DateTime.TryParse(fromStr, out fromD) && DateTime.TryParse(toStr, out toD);
+                        }
+                        @(hasDates ? $"{fromD:MM/dd/yyyy} thru {toD:MM/dd/yyyy}" : "Select Date Range")
+                    </span>
+                    <i class="fas fa-chevron-down text-muted fs-8"></i>
+                </button>
+
+                <!-- Intelligence Date Dropdown (Dual Pane Master) -->
+                <div id="dateIntelligenceDropdown" class="section-card shadow-lg border p-0 position-absolute end-0 mt-2 dropdown-intelligence" style="width: 720px; z-index: 9999; border-radius: 20px; overflow: hidden; background: white !important; border: 1px solid rgba(0,0,0,0.05);">
+                    <div class="d-flex" style="min-height: 420px;">
+                        <!-- Left Pane: Visual Identity & Calendar Sidebar -->
+                        <div class="p-4 text-white d-flex flex-column justify-content-between" style="width: 200px; background: linear-gradient(180deg, #1e1e2d 0%, #312e81 100%);">
+                            <div>
+                                <div class="opacity-50 small fw-700 mb-1" id="calYear">2026</div>
+                                <div class="h2 fw-900 mb-0" id="calDayName">Thursday</div>
+                                <div class="h3 fw-400 opacity-90" id="calMonthDay">May 14</div>
+                            </div>
+                            <div class="mt-4">
+                                <div class="bg-white bg-opacity-10 rounded-4 p-3 border border-white border-opacity-10">
+                                    <div class="small opacity-50 fw-700 uppercase mb-1">Status</div>
+                                    <div class="fw-800 fs-7 text-info"><i class="fas fa-check-circle me-1"></i> Live Query</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Center Pane: Interactive Calendar Grid -->
+                        <div class="p-4 border-end bg-white" style="flex: 1;">
+                            <div class="d-flex align-items-center justify-content-between mb-4">
+                                <button type="button" class="btn btn-link p-0 text-muted hover-primary" id="prevMonth"><i class="fas fa-chevron-left fs-8"></i></button>
+                                <div class="fw-800 text-dark uppercase letter-spacing-1 fs-7" id="calMonthHeader">MAY 2026</div>
+                                <button type="button" class="btn btn-link p-0 text-muted hover-primary" id="nextMonth"><i class="fas fa-chevron-right fs-8"></i></button>
+                            </div>
+                            
+                            <div id="calendarGrid" class="calendar-grid">
+                                <!-- Generated by JS -->
+                            </div>
+                            
+                            <div class="mt-4 pt-3 border-top d-flex align-items-center justify-content-between">
+                                <span class="text-muted small fw-700">Intelligence Mapping:</span>
+                                <i class="fas fa-bolt text-primary animate-pulse"></i>
+                            </div>
+                        </div>
+
+                        <!-- Right Pane: Controls & Presets -->
+                        <div class="p-4 bg-light bg-opacity-50" style="width: 240px;">
+                            <div class="mb-4">
+                                <div class="d-flex align-items-center bg-white rounded-3 p-2 mb-2 border shadow-sm">
+                                    <span class="text-muted small fw-800 me-2" style="width: 40px;">FROM</span>
+                                    <input type="date" id="inputDateFrom" value="@ViewBag.DateFrom" class="bg-transparent border-0 flex-grow-1 fw-700 text-dark fs-8" style="outline: none;" />
+                                </div>
+                                <div class="d-flex align-items-center bg-white rounded-3 p-2 border shadow-sm">
+                                    <span class="text-muted small fw-800 me-2" style="width: 40px;">TO</span>
+                                    <input type="date" id="inputDateTo" value="@ViewBag.DateTo" class="bg-transparent border-0 flex-grow-1 fw-700 text-dark fs-8" style="outline: none;" />
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex flex-column gap-2 mb-4">
+                                <button type="button" class="btn bg-white text-dark fw-700 fs-8 py-2 rounded-pill border-light-subtle hover-theme preset-btn shadow-sm" data-days="7">Last 7 Days</button>
+                                <button type="button" class="btn bg-white text-dark fw-700 fs-8 py-2 rounded-pill border-light-subtle hover-theme preset-btn shadow-sm" data-days="30">Last 30 Days</button>
+                                <button type="button" class="btn bg-white text-dark fw-700 fs-8 py-2 rounded-pill border-light-subtle hover-theme preset-btn shadow-sm" data-days="month">Month-To-Date</button>
+                                <button type="button" class="btn bg-white text-dark fw-700 fs-8 py-2 rounded-pill border-light-subtle hover-theme preset-btn shadow-sm" data-days="lastMonth">Last Month</button>
+                            </div>
+
+                            <div class="d-flex gap-2 pt-3 border-top">
+                                <button type="button" id="resetDateBtn" class="btn btn-link text-muted fw-700 fs-8 text-decoration-none flex-grow-1 p-0">RESET</button>
+                                <button type="button" id="applyDateBtn" class="premium-btn py-2 px-3 fs-8 flex-grow-1">APPLY</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hidden Inputs -->
+            <input type="hidden" name="dateFrom" id="hiddenDateFrom" value="@ViewBag.DateFrom" />
+            <input type="hidden" name="dateTo" id="hiddenDateTo" value="@ViewBag.DateTo" />
+
+            <style>
+                .dropdown-intelligence {
+                    opacity: 0;
+                    transform: translateY(10px);
+                    transition: all 0.2s ease-in-out;
+                    pointer-events: none;
+                    visibility: hidden;
+                }
+                .dropdown-intelligence.nexus-active {
+                    display: block !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    transform: translateY(0) !important;
+                    pointer-events: auto !important;
+                }
+                .hover-theme:hover {
+                    background: var(--nexus-primary) !important;
+                    color: white !important;
+                }
+                .cursor-pointer { cursor: pointer !important; }
+            </style>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // DOM Elements
+                    const container = document.getElementById('datePickerContainer');
+                    const dropdown = document.getElementById('dateIntelligenceDropdown');
+                    const fromInput = document.getElementById('inputDateFrom');
+                    const toInput = document.getElementById('inputDateTo');
+                    const applyBtn = document.getElementById('applyDateBtn');
+                    const presetBtns = document.querySelectorAll('.preset-btn');
+                    const hiddenFrom = document.getElementById('hiddenDateFrom');
+                    const hiddenTo = document.getElementById('hiddenDateTo');
+                    const filterForm = document.getElementById('filterForm');
+                    
+                    const calYear = document.getElementById('calYear');
+                    const calDayName = document.getElementById('calDayName');
+                    const calMonthDay = document.getElementById('calMonthDay');
+                    const calGrid = document.getElementById('calendarGrid');
+                    const calHeader = document.getElementById('calMonthHeader');
+
+                    let currentMonth = new Date().getMonth();
+                    let currentYear = new Date().getFullYear();
+
+                    const resetBtn = document.getElementById('resetDateBtn');
+
+                    // --- CALENDAR ENGINE ---
+                    function renderCalendar() {
+                        if (!calGrid) return;
+                        calGrid.innerHTML = '';
+                        
+                        const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+                        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+                        const monthName = new Date(currentYear, currentMonth).toLocaleDateString('en-US', { month: 'long' }).toUpperCase();
+                        
+                        calHeader.textContent = `${monthName} ${currentYear}`;
+                        
+                        ['M','T','W','T','F','S','S'].forEach(d => {
+                            const h = document.createElement('div');
+                            h.className = 'day-header';
+                            h.textContent = d;
+                            calGrid.appendChild(h);
+                        });
+                        
+                        const padding = (firstDay === 0 ? 6 : firstDay - 1);
+                        for(let i=0; i<padding; i++) {
+                            const p = document.createElement('div');
+                            p.className = 'day-cell opacity-25';
+                            calGrid.appendChild(p);
+                        }
+                        
+                        const fromD = fromInput.value ? new Date(fromInput.value) : null;
+                        const toD = toInput.value ? new Date(toInput.value) : null;
+                        
+                        for(let i=1; i<=daysInMonth; i++) {
+                            const cellDate = new Date(currentYear, currentMonth, i);
+                            const cell = document.createElement('div');
+                            cell.className = 'day-cell';
+                            cell.textContent = i;
+                            
+                            if (fromD && toD) {
+                                const isFrom = cellDate.toDateString() === fromD.toDateString();
+                                const isTo = cellDate.toDateString() === toD.toDateString();
+                                const isInRange = cellDate > fromD && cellDate < toD;
+                                if (isFrom || isTo) cell.classList.add('selected', 'edge');
+                                else if (isInRange) cell.classList.add('selected');
+                            } else if (fromD && cellDate.toDateString() === fromD.toDateString()) {
+                                cell.classList.add('selected', 'edge');
+                            }
+                            
+                            cell.onclick = () => {
+                                if (!fromInput.value || (fromInput.value && toInput.value)) {
+                                    fromInput.value = cellDate.toISOString().split('T')[0];
+                                    toInput.value = '';
+                                } else {
+                                    const first = new Date(fromInput.value);
+                                    if (cellDate < first) {
+                                        fromInput.value = cellDate.toISOString().split('T')[0];
+                                        toInput.value = first.toISOString().split('T')[0];
+                                    } else {
+                                        toInput.value = cellDate.toISOString().split('T')[0];
+                                    }
+                                }
+                                updateSidebarDate();
+                                renderCalendar();
+                            };
+                            calGrid.appendChild(cell);
+                        }
+                    }
+
+                    function updateSidebarDate() {
+                        const date = fromInput.value ? new Date(fromInput.value) : new Date();
+                        if (!isNaN(date) && calYear) {
+                            calYear.textContent = date.getFullYear();
+                            calDayName.textContent = date.toLocaleDateString('en-US', { weekday: 'long' });
+                            calMonthDay.textContent = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+                        }
+                    }
+
+                    // --- EVENT LISTENERS ---
+                    if (applyBtn) {
+                        applyBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            if (!fromInput.value || !toInput.value) {
+                                alert('Please select a valid date range');
+                                return;
+                            }
+                            hiddenFrom.value = fromInput.value;
+                            hiddenTo.value = toInput.value;
+                            filterForm.submit();
+                        });
+                    }
+
+                    if (resetBtn) {
+                        resetBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            const today = new Date().toISOString().split('T')[0];
+                            fromInput.value = today;
+                            toInput.value = today;
+                            updateSidebarDate();
+                            renderCalendar();
+                        });
+                    }
+
+                    presetBtns.forEach(btn => {
+                        btn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            const days = this.getAttribute('data-days');
+                            const to = new Date();
+                            let from = new Date();
+                            
+                            if (days === 'month') from = new Date(to.getFullYear(), to.getMonth(), 1);
+                            else if (days === 'lastMonth') {
+                                from = new Date(to.getFullYear(), to.getMonth() - 1, 1);
+                                to.setDate(0); // Last day of previous month
+                            }
+                            else from.setDate(to.getDate() - (parseInt(days) - 1));
+                            
+                            fromInput.value = from.toISOString().split('T')[0];
+                            toInput.value = to.toISOString().split('T')[0];
+                            
+                            currentMonth = from.getMonth();
+                            currentYear = from.getFullYear();
+                            
+                            updateSidebarDate();
+                            renderCalendar();
+                        });
+                    });
+
+                    document.getElementById('prevMonth')?.addEventListener('click', () => {
+                        currentMonth--;
+                        if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+                        renderCalendar();
+                    });
+
+                    document.getElementById('nextMonth')?.addEventListener('click', () => {
+                        currentMonth++;
+                        if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+                        renderCalendar();
+                    });
+
+                    document.addEventListener('click', function(e) {
+                        if (container && !container.contains(e.target) && dropdown && dropdown.classList.contains('nexus-active')) {
+                            dropdown.classList.remove('nexus-active');
+                        }
+                    });
+
+                    if (dropdown) dropdown.addEventListener('click', function(e) { e.stopPropagation(); });
+
+                    fromInput?.addEventListener('change', () => { updateSidebarDate(); renderCalendar(); });
+                    toInput?.addEventListener('change', () => { updateSidebarDate(); renderCalendar(); });
+
+                    window.exportToExcel = function() {
+                        const params = new URLSearchParams(new FormData(filterForm)).toString();
+                        window.location.href = '/User/ExportVisitLog?' + params;
+                    };
+
+                    // Initial Render
+                    if (!fromInput.value) fromInput.value = new Date().toISOString().split('T')[0];
+                    if (!toInput.value) toInput.value = new Date().toISOString().split('T')[0];
+
+                    updateSidebarDate();
+                    renderCalendar();
+                });
+            </script>
+
+            <!-- Actions Row -->
+            <div class="d-flex align-items-center gap-2">
+                <a href="/User/Visit" class="btn btn-light rounded-circle d-flex align-items-center justify-content-center shadow-none border-0 hover-rotate" style="width: 42px; height: 42px; transition: all 0.3s ease;" title="Reset Filters">
+                    <i class="fas fa-sync-alt text-muted fs-7"></i>
+                </a>
+                
+                <div class="vr mx-1 opacity-10" style="height: 24px;"></div>
+                
+                <button type="button" onclick="exportToExcel()" class="premium-btn secondary d-flex align-items-center gap-2 px-3 fs-7 border-0" style="height: 42px; background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                    <i class="fas fa-file-excel"></i>
+                    <span class="d-none d-xl-inline">Export Excel</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Detailed Visit Table -->
+    <div class="section-card border-0 shadow-sm p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0" style="width: 60px;">No.</th>
+                        <th class="py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0">Visitor Details</th>
+                        <th class="py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0">Visit Schedule</th>
+                        <th class="py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0">Meeting Person</th>
+                        <th class="py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0 text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    @if (Model != null && Model.Any())
+                    {
+                        int index = 1;
+                        foreach (var v in Model)
+                        {
+                            var rowNo = ((pModel.CurrentPage - 1) * pModel.PageSize) + index;
+                            <tr>
+                                <td class="ps-4 py-3 fw-800 text-muted small">#@rowNo</td>
+                                <td class="py-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-800 shadow-sm" style="width: 42px; height: 42px; font-size: 14px;">
+                                            @((v.Visitor?.Name ?? "?").Substring(0, 1).ToUpper())
+                                        </div>
+                                        <div>
+                                            <div class="fw-800 text-dark mb-0">@(v.Visitor?.Name ?? "Unknown")</div>
+                                            <div class="small text-muted fw-600">@(v.Visitor?.Phone ?? "—")</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3">
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-700 text-dark small"><i class="far fa-calendar-alt text-primary me-2"></i>@v.VisitDate.ToString("dd MMM yyyy")</span>
+                                        <span class="text-muted fs-7 mt-1">
+                                            <i class="far fa-clock me-1"></i> @v.CheckInTime.ToString("hh:mm tt") 
+                                            @if(v.CheckOutTime.HasValue) {
+                                                <span class="mx-1">→</span> @v.CheckOutTime.Value.ToString("hh:mm tt")
+                                            } else {
+                                                <span class="badge bg-soft-success text-success ms-2 fs-9 fw-700">STILL INSIDE</span>
+                                            }
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="py-3">
+                                    <div class="fw-700 text-dark small">@(v.Employee?.Name ?? "—")</div>
+                                    <div class="text-muted fs-7">@(v.Employee?.Department?.DepartmentName ?? "General Unit")</div>
+                                </td>
+                                <td class="py-3 text-center">
+                                    @{
+                                        string badgeClass = (v.Status ?? "Pending") switch {
+                                            "Active" => "nexus-badge-success",
+                                            "Pending" => "nexus-badge-warning",
+                                            "CheckedOut" => "nexus-badge-info",
+                                            _ => "nexus-badge-secondary"
+                                        };
+                                        string statusText = (v.Status ?? "Pending") switch {
+                                            "Active" => "Inside",
+                                            "Pending" => "Awaiting",
+                                            "CheckedOut" => "Checked Out",
+                                            _ => v.Status ?? "Unknown"
+                                        };
+                                    }
+                                    <span class="nexus-badge @badgeClass">@statusText</span>
+                                </td>
+                            </tr>
+                            index++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="py-5 text-center">
+                                <div class="opacity-25 mb-3">
+                                    <i class="fas fa-folder-open fs-1"></i>
+                                </div>
+                                <h6 class="fw-800 text-muted mb-1">No Visit Logs Found</h6>
+                                <p class="small text-muted mb-0">Adjust your filters or start a new check-in.</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (pModel.TotalPages > 1)
+        {
+            <div class="p-4 border-top bg-light bg-opacity-50">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="small text-muted fw-600">
+                        Showing <span class="text-dark fw-800">@(((pModel.CurrentPage - 1) * pModel.PageSize) + 1)</span> to 
+                        <span class="text-dark fw-800">@(Math.Min(pModel.CurrentPage * pModel.PageSize, pModel.TotalItems))</span> of 
+                        <span class="text-dark fw-800">@pModel.TotalItems</span> logs
+                    </div>
+                    <nav>
+                        <ul class="nexus-pagination mb-0">
+                            @if (pModel.HasPreviousPage)
+                            {
+                                var prevVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage - 1).ToString() };
+                                <li class="page-item"><a href="@Url.Action(pModel.Action, pModel.Controller, prevVals)" class="page-link"><i class="fas fa-chevron-left"></i></a></li>
+                            }
+                            @for (int i = Math.Max(1, pModel.CurrentPage - 2); i <= Math.Min(pModel.TotalPages, pModel.CurrentPage + 2); i++)
+                            {
+                                var pageVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = i.ToString() };
+                                <li class="page-item @(i == pModel.CurrentPage ? "active" : "")"><a href="@Url.Action(pModel.Action, pModel.Controller, pageVals)" class="page-link">@i</a></li>
+                            }
+                            @if (pModel.HasNextPage)
+                            {
+                                var nextVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage + 1).ToString() };
+                                <li class="page-item"><a href="@Url.Action(pModel.Action, pModel.Controller, nextVals)" class="page-link"><i class="fas fa-chevron-right"></i></a></li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .bg-soft-success { background: #dcfce7; color: #15803d; }
+    .fs-7 { font-size: 0.85rem; }
+    .fs-8 { font-size: 0.75rem; }
+    .fs-9 { font-size: 0.65rem; }
+    .letter-spacing-1 { letter-spacing: 1px; }
+
+    /* Premium Calendar Grid */
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2px;
+        text-align: center;
+    }
+    .day-header {
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: #94a3b8;
+        padding-bottom: 10px;
+        text-transform: uppercase;
+    }
+    .day-cell {
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #475569;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+    .day-cell:hover:not(.opacity-25) {
+        background: #f1f5f9;
+        color: var(--nexus-primary);
+    }
+    .day-cell.selected {
+        background: rgba(99, 102, 241, 0.1);
+        color: var(--nexus-primary);
+        border-radius: 0;
+    }
+    .day-cell.edge {
+        background: var(--nexus-primary) !important;
+        color: white !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        z-index: 1;
+    }
+    .hover-primary:hover { color: var(--nexus-primary) !important; }
+    
+    @@media (max-width: 991px) {
+        .dropdown-intelligence { width: 340px !important; }
+        .dropdown-intelligence .d-flex { flex-direction: column; }
+        .dropdown-intelligence > div > div:first-child,
+        .dropdown-intelligence > div > div:nth-child(2) { display: none; }
+        .dropdown-intelligence > div > div:last-child { width: 100% !important; }
+    }
+</style>
+
+

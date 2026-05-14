@@ -35,10 +35,10 @@
 
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="tmb-sidebar-logo">
+            <a href="/User/Dashboard" class="tmb-sidebar-logo" style="text-decoration: none;">
                 <i class="fas fa-crown tmb-logo-icon"></i>
                 <span class="nav-text">VISION<span class="tmb-logo-accent">|VMS</span></span>
-            </div>
+            </a>
         </div>
 
         <div class="sidebar-nav">
@@ -70,7 +70,7 @@
                     <i class="fas fa-qrcode"></i>
                     <span class="nav-text">QR Scanner</span>
                 </a>
-                <a href="/User/AllQRCodes" class="nav-item @(currentAction == "AllQRCodes" ? "active" : "")" data-title="Visitor Passes">
+                <a href="/User/AllQRCodes" class="nav-item @(currentAction == "AllQRCodes" || currentAction == "GenerateQR" ? "active" : "")" data-title="Visitor Passes">
                     <i class="fas fa-id-badge"></i>
                     <span class="nav-text">Visitor Passes</span>
                 </a>
@@ -78,11 +78,23 @@
 
             <div class="nav-section">
                 <div class="section-title"><span>EMPLOYEES</span></div>
-                <a href="/User/Employee" class="nav-item @(currentAction == "Employee" ? "active" : "")" data-title="Employees">
+                @{
+                    var isEmployeeActive = currentAction == "Employee" || 
+                                          currentAction == "AddEmployeePage" || 
+                                          currentAction == "EditEmployeePage" || 
+                                          currentAction == "ViewEmployeePage";
+                }
+                <a href="/User/Employee" class="nav-item @(isEmployeeActive ? "active" : "")" data-title="Employees">
                     <i class="fas fa-user-tie"></i>
                     <span class="nav-text">Employees</span>
                 </a>
-                <a href="/User/Department" class="nav-item @(currentAction == "Department" ? "active" : "")" data-title="Departments">
+                @{
+                    var isDepartmentActive = currentAction == "Department" || 
+                                            currentAction == "DepartmentAdd" || 
+                                            currentAction == "DepartmentEditPage" || 
+                                            currentAction == "DepartmentDetails";
+                }
+                <a href="/User/Department" class="nav-item @(isDepartmentActive ? "active" : "")" data-title="Departments">
                     <i class="fas fa-building-user"></i>
                     <span class="nav-text">Departments</span>
                 </a>

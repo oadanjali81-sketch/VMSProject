@@ -1,0 +1,87 @@
+@model VMSProject.Models.Employee
+@{
+    Layout = "UserLayout";
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="row g-4 animate-fade-up">
+    <!-- Left Column: Profile Snapshot -->
+    <div class="col-lg-4">
+        <div class="section-card h-100 text-center position-relative overflow-hidden">
+            <div class="position-absolute top-0 start-0 w-100" style="height: 120px; background: linear-gradient(135deg, var(--nexus-primary), #4f46e5);"></div>
+            
+            <div class="position-relative mt-5 pt-3">
+                <div class="rounded-circle bg-white p-2 d-inline-block shadow-sm mb-3" style="border: 1px solid rgba(99, 102, 241, 0.1);">
+                    <div class="rounded-circle overflow-hidden d-flex align-items-center justify-content-center bg-light" style="width: 120px; height: 120px;">
+                        @if (!string.IsNullOrEmpty(Model.PhotoPath))
+                        {
+                            <img src="@Model.PhotoPath" alt="@Model.Name" class="w-100 h-100" style="object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <span class="fs-1 fw-800 text-primary">@(Model.Name != null && Model.Name.Length > 0 ? Model.Name.Substring(0, 1).ToUpper() : "?")</span>
+                        }
+                    </div>
+                </div>
+                
+                <h3 class="fw-800 text-dark mb-1" style="letter-spacing: -0.5px;">@Model.Name</h3>
+                <span class="nexus-badge nexus-badge-info mb-3">@Model.Designation</span>
+                
+                <div class="d-flex flex-column gap-2 mt-4">
+                    <a href="/User/Employee/Edit/@Model.EmployeeId" class="premium-btn w-100 py-2">
+                        <i class="fas fa-user-edit me-2"></i> Edit Profile
+                    </a>
+                    <a href="/User/Employee" class="premium-btn secondary w-100 py-2">
+                        <i class="fas fa-arrow-left me-2"></i> Back to Directory
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Detailed Information -->
+    <div class="col-lg-8">
+        <div class="section-card h-100">
+            <h5 class="fw-800 text-dark mb-4 pb-3 border-bottom"><i class="fas fa-address-card text-primary me-2"></i> Contact & Organizational Details</h5>
+            
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="p-4 rounded-4" style="background: #f8fafc; border: 1px solid #f1f5f9;">
+                        <div class="text-muted small fw-800 uppercase letter-spacing-1 mb-2">Email Address</div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <span class="fw-700 text-dark fs-6">@(string.IsNullOrEmpty(Model.Email) ? "Not provided" : Model.Email)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="p-4 rounded-4" style="background: #f8fafc; border: 1px solid #f1f5f9;">
+                        <div class="text-muted small fw-800 uppercase letter-spacing-1 mb-2">Phone Number</div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <span class="fw-700 text-dark fs-6">@(string.IsNullOrEmpty(Model.Phone) ? "Not provided" : Model.Phone)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="p-4 rounded-4" style="background: #f8fafc; border: 1px solid #f1f5f9;">
+                        <div class="text-muted small fw-800 uppercase letter-spacing-1 mb-2">Assigned Department</div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <span class="fw-700 text-dark fs-6">@(Model.Department?.DepartmentName ?? "General Unit")</span>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>

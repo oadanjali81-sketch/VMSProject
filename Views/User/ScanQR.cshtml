@@ -65,15 +65,34 @@
 
     <!-- Results and Activity Feed -->
     <div class="col-xl-4">
-        <!-- Live Result Card -->
-        <div class="section-card p-0 overflow-hidden mb-4 animate-fade-up" id="resultCard" style="display:none; border: 2px solid #e2e8f0;">
-            <div class="px-4 py-3 text-center border-0" id="resultHeader" style="background: var(--nexus-primary);">
-                <h6 class="fw-800 mb-0 text-white" id="resultTitle" style="letter-spacing: 1px;">SCAN RESULT</h6>
-            </div>
-            <div class="p-4" id="resultContent">
-                <!-- Dynamic Content Injection -->
+        <!-- Result Modal -->
+        <div class="modal fade" id="scanResultModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                    <div id="modalHeader" class="px-4 py-4 text-center">
+                        <div id="modalIcon" class="mb-3 text-white">
+                            <!-- Icon injected by JS -->
+                        </div>
+                        <h4 class="fw-800 text-white mb-0" id="modalTitle">SCAN RESULT</h4>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div id="modalContent">
+                            <!-- Content injected by JS -->
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top-0 px-4 pb-4 pt-0">
+                        <button type="button" class="premium-btn secondary w-100 py-3 rounded-3 fw-800" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i> CLOSE OVERLAY
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- Hidden Audio for Beep -->
+        <audio id="scanBeep" preload="auto">
+            <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+        </audio>
 
         <!-- Activity Feed -->
         <div class="section-card h-100 p-0 overflow-hidden animate-fade-up" style="display: flex; flex-direction: column;">

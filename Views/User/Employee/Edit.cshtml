@@ -1,0 +1,235 @@
+@model VMSProject.Models.Employee
+@{
+    Layout = "UserLayout";
+    ViewData["Title"] = "Edit Employee";
+    var departments = (List<VMSProject.Models.Department>)ViewBag.Departments;
+}
+
+<div class="animate-fade-up">
+    <!-- Header Section -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="/User/Employee" class="text-primary text-decoration-none fw-600">Employees</a></li>
+                    <li class="breadcrumb-item active fw-600" aria-current="page">Edit Profile</li>
+                </ol>
+            </nav>
+            <h3 class="fw-800 text-dark mb-0" style="letter-spacing: -0.5px;">Update Employee Profile</h3>
+        </div>
+        <a href="/User/Employee" class="premium-btn secondary py-2 px-4">
+            <i class="fas fa-arrow-left me-2"></i>Back to Directory
+        </a>
+    </div>
+
+    <form method="post" action="/User/EditEmployee" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="EmployeeId" value="@Model.EmployeeId" />
+        <div class="row g-4">
+            <!-- Left Column: Photo & Stats -->
+            <div class="col-lg-4">
+                <div class="section-card h-100 text-center">
+                    <h5 class="fw-800 text-dark mb-4 text-start"><i class="fas fa-camera text-primary me-2"></i>Profile Image</h5>
+                    
+                    <div class="position-relative d-inline-block mb-4">
+                        <div class="rounded-circle bg-white p-2 shadow-sm d-inline-block" style="border: 1px solid #e2e8f0;">
+                            <div class="rounded-circle overflow-hidden d-flex align-items-center justify-content-center bg-light mx-auto" style="width: 170px; height: 170px;">
+                                @if (!string.IsNullOrEmpty(Model.PhotoPath))
+                                {
+                                    <img id="photoPreview" src="@Model.PhotoPath" class="w-100 h-100" style="object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <img id="photoPreview" src="" class="w-100 h-100 d-none" style="object-fit: cover;" />
+                                    <div id="photoPlaceholder" class="text-center">
+                                        <i class="fas fa-user text-muted fs-1 mb-2"></i>
+                                        <p class="text-muted small fw-600 mb-0">No Photo</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <input type="file" id="Photo" name="Photo" class="d-none" accept="image/*" onchange="previewImage(this)" />
+                    </div>
+
+                    <div class="d-flex flex-column gap-2 px-4">
+                        <button type="button" onclick="openCameraModal()" class="premium-btn w-100 py-2 fs-7" style="background: var(--nexus-primary);">
+                            <i class="fas fa-camera me-2"></i>Take Live Photo
+                        </button>
+                        <label for="Photo" class="premium-btn secondary w-100 py-2 fs-7 mb-0 cursor-pointer">
+                            <i class="fas fa-upload me-2"></i>Update Image
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Form Fields -->
+            <div class="col-lg-8">
+                <div class="section-card">
+                    <h5 class="fw-800 text-dark mb-4 pb-2 border-bottom"><i class="fas fa-id-card text-primary me-2"></i>Personal & Work Details</h5>
+                    
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="nexus-form-group">
+                                <label class="nexus-label">Full Name</label>
+                                <div class="position-relative">
+                                    <i class="fas fa-user position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                                    <input type="text" name="Name" class="nexus-input ps-5" value="@Model.Name" required />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="nexus-form-group">
+                                <label class="nexus-label">Job Title</label>
+                                <div class="position-relative">
+                                    <i class="fas fa-briefcase position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                                    <input type="text" name="Designation" class="nexus-input ps-5" value="@Model.Designation" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="nexus-form-group">
+                                <label class="nexus-label">Department</label>
+                                <div class="position-relative">
+                                    <i class="fas fa-building position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                                    <select name="DepartmentId" class="nexus-input ps-5" required>
+                                        @if (departments != null)
+                                        {
+                                            foreach (var d in departments)
+                                            {
+                                                <option value="@d.DepartmentId" selected="@(d.DepartmentId == Model.DepartmentId)">@d.DepartmentName</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-800 text-dark mb-4 mt-5 pb-2 border-bottom"><i class="fas fa-phone-alt text-primary me-2"></i>Contact Details</h5>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="nexus-form-group">
+                                <label class="nexus-label">Email Address</label>
+                                <div class="position-relative">
+                                    <i class="fas fa-envelope position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                                    <input type="email" name="Email" class="nexus-input ps-5" value="@Model.Email" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="nexus-form-group">
+                                <label class="nexus-label">Phone Number</label>
+                                <div class="position-relative">
+                                    <i class="fas fa-phone position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                                    <input type="text" name="Phone" class="nexus-input ps-5" value="@Model.Phone" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 mt-5 pt-4">
+                        <button type="submit" class="premium-btn flex-grow-1 py-3 shadow-sm">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                        <button type="reset" class="premium-btn secondary py-3 px-5 text-center">Reset Fields</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Camera Modal -->
+<div class="modal fade" id="cameraModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-dark text-white border-0">
+                <h5 class="modal-title fw-800 small uppercase letter-spacing-1">Live Camera Capture</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" onclick="stopCamera()"></button>
+            </div>
+            <div class="modal-body p-0 bg-black position-relative" style="min-height: 400px;">
+                <video id="video" class="w-100 h-100" autoplay playsinline style="object-fit: cover;"></video>
+                <div class="position-absolute bottom-0 start-50 translate-middle-x mb-4">
+                    <button type="button" onclick="capturePhoto()" class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-lg border-0" style="width: 70px; height: 70px; border: 5px solid rgba(255,255,255,0.3) !important;">
+                        <i class="fas fa-camera fs-3"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light justify-content-center">
+                <p class="text-muted small mb-0 fw-600">Position the employee clearly in the frame</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<canvas id="canvas" class="d-none"></canvas>
+
+@section Scripts {
+    <script>
+        let stream = null;
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const photoPreview = document.getElementById('photoPreview');
+        const photoPlaceholder = document.getElementById('photoPlaceholder');
+        const photoInput = document.getElementById('Photo');
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    photoPreview.src = e.target.result;
+                    photoPreview.classList.remove('d-none');
+                    if(photoPlaceholder) photoPlaceholder.classList.add('d-none');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        async function openCameraModal() {
+            const modal = new bootstrap.Modal(document.getElementById('cameraModal'));
+            modal.show();
+            
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+                video.srcObject = stream;
+            } catch (err) {
+                console.error("Camera error:", err);
+                alert("Could not access camera. Please ensure you have given permission.");
+                modal.hide();
+            }
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+        }
+
+        function capturePhoto() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const dataUrl = canvas.toDataURL('image/jpeg');
+            photoPreview.src = dataUrl;
+            photoPreview.classList.remove('d-none');
+            if(photoPlaceholder) photoPlaceholder.classList.add('d-none');
+            
+            fetch(dataUrl)
+                .then(res => res.blob())
+                .then(blob => {
+                    const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    photoInput.files = dataTransfer.files;
+                });
+
+            stopCamera();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('cameraModal'));
+            modal.hide();
+        }
+    </script>
+}
+

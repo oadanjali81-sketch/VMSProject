@@ -102,7 +102,7 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="d-flex justify-content-end gap-2">
-                                        <a href="/User/EditVisitorPage/@v.VisitorId" class="tool-btn" style="color: #F59E0B;" title="Edit" onclick="event.stopPropagation();">
+                                        <a href="/User/EditVisitorPage/@v.VisitorId" class="tool-btn warning" title="Edit" onclick="event.stopPropagation();">
                                             <i class="fas fa-pen"></i>
                                         </a>
                                         <a href="/User/GenerateQR/@v.VisitorId" class="tool-btn success" title="QR Pass" onclick="event.stopPropagation();">
@@ -133,32 +133,43 @@
         var pModel = (VMSProject.Models.PaginationViewModel)ViewBag.Pagination;
         @if (pModel.TotalPages > 0)
         {
-            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mt-4 px-2">
-                <div class="text-muted small fw-600">
+            <div class="nexus-pagination-wrapper">
+                <div class="nexus-page-info">
                     Showing @(((pModel.CurrentPage - 1) * pModel.PageSize) + 1) to @(Math.Min(pModel.CurrentPage * pModel.PageSize, pModel.TotalItems)) of @pModel.TotalItems entries
                 </div>
                 <div class="d-flex align-items-center gap-3">
-                    <select class="form-select form-select-sm rounded-pill px-3" onchange="updatePageSize(this.value)" style="width: auto; border-color: #e2e8f0; font-weight: 600;">
+                    <select class="nexus-page-size-select" onchange="updatePageSize(this.value)">
                         <option value="10" selected="@(pModel.PageSize == 10)">10 per page</option>
                         <option value="20" selected="@(pModel.PageSize == 20)">20 per page</option>
                         <option value="50" selected="@(pModel.PageSize == 50)">50 per page</option>
+                        <option value="100" selected="@(pModel.PageSize == 100)">100 per page</option>
                     </select>
                     <nav>
-                        <ul class="pagination pagination-sm mb-0 gap-1">
+                        <ul class="nexus-pagination">
                             @if (pModel.HasPreviousPage)
                             {
                                 var prevVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage - 1).ToString() };
-                                <li class="page-item"><a href="@Url.Action(pModel.Action, pModel.Controller, prevVals)" class="page-link rounded-circle border-0 bg-light text-dark"><i class="fas fa-chevron-left"></i></a></li>
+                                <li class="page-item">
+                                    <a href="@Url.Action(pModel.Action, pModel.Controller, prevVals)" class="page-link">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
                             }
                             @for (int i = Math.Max(1, pModel.CurrentPage - 2); i <= Math.Min(pModel.TotalPages, pModel.CurrentPage + 2); i++)
                             {
                                 var pageVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = i.ToString() };
-                                <li class="page-item"><a href="@Url.Action(pModel.Action, pModel.Controller, pageVals)" class="page-link rounded-circle border-0 @(i == pModel.CurrentPage ? "bg-primary text-white shadow-sm" : "bg-light text-dark")" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: 700;">@i</a></li>
+                                <li class="page-item @(i == pModel.CurrentPage ? "active" : "")">
+                                    <a href="@Url.Action(pModel.Action, pModel.Controller, pageVals)" class="page-link">@i</a>
+                                </li>
                             }
                             @if (pModel.HasNextPage)
                             {
                                 var nextVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage + 1).ToString() };
-                                <li class="page-item"><a href="@Url.Action(pModel.Action, pModel.Controller, nextVals)" class="page-link rounded-circle border-0 bg-light text-dark"><i class="fas fa-chevron-right"></i></a></li>
+                                <li class="page-item">
+                                    <a href="@Url.Action(pModel.Action, pModel.Controller, nextVals)" class="page-link">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
                             }
                         </ul>
                     </nav>
@@ -180,13 +191,7 @@
 @if (ViewBag.Mode == "Add")
 {
     <!-- Add Visitor Section -->
-    <div class="d-flex align-items-center gap-2 mb-4">
-        <a href="/User/VisitorManagement" class="text-muted text-decoration-none fw-600 small">
-            <i class="fas fa-users me-1"></i>Visitors
-        </a>
-        <i class="fas fa-chevron-right text-muted" style="font-size: 0.6rem;"></i>
-        <span class="fw-700 text-dark small">New Registration</span>
-    </div>
+
 
     <div class="section-card animate-fade-up">
         <div class="d-flex align-items-center gap-3 mb-4 pb-3" style="border-bottom: 1px solid #f1f5f9;">
@@ -461,17 +466,41 @@ else if (ViewBag.Mode == "Edit")
             <div><h5 class="fw-800 text-dark mb-0" style="letter-spacing: -0.5px;">Edit Visitor Profile</h5><p class="text-muted small mb-0">Update the details for <strong class="text-primary">@(v?.Name ?? "this visitor")</strong>.</p></div>
         </div>
 
-        <form action="/User/EditVisitor" method="post">
+        <form action="/User/EditVisitor" method="post" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
             <input type="hidden" name="VisitorId" value="@v?.VisitorId" />
             <div class="row g-4">
                 <div class="col-lg-3">
                     <div class="bg-light rounded-4 p-4 text-center">
-                        <label class="nexus-label mb-3">CURRENT PHOTO</label>
-                        <div class="rounded-4 overflow-hidden shadow-sm mx-auto mb-3" style="width: 140px; height: 140px; border: 2px solid #e2e8f0;">
-                            @if (!string.IsNullOrEmpty(v?.CapturePhoto)) { <img src="@v.CapturePhoto" class="w-100 h-100" style="object-fit: cover;" /> } else { <div class="w-100 h-100 bg-white d-flex align-items-center justify-content-center"><span class="fw-800 text-primary" style="font-size: 2.5rem;">@(string.IsNullOrEmpty(v?.Name) ? "?" : v.Name[0].ToString().ToUpper())</span></div> }
+                        <label class="nexus-label mb-3">UPDATE PHOTO</label>
+                        <div class="position-relative d-inline-block mx-auto mb-3">
+                            <div id="photo_preview" class="rounded-4 bg-white d-flex align-items-center justify-content-center overflow-hidden shadow-sm mx-auto" style="width: 140px; height: 140px; border: 2px dashed #e2e8f0;">
+                                @if (!string.IsNullOrEmpty(v?.CapturePhoto)) { <img src="@v.CapturePhoto" class="w-100 h-100" style="object-fit: cover;" /> } else { <i class="fas fa-camera fa-2x text-primary opacity-25"></i> }
+                                <video id="camera_feed" class="d-none w-100 h-100" style="object-fit: cover;" autoplay playsinline></video>
+                            </div>
+                            <canvas id="capture_canvas" class="d-none"></canvas>
                         </div>
-                        <p class="text-muted small mb-0">ID: <span class="font-monospace fw-700">#100@v?.VisitorId</span></p>
+                        <input type="file" name="PhotoFile" id="photoFile" class="d-none" accept="image/*" onchange="previewImage(this, 'photo_preview')">
+                        
+                        <div class="d-flex flex-column gap-2">
+                            <button type="button" id="btn_start_camera" onclick="startCamera()" class="premium-btn w-100" style="font-size: 0.78rem; background: #6366f1;">
+                                <i class="fas fa-video me-2"></i>Live Camera
+                            </button>
+                            <button type="button" id="btn_capture" onclick="capturePhoto()" class="premium-btn w-100 d-none" style="font-size: 0.78rem; background: #10b981;">
+                                <i class="fas fa-camera me-2"></i>Capture Photo
+                            </button>
+                            <button type="button" onclick="document.getElementById('photoFile').click()" class="premium-btn secondary w-100" style="font-size: 0.78rem;">
+                                <i class="fas fa-upload me-2"></i>Upload New
+                            </button>
+                        </div>
+
+                        <hr class="my-4" style="border-color: #e2e8f0;">
+                        <label class="nexus-label mb-3">ID DOCUMENT</label>
+                        <input type="file" name="IdFile" id="idFile" class="d-none" accept="image/*,.pdf" onchange="showFileName(this, 'id_name')">
+                        <button type="button" onclick="document.getElementById('idFile').click()" class="premium-btn secondary w-100" style="font-size: 0.78rem;">
+                            <i class="fas fa-id-card me-2"></i>Change ID
+                        </button>
+                        <p id="id_name" class="text-muted small mt-2 mb-0 text-truncate">@(!string.IsNullOrEmpty(v?.UploadId) ? "Current ID Uploaded" : "No ID provided")</p>
                     </div>
                 </div>
                 <div class="col-lg-9">

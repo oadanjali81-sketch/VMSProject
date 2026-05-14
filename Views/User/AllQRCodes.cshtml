@@ -121,34 +121,46 @@
     var pModel = (VMSProject.Models.PaginationViewModel)ViewBag.Pagination;
     @if (pModel.TotalPages > 0)
     {
-        <div class="section-card mt-4">
-            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 px-2">
-                <div class="text-muted small fw-600">
-                    Showing @(((pModel.CurrentPage - 1) * pModel.PageSize) + 1) to @(Math.Min(pModel.CurrentPage * pModel.PageSize, pModel.TotalItems)) of @pModel.TotalItems entries
-                </div>
-                <div class="d-flex align-items-center gap-3">
-                    <select class="form-select form-select-sm rounded-pill px-3" onchange="updatePageSize(this.value)" style="width: auto; border-color: #e2e8f0; font-weight: 600;">
-                        <option value="12" selected="@(pModel.PageSize == 12)">12 per page</option>
-                        <option value="24" selected="@(pModel.PageSize == 24)">24 per page</option>
-                        <option value="48" selected="@(pModel.PageSize == 48)">48 per page</option>
-                    </select>
-                    <nav>
-                        <ul class="pagination pagination-sm mb-0 gap-1">
-                            @if (pModel.HasPreviousPage) {
-                                var prevVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage - 1).ToString() };
-                                <li class="page-item"><a href="@Url.Action(pModel.Action, pModel.Controller, prevVals)" class="page-link rounded-circle border-0 bg-light text-dark"><i class="fas fa-chevron-left"></i></a></li>
-                            }
-                            @for (int i = Math.Max(1, pModel.CurrentPage - 2); i <= Math.Min(pModel.TotalPages, pModel.CurrentPage + 2); i++) {
-                                var pageVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = i.ToString() };
-                                <li class="page-item"><a href="@Url.Action(pModel.Action, pModel.Controller, pageVals)" class="page-link rounded-circle border-0 @(i == pModel.CurrentPage ? "bg-primary text-white shadow-sm" : "bg-light text-dark")" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: 700;">@i</a></li>
-                            }
-                            @if (pModel.HasNextPage) {
-                                var nextVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage + 1).ToString() };
-                                <li class="page-item"><a href="@Url.Action(pModel.Action, pModel.Controller, nextVals)" class="page-link rounded-circle border-0 bg-light text-dark"><i class="fas fa-chevron-right"></i></a></li>
-                            }
-                        </ul>
-                    </nav>
-                </div>
+        <div class="nexus-pagination-wrapper">
+            <div class="nexus-page-info">
+                Showing @(((pModel.CurrentPage - 1) * pModel.PageSize) + 1) to @(Math.Min(pModel.CurrentPage * pModel.PageSize, pModel.TotalItems)) of @pModel.TotalItems entries
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <select class="nexus-page-size-select" onchange="updatePageSize(this.value)">
+                    <option value="10" selected="@(pModel.PageSize == 10)">10 per page</option>
+                    <option value="20" selected="@(pModel.PageSize == 20)">20 per page</option>
+                    <option value="50" selected="@(pModel.PageSize == 50)">50 per page</option>
+                    <option value="100" selected="@(pModel.PageSize == 100)">100 per page</option>
+                </select>
+                <nav>
+                    <ul class="nexus-pagination">
+                        @if (pModel.HasPreviousPage)
+                        {
+                            var prevVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage - 1).ToString() };
+                            <li class="page-item">
+                                <a href="@Url.Action(pModel.Action, pModel.Controller, prevVals)" class="page-link">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                        }
+                        @for (int i = Math.Max(1, pModel.CurrentPage - 2); i <= Math.Min(pModel.TotalPages, pModel.CurrentPage + 2); i++)
+                        {
+                            var pageVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = i.ToString() };
+                            <li class="page-item @(i == pModel.CurrentPage ? "active" : "")">
+                                <a href="@Url.Action(pModel.Action, pModel.Controller, pageVals)" class="page-link">@i</a>
+                            </li>
+                        }
+                        @if (pModel.HasNextPage)
+                        {
+                            var nextVals = new Dictionary<string, string>(pModel.RouteValues) { ["page"] = (pModel.CurrentPage + 1).ToString() };
+                            <li class="page-item">
+                                <a href="@Url.Action(pModel.Action, pModel.Controller, nextVals)" class="page-link">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
             </div>
         </div>
         <script>

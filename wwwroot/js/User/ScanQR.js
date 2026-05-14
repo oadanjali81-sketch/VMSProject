@@ -88,6 +88,9 @@
     }
 
     function processPass(passNumber) {
+        // Stop scanner immediately on first successful detection
+        stopScanner();
+
         fetch('/User/ProcessQR', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -95,31 +98,60 @@
         })
         .then(r => r.json())
         .then(res => {
+            // Play success beep if valid scan
+            if (res.success) {
+                const beep = document.getElementById('scanBeep');
+                if (beep) {
+                    beep.currentTime = 0;
+                    beep.play().catch(e => console.log("Audio play blocked:", e));
+                }
+            }
+            
             displayResult(res, passNumber);
             if (res.success) addActivity(res.visitor, passNumber, res.message);
         })
-        .catch(err => console.error("API Error:", err));
+        .catch(err => {
+            console.error("API Error:", err);
+            // Re-enable if needed or show error
+        });
     }
 
     function displayResult(res, pass) {
-        const card = document.getElementById('resultCard');
-        const header = document.getElementById('resultHeader');
-        const title = document.getElementById('resultTitle');
-        const content = document.getElementById('resultContent');
-        if (!card || !header || !title || !content) return;
+        const modalEl = document.getElementById('scanResultModal');
+        const header = document.getElementById('modalHeader');
+        const title = document.getElementById('modalTitle');
+        const content = document.getElementById('modalContent');
+        const iconContainer = document.getElementById('modalIcon');
+        
+        if (!modalEl || !header || !title || !content || !iconContainer) return;
 
-        card.style.display = 'block';
+        const modal = new bootstrap.Modal(modalEl);
+        
+        // Style based on success
         header.style.backgroundColor = res.success ? '#10B981' : '#EF4444';
-        title.innerHTML = res.success ? '<i class="fas fa-check-double me-2"></i>ACCESS GRANTED' : '<i class="fas fa-times-circle me-2"></i>ACCESS DENIED';
+        title.innerText = res.message.toUpperCase();
+        iconContainer.innerHTML = res.success 
+            ? '<i class="fas fa-check-circle fa-4x animate-bounce"></i>' 
+            : '<i class="fas fa-exclamation-triangle fa-4x"></i>';
 
         content.innerHTML = `
             <div class="result-info">
-                <div class="result-field"><span class="result-label">PASS IDENTIFIER</span><span class="result-value fw-800 text-primary">${pass}</span></div>
-                <div class="result-field"><span class="result-label">VISITOR NAME</span><span class="result-value">${res.visitor || 'N/A'}</span></div>
-                <div class="result-field"><span class="result-label">SYSTEM MESSAGE</span><span class="result-value">${res.message}</span></div>
+                <div class="result-field">
+                    <span class="result-label">PASS IDENTIFIER</span>
+                    <span class="result-value fw-800 text-primary font-monospace">${pass}</span>
+                </div>
+                <div class="result-field">
+                    <span class="result-label">VISITOR NAME</span>
+                    <span class="result-value fw-700 text-dark">${res.visitor || 'Unknown Visitor'}</span>
+                </div>
+                <div class="result-field">
+                    <span class="result-label">COMPANY NAME</span>
+                    <span class="result-value fw-700 text-dark">${res.companyName || 'Individual / Personal'}</span>
+                </div>
             </div>
-            <button class="premium-btn secondary w-100 mt-4 rounded-pill fw-800" onclick="document.getElementById('resultCard').style.display='none'">DISMISS</button>
         `;
+
+        modal.show();
     }
 
     function addActivity(name, pass, msg) {
