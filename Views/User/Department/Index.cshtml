@@ -40,49 +40,48 @@
 
     <div class="nexus-table-wrapper">
         <div class="table-responsive">
-            <table class="nexus-table" id="standardTable">
-                <thead>
+            <table class="table table-hover align-middle mb-0" id="standardTable">
+                <thead class="bg-light">
                     <tr>
-                        <th style="width: 60px;">#</th>
-                        <th>Department Details</th>
-                        <th>Total Workforce</th>
-                        <th>Strategic Category</th>
-                        <th class="text-end">Actions</th>
+                        <th class="ps-4 py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0" style="width: 60px;">No.</th>
+                        <th class="py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0">Department Name</th>
+                        <th class="py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0 text-center">Total Employees</th>
+                        <th class="py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0 text-center">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="border-top-0">
                     @if (Model != null && Model.Any())
                     {
                         int i = 1;
                         foreach (var d in Model)
                         {
                             var empCount = empCounts.ContainsKey(d.DepartmentId) ? empCounts[d.DepartmentId] : 0;
-                            <tr class="hover-row" style="cursor: pointer;" onclick="if(!event.target.closest('.tool-btn')) { window.location.href='/User/Department/Details/@d.DepartmentId'; }">
-                                <td><span class="nexus-badge nexus-badge-info">@i</span></td>
-                                <td>
+                            <tr style="cursor: pointer;" onclick="if(!event.target.closest('.tool-btn')) { window.location.href='/User/Department/Details/@d.DepartmentId'; }">
+                                <td class="ps-4 py-3 fw-800 text-muted small">@i</td>
+                                <td class="py-3">
                                     <div class="d-flex align-items-center gap-3">
-                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-800 shadow-sm" style="width: 42px; height: 42px; font-size: 14px; border: 1px solid rgba(99, 102, 241, 0.1);">
-                                            @d.DepartmentName.Substring(0, 1).ToUpper()
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm" style="width: 42px; height: 42px; background: #f8fafc; border: 1px solid rgba(0,0,0,0.05);">
+                                            <div class="bg-primary bg-opacity-10 text-primary w-100 h-100 d-flex align-items-center justify-content-center fw-800" style="font-size: 14px;">
+                                                @d.DepartmentName.Substring(0, 1).ToUpper()
+                                            </div>
                                         </div>
                                         <div>
-                                            <div class="fw-800 text-dark fs-7 lh-1 mb-1">@d.DepartmentName</div>
-                                            <small class="text-muted" style="font-size: 0.75rem;">ID: DEPT-@(d.DepartmentId.ToString("D3"))</small>
+                                            <div class="fw-800 text-dark mb-0">@d.DepartmentName</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="progress flex-grow-1" style="height: 6px; max-width: 100px; border-radius: 10px; background: #f1f5f9;">
-                                            <div class="progress-bar bg-primary rounded-pill" role="progressbar" style="width: @(Math.Min(empCount * 10, 100))%;"></div>
-                                        </div>
-                                        <span class="fw-800 text-dark fs-7">@empCount</span>
+                                <td class="py-3 text-center">
+                                    <div class="d-inline-flex align-items-center gap-3 bg-light px-3 py-1 rounded-pill border">
+                                        <span class="fw-800 text-primary">@empCount</span>
+                                        <span class="text-muted small fw-700 uppercase" style="font-size: 0.65rem;">Employees</span>
                                     </div>
                                 </td>
-                                <td><span class="nexus-badge nexus-badge-success">Operational Unit</span></td>
-                                <td class="text-end">
-                                    <a href="/User/Department/Edit/@d.DepartmentId" class="tool-btn warning d-inline-flex align-items-center justify-content-center text-decoration-none" title="Edit">
-                                        <i class="fas fa-pen"></i>
-                                    </a>
+                                <td class="py-3 text-center">
+                                    <div class="d-flex justify-content-center">
+                                        <a href="/User/Department/Edit/@d.DepartmentId" class="tool-btn warning d-inline-flex align-items-center justify-content-center text-decoration-none" title="Edit">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             i++;
@@ -91,9 +90,12 @@
                     else
                     {
                         <tr>
-                            <td colspan="5" class="text-center py-5">
-                                <div class="opacity-25 mb-3"><i class="fas fa-sitemap fa-3x"></i></div>
-                                <p class="text-muted fw-600">No departments found in the directory.</p>
+                            <td colspan="4" class="py-5 text-center">
+                                <div class="opacity-25 mb-3">
+                                    <i class="fas fa-sitemap fs-1"></i>
+                                </div>
+                                <h6 class="fw-800 text-muted mb-1">No Departments Found</h6>
+                                <p class="small text-muted mb-0">Add a new department to get started.</p>
                             </td>
                         </tr>
                     }

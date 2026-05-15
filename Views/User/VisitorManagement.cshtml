@@ -48,61 +48,62 @@
 
     <div class="nexus-table-wrapper">
         <div class="table-responsive">
-            <table class="nexus-table" id="standardTable">
-                <thead>
+            <table class="table table-hover align-middle mb-0" id="standardTable">
+                <thead class="bg-light">
                     <tr>
-                        <th>#</th>
-                        <th>Visitor Details</th>
-                        <th>Contact Info</th>
-                        <th>Company</th>
-                        <th>Host Details</th>
-                        <th>Status</th>
-                        <th class="text-end">Actions</th>
+                        <th class="ps-4 py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0" style="width: 60px;">No.</th>
+                        <th class="py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0">Visitor Details</th>
+                        <th class="py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0">Contact Info</th>
+                        <th class="py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0">Company</th>
+                        <th class="py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0">Host Details</th>
+                        <th class="py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0">Status</th>
+                        <th class="py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0 text-end">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="border-top-0">
                     @if (Model != null && Model.Count > 0)
                     {
                         int i = 1;
                         foreach (var v in Model)
                         {
-                            <tr class="hover-row" style="cursor: pointer;" onclick="if(!event.target.closest('.tool-btn')) window.location.href='/User/ViewVisitor/@v.VisitorId'">
-                                <td style="width: 60px;"><span class="nexus-badge nexus-badge-info">@i</span></td>
-                                <td>
+                            <tr style="cursor: pointer;" onclick="if(!event.target.closest('.tool-btn')) window.location.href='/User/ViewVisitor/@v.VisitorId'">
+                                <td class="ps-4 py-3 fw-800 text-muted small">@i</td>
+                                <td class="py-3">
                                     <div class="d-flex align-items-center gap-3">
-                                        @if (!string.IsNullOrEmpty(v.CapturePhoto))
-                                        {
-                                            <div class="rounded-circle overflow-hidden shadow-sm" style="width: 42px; height: 42px; border: 2px solid #fff; outline: 1px solid #e2e8f0;">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm" style="width: 42px; height: 42px; background: #f8fafc; border: 1px solid rgba(0,0,0,0.05);">
+                                            @if (!string.IsNullOrEmpty(v.CapturePhoto))
+                                            {
                                                 <img src="@v.CapturePhoto" class="w-100 h-100" style="object-fit: cover;" />
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-800" style="width: 42px; height: 42px; font-size: 0.9rem; border: 1px solid rgba(99, 102, 241, 0.2);">
-                                                @(string.IsNullOrEmpty(v.Name) ? "?" : v.Name!.Substring(0, 1).ToUpper())
-                                            </div>
-                                        }
+                                            }
+                                            else
+                                            {
+                                                <div class="bg-primary bg-opacity-10 text-primary w-100 h-100 d-flex align-items-center justify-content-center fw-800" style="font-size: 14px;">
+                                                    @(string.IsNullOrEmpty(v.Name) ? "?" : v.Name!.Substring(0, 1).ToUpper())
+                                                </div>
+                                            }
+                                        </div>
                                         <div>
-                                            <div class="fw-700 text-dark lh-1 mb-1">@(v.Name ?? "Anonymous")</div>
-                                            <small class="text-muted" style="font-size: 0.75rem;">ID: #100@v.VisitorId</small>
+                                            <div class="fw-800 text-dark mb-0">@(v.Name ?? "Anonymous")</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td>
-                                    <div class="fw-600 text-dark mb-1">@(v.Phone ?? "—")</div>
+                                <td class="py-3">
+                                    <div class="fw-600 text-dark mb-0">@(v.Phone ?? "—")</div>
                                     <div class="text-muted small">@(v.Email ?? "—")</div>
                                 </td>
-                                <td><span class="fw-700 text-primary small uppercase letter-spacing-1">@(v.CompanyName ?? "INDIVIDUAL")</span></td>
-                                <td>
-                                    <div class="fw-700 text-dark mb-1">@(v.WhomeToMeet ?? "—")</div>
+                                <td class="py-3">
+                                    <span class="fw-700 text-primary small uppercase letter-spacing-1">@(v.CompanyName ?? "INDIVIDUAL")</span>
+                                </td>
+                                <td class="py-3">
+                                    <div class="fw-700 text-dark mb-0">@(v.WhomeToMeet ?? "—")</div>
                                     <span class="nexus-badge nexus-badge-info" style="font-size: 0.65rem;">@(v.Department ?? "General")</span>
                                 </td>
-                                <td>
+                                <td class="py-3">
                                     <span class="nexus-badge nexus-badge-success">Registered</span>
                                 </td>
-                                <td class="text-end">
+                                <td class="py-3 text-end">
                                     <div class="d-flex justify-content-end gap-2">
-                                        <a href="/User/EditVisitorPage/@v.VisitorId" class="tool-btn warning" title="Edit" onclick="event.stopPropagation();">
+                                        <a href="/User/EditVisitorPage/@v.VisitorId" class="tool-btn warning me-1" title="Edit" onclick="event.stopPropagation();">
                                             <i class="fas fa-pen"></i>
                                         </a>
                                         <a href="/User/GenerateQR/@v.VisitorId" class="tool-btn success" title="QR Pass" onclick="event.stopPropagation();">
@@ -117,9 +118,12 @@
                     else
                     {
                         <tr>
-                            <td colspan="7" class="text-center py-5">
-                                <div class="opacity-25 mb-3"><i class="fas fa-users-slash fa-3x"></i></div>
-                                <p class="text-muted fw-600">No visitors found in the directory.</p>
+                            <td colspan="7" class="py-5 text-center">
+                                <div class="opacity-25 mb-3">
+                                    <i class="fas fa-users-slash fs-1"></i>
+                                </div>
+                                <h6 class="fw-800 text-muted mb-1">No Visitors Found</h6>
+                                <p class="small text-muted mb-0">No visitors found in the directory.</p>
                             </td>
                         </tr>
                     }

@@ -39,53 +39,60 @@
 
     <div class="nexus-table-wrapper">
         <div class="table-responsive">
-            <table class="nexus-table" id="standardTable">
-                <thead>
+            <table class="table table-hover align-middle mb-0" id="standardTable">
+                <thead class="bg-light">
                     <tr>
-                        <th>#</th>
-                        <th>Employee Details</th>
-                        <th>Contact Info</th>
-                        <th>Department</th>
-                        <th>Designation</th>
-                        <th class="text-end">Actions</th>
+                        <th class="ps-4 py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0" style="width: 60px;">No.</th>
+                        <th class="py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0">Employee Details</th>
+                        <th class="py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0">Contact Info</th>
+                        <th class="py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0">Department</th>
+                        <th class="py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0">Designation</th>
+                        <th class="py-3 text-muted small fw-800 uppercase letter-spacing-1 border-0 text-center">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="border-top-0">
                     @if (Model != null && Model.Count > 0)
                     {
                         int i = 1;
                         foreach (var e in Model)
                         {
-                            <tr class="hover-row" style="cursor: pointer;" onclick="if(!event.target.closest('.tool-btn')) { window.location.href='/User/Employee/Details/@e.EmployeeId'; }">
-                                <td style="width: 60px;"><span class="nexus-badge nexus-badge-info">@i</span></td>
-                                <td>
+                            <tr style="cursor: pointer;" onclick="if(!event.target.closest('.tool-btn')) { window.location.href='/User/Employee/Details/@e.EmployeeId'; }">
+                                <td class="ps-4 py-3 fw-800 text-muted small">@i</td>
+                                <td class="py-3">
                                     <div class="d-flex align-items-center gap-3">
-                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-800" style="width: 42px; height: 42px; font-size: 0.9rem; border: 1px solid rgba(99, 102, 241, 0.1);">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm" style="width: 42px; height: 42px; background: #f8fafc; border: 1px solid rgba(0,0,0,0.05);">
                                             @if (!string.IsNullOrEmpty(e.PhotoPath))
                                             {
-                                                <img src="@e.PhotoPath" alt="@e.Name" class="w-100 h-100 rounded-circle" style="object-fit: cover;" />
+                                                <img src="@e.PhotoPath" alt="@e.Name" class="w-100 h-100" style="object-fit: cover;" />
                                             }
                                             else
                                             {
-                                                <span>@(e.Name != null ? e.Name.Substring(0, 1).ToUpper() : "?")</span>
+                                                <div class="bg-primary bg-opacity-10 text-primary w-100 h-100 d-flex align-items-center justify-content-center fw-800" style="font-size: 14px;">
+                                                    @(e.Name != null ? e.Name.Substring(0, 1).ToUpper() : "?")
+                                                </div>
                                             }
                                         </div>
                                         <div>
-                                            <div class="fw-700 text-dark lh-1 mb-1">@e.Name</div>
-                                            <small class="text-muted" style="font-size: 0.75rem;">ID: EMP-100@e.EmployeeId</small>
+                                            <div class="fw-800 text-dark mb-0">@e.Name</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td>
-                                    <div class="fw-600 text-dark mb-1">@e.Email</div>
-                                    <small class="text-muted">@e.Phone</small>
+                                <td class="py-3">
+                                    <div class="fw-600 text-dark mb-0">@e.Email</div>
+                                    <div class="text-muted small">@e.Phone</div>
                                 </td>
-                                <td><span class="nexus-badge nexus-badge-success">@(e.Department?.DepartmentName ?? "—")</span></td>
-                                <td><span class="fw-700 text-secondary small uppercase">@e.Designation</span></td>
-                                <td class="text-end">
-                                    <a href="/User/Employee/Edit/@e.EmployeeId" class="tool-btn warning d-inline-flex align-items-center justify-content-center text-decoration-none" title="Edit">
-                                        <i class="fas fa-pen"></i>
-                                    </a>
+                                <td class="py-3">
+                                    <span class="nexus-badge nexus-badge-success">@(e.Department?.DepartmentName ?? "—")</span>
+                                </td>
+                                <td class="py-3">
+                                    <span class="fw-700 text-secondary small uppercase letter-spacing-1">@e.Designation</span>
+                                </td>
+                                <td class="py-3 text-center">
+                                    <div class="d-flex justify-content-center">
+                                        <a href="/User/Employee/Edit/@e.EmployeeId" class="tool-btn warning d-inline-flex align-items-center justify-content-center text-decoration-none" title="Edit">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             i++;
@@ -94,9 +101,12 @@
                     else
                     {
                         <tr>
-                            <td colspan="6" class="text-center py-5">
-                                <div class="opacity-25 mb-3"><i class="fas fa-user-slash fa-3x"></i></div>
-                                <p class="text-muted fw-600">No employees found in the directory.</p>
+                            <td colspan="6" class="py-5 text-center">
+                                <div class="opacity-25 mb-3">
+                                    <i class="fas fa-user-slash fs-1"></i>
+                                </div>
+                                <h6 class="fw-800 text-muted mb-1">No Employees Found</h6>
+                                <p class="small text-muted mb-0">Manage your workforce from here.</p>
                             </td>
                         </tr>
                     }

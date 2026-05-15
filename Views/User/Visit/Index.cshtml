@@ -39,70 +39,85 @@
         </div>
     </div>
 
-    <!-- Premium Stats Cards (Trending Style) -->
+    <!-- Premium Intelligence Stats -->
     <div class="row g-4 mb-5">
+        <!-- Total Logs -->
         <div class="col-xl-3 col-md-6">
-            <div class="section-card border-0 shadow-sm overflow-hidden position-relative" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); h-100">
-                <div class="position-absolute top-0 end-0 p-3 opacity-10">
-                    <i class="fas fa-users-viewfinder fs-1 text-primary"></i>
+            <div class="intelligence-card">
+                <div class="intelligence-icon-container icon-glow-blue">
+                    <i class="fas fa-users-viewfinder"></i>
                 </div>
-                <div class="text-muted small fw-800 uppercase letter-spacing-1 mb-1">Total Logs</div>
-                <div class="h2 fw-900 text-dark mb-0">@ViewBag.TotalVisits</div>
-                <div class="small text-primary fw-600 mt-2">
-                    <i class="fas fa-chart-line me-1"></i> Recorded visits
+                <div>
+                    <div class="intelligence-label">Total Logs</div>
+                    <div class="intelligence-stat">@ViewBag.TotalVisits</div>
+                </div>
+                <div class="intelligence-desc">
+                    <i class="fas fa-chart-line text-primary"></i> Recorded visits
                 </div>
             </div>
         </div>
+
+        <!-- Active Inside -->
         <div class="col-xl-3 col-md-6">
-            <div class="section-card border-0 shadow-sm overflow-hidden position-relative" style="background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); h-100">
-                <div class="position-absolute top-0 end-0 p-3 opacity-10">
-                    <i class="fas fa-door-open fs-1 text-success"></i>
+            <div class="intelligence-card">
+                <div class="intelligence-icon-container icon-glow-cyan">
+                    <i class="fas fa-door-open"></i>
                 </div>
-                <div class="text-muted small fw-800 uppercase letter-spacing-1 mb-1">Active Inside</div>
-                <div class="h2 fw-900 text-success mb-0">@ViewBag.ActiveVisits</div>
-                <div class="small text-success fw-600 mt-2">
-                    <i class="fas fa-circle-check me-1"></i> Currently on premises
+                <div>
+                    <div class="intelligence-label">Active Inside</div>
+                    <div class="intelligence-stat">@ViewBag.ActiveVisits</div>
+                </div>
+                <div class="intelligence-desc">
+                    <i class="fas fa-circle-check text-info"></i> Currently on premises
                 </div>
             </div>
         </div>
+
+        <!-- Checked Out -->
         <div class="col-xl-3 col-md-6">
-            <div class="section-card border-0 shadow-sm overflow-hidden position-relative" style="background: linear-gradient(135deg, #ffffff 0%, #ecfeff 100%); h-100">
-                <div class="position-absolute top-0 end-0 p-3 opacity-10">
-                    <i class="fas fa-clock-rotate-left fs-1 text-info"></i>
+            <div class="intelligence-card">
+                <div class="intelligence-icon-container icon-glow-green">
+                    <i class="fas fa-clock-rotate-left"></i>
                 </div>
-                <div class="text-muted small fw-800 uppercase letter-spacing-1 mb-1">Checked Out</div>
-                <div class="h2 fw-900 text-info mb-0">@ViewBag.CheckedOutCount</div>
-                <div class="small text-info fw-600 mt-2">
-                    <i class="fas fa-sign-out-alt me-1"></i> Completed visits
+                <div>
+                    <div class="intelligence-label">Checked Out</div>
+                    <div class="intelligence-stat">@ViewBag.CheckedOutCount</div>
+                </div>
+                <div class="intelligence-desc">
+                    <i class="fas fa-sign-out-alt text-success"></i> Completed visits
                 </div>
             </div>
         </div>
+
+        <!-- Pending -->
         <div class="col-xl-3 col-md-6">
-            <div class="section-card border-0 shadow-sm overflow-hidden position-relative" style="background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%); h-100">
-                <div class="position-absolute top-0 end-0 p-3 opacity-10">
-                    <i class="fas fa-hourglass-half fs-1 text-warning"></i>
+            <div class="intelligence-card">
+                <div class="intelligence-icon-container icon-glow-orange">
+                    <i class="fas fa-hourglass-half"></i>
                 </div>
-                <div class="text-muted small fw-800 uppercase letter-spacing-1 mb-1">Pending</div>
-                <div class="h2 fw-900 text-warning mb-0">@ViewBag.PendingVisits</div>
-                <div class="small text-warning fw-600 mt-2">
-                    <i class="fas fa-spinner me-1"></i> Awaiting check-in
+                <div>
+                    <div class="intelligence-label">Pending</div>
+                    <div class="intelligence-stat">@ViewBag.PendingVisits</div>
+                </div>
+                <div class="intelligence-desc">
+                    <i class="fas fa-spinner text-warning"></i> Awaiting check-in
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Trending Toolbar (Single Row Filter Bar) -->
-    <div class="section-card mb-4 border-0 shadow-sm p-2" style="background: rgba(255,255,255,0.9); backdrop-filter: blur(15px); border-radius: 16px; overflow: visible !important; position: relative; z-index: 1100;">
+    <div class="section-card mb-4 border-0 shadow-sm p-2 trending-toolbar" style="background: rgba(255,255,255,0.9); backdrop-filter: blur(15px); border-radius: 16px; overflow: visible !important; position: relative; z-index: 1100;">
         <form method="get" action="/User/Visit" id="filterForm" class="d-flex align-items-center gap-2 flex-wrap flex-lg-nowrap" style="overflow: visible !important;">
             <!-- Search: Flex Grow -->
             <div class="flex-grow-1 position-relative">
                 <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted opacity-50"></i>
-                <input type="text" name="search" value="@ViewBag.Search" class="nexus-input ps-5 border-0 bg-light rounded-4 fs-7" placeholder="Search visitors..." style="height: 42px;" onchange="this.form.submit()" />
+                <input type="text" name="search" value="@ViewBag.Search" class="nexus-input ps-5 bg-light rounded-4 fs-7" placeholder="Search visitors..." style="height: 42px;" onchange="this.form.submit()" />
             </div>
 
             <!-- Status: Compact -->
             <div style="min-width: 140px;">
-                <select name="status" class="nexus-input border-0 bg-light rounded-4 fs-7 cursor-pointer" style="height: 42px;" onchange="this.form.submit()">
+                <select name="status" class="nexus-input bg-light rounded-4 fs-7 cursor-pointer" style="height: 42px;" onchange="this.form.submit()">
                     <option value="">All Activity</option>
                     <option value="Active" selected="@(ViewBag.StatusFilter == "Active")">Inside</option>
                     <option value="CheckedOut" selected="@(ViewBag.StatusFilter == "CheckedOut")">Completed</option>
@@ -112,7 +127,7 @@
 
             <!-- Trending Date Intelligence Picker -->
             <div class="position-relative" id="datePickerContainer" style="z-index: 1050; min-width: 260px;">
-                <button type="button" id="dateTriggerBtn" class="nexus-input bg-light border-0 rounded-4 fs-7 px-3 d-flex align-items-center gap-3 shadow-none cursor-pointer" style="height: 42px; width: 100%;" onclick="window.nexusToggleDatePicker(event)">
+                <button type="button" id="dateTriggerBtn" class="nexus-input bg-light rounded-4 fs-7 px-3 d-flex align-items-center gap-3 cursor-pointer" style="height: 42px; width: 100%;" onclick="window.nexusToggleDatePicker(event)">
                     <i class="fas fa-calendar-alt text-primary"></i>
                     <span class="flex-grow-1 text-start fw-600 text-dark" id="dateDisplayLabel">
                         @{
@@ -404,13 +419,13 @@
 
             <!-- Actions Row -->
             <div class="d-flex align-items-center gap-2">
-                <a href="/User/Visit" class="btn btn-light rounded-circle d-flex align-items-center justify-content-center shadow-none border-0 hover-rotate" style="width: 42px; height: 42px; transition: all 0.3s ease;" title="Reset Filters">
-                    <i class="fas fa-sync-alt text-muted fs-7"></i>
+                <a href="/User/Visit" class="toolbar-refresh-btn" title="Reset Filters">
+                    <i class="fas fa-sync-alt fs-7"></i>
                 </a>
                 
                 <div class="vr mx-1 opacity-10" style="height: 24px;"></div>
                 
-                <button type="button" onclick="exportToExcel()" class="premium-btn secondary d-flex align-items-center gap-2 px-3 fs-7 border-0" style="height: 42px; background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                <button type="button" onclick="exportToExcel()" class="toolbar-export-btn d-flex align-items-center gap-2 px-3 fs-7" style="height: 42px;">
                     <i class="fas fa-file-excel"></i>
                     <span class="d-none d-xl-inline">Export Excel</span>
                 </button>
@@ -439,11 +454,20 @@
                         {
                             var rowNo = ((pModel.CurrentPage - 1) * pModel.PageSize) + index;
                             <tr>
-                                <td class="ps-4 py-3 fw-800 text-muted small">#@rowNo</td>
+                                <td class="ps-4 py-3 fw-800 text-muted small">@rowNo</td>
                                 <td class="py-3">
                                     <div class="d-flex align-items-center gap-3">
-                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-800 shadow-sm" style="width: 42px; height: 42px; font-size: 14px;">
-                                            @((v.Visitor?.Name ?? "?").Substring(0, 1).ToUpper())
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm" style="width: 42px; height: 42px; background: #f8fafc; border: 1px solid rgba(0,0,0,0.05);">
+                                            @if (!string.IsNullOrEmpty(v.Visitor?.CapturePhoto))
+                                            {
+                                                <img src="@v.Visitor.CapturePhoto" class="w-100 h-100" style="object-fit: cover;" />
+                                            }
+                                            else
+                                            {
+                                                <div class="bg-primary bg-opacity-10 text-primary w-100 h-100 d-flex align-items-center justify-content-center fw-800" style="font-size: 14px;">
+                                                    @((v.Visitor?.Name ?? "?").Substring(0, 1).ToUpper())
+                                                </div>
+                                            }
                                         </div>
                                         <div>
                                             <div class="fw-800 text-dark mb-0">@(v.Visitor?.Name ?? "Unknown")</div>

@@ -24,22 +24,68 @@
         const startBtn = document.getElementById('startScanBtn');
         const stopBtn = document.getElementById('stopScanBtn');
 
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            status.innerHTML = '<i class="fas fa-exclamation-triangle me-2 text-danger"></i>Insecure / Unsupported';
+            alert("Camera access requires a secure (HTTPS) connection or localhost. Please check your browser settings.");
+            return;
+        }
+
         try {
-            status.innerHTML = '<i class="fas fa-spinner fa-spin me-2 text-primary"></i>Accessing Camera...';
-            videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            status.innerHTML = '<i class="fas fa-spinner fa-spin me-2 text-primary"></i>Requesting Camera...';
+            
+            let constraints = { 
+                video: { 
+                    facingMode: { ideal: "environment" },
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                } 
+            };
+
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+            } catch (e) {
+                console.warn("Preferred constraints failed, falling back to basic video...", e);
+                videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            }
+
+            console.log("Stream obtained:", videoStream.id);
             video.srcObject = videoStream;
-            await video.play();
             
-            status.innerHTML = '<i class="fas fa-wifi fa-pulse me-2 text-success"></i>Scanner Online';
-            scanningActive = true;
-            startBtn.style.display = 'none';
-            stopBtn.style.display = 'inline-block';
-            
-            scanInterval = setInterval(scanQRCode, 200);
+            // Some browsers require explicit play call
+            video.onloadedmetadata = async () => {
+                try {
+                    await video.play();
+                    status.innerHTML = '<i class="fas fa-wifi fa-pulse me-2 text-success"></i>Scanner Online';
+                    scanningActive = true;
+                    startBtn.style.display = 'none';
+                    stopBtn.style.display = 'inline-block';
+                    
+                    if (scanInterval) clearInterval(scanInterval);
+                    scanInterval = setInterval(scanQRCode, 250);
+                } catch (playErr) {
+                    console.error("Playback Error:", playErr);
+                    status.innerHTML = '<i class="fas fa-times-circle me-2 text-danger"></i>Playback Blocked';
+                }
+            };
+
         } catch (err) {
             console.error("Scanner Error:", err);
-            status.innerHTML = '<i class="fas fa-times-circle me-2 text-danger"></i>Access Denied';
-            alert("Camera access is required for scanning.");
+            let msg = "Camera access denied.";
+            let detail = "Please check your browser permissions.";
+
+            if (err.name === 'NotAllowedError') {
+                msg = "Camera permission denied.";
+                detail = "Please click the camera/lock icon in your browser address bar and allow camera access for this site.";
+            } else if (err.name === 'NotFoundError') {
+                msg = "No camera detected.";
+                detail = "Ensure your camera is connected and recognized by your system.";
+            } else if (err.name === 'NotReadableError') {
+                msg = "Camera in use.";
+                detail = "Another application is using your camera. Please close it and try again.";
+            }
+            
+            status.innerHTML = `<i class="fas fa-times-circle me-2 text-danger"></i>${msg}`;
+            alert(`${msg}\n\n${detail}`);
         }
     };
 
